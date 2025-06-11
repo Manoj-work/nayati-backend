@@ -1,24 +1,18 @@
 package com.medhir.rest.service;
 
+import com.medhir.rest.dto.ModuleResponseDTO;
+import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.repository.EmployeeRepository;
 import com.medhir.rest.exception.ResourceNotFoundException;
+import com.medhir.rest.model.CompanyModel;
 import com.medhir.rest.model.ModuleModel;
-import com.medhir.rest.employee.EmployeeModel;
-import com.medhir.rest.employee.EmployeeRepository;
 import com.medhir.rest.repository.ModuleRepository;
 import com.medhir.rest.utils.GeneratedId;
-import com.medhir.rest.dto.ModuleResponseDTO;
-import com.medhir.rest.dto.UserCompanyDTO;
-import com.medhir.rest.model.CompanyModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.HashMap;
-import java.util.Set;
 
 @Service
 public class ModuleService {
@@ -55,12 +49,23 @@ public class ModuleService {
         // Save the module
         ModuleModel savedModule = moduleRepository.save(moduleModel);
 
-        // Update employee details with module ID
+        // Update employee details with module ID and roles
         for (EmployeeModel employee : employees) {
             if (employee.getModuleIds() == null) {
                 employee.setModuleIds(new ArrayList<>());
             }
             employee.getModuleIds().add(savedModule.getModuleId());
+            
+            // If module name contains "HR", add HRADMIN role
+            if (savedModule.getModuleName().toUpperCase().contains("HR")) {
+                Set<String> roles = employee.getRoles();
+                if (roles == null) {
+                    roles = new HashSet<>();
+                }
+                roles.add("HRADMIN");
+                employee.setRoles(roles);
+            }
+            
             employeeRepository.save(employee);
         }
 
@@ -113,6 +118,23 @@ public class ModuleService {
         // Update only the allowed fields
         if (updatedModule.getModuleName() != null) {
             existingModule.setModuleName(updatedModule.getModuleName());
+            
+            // Check if module name contains "HR" and update employee roles
+            if (updatedModule.getModuleName().toUpperCase().contains("HR")) {
+                // Get all employees associated with this module
+                List<EmployeeModel> employees = employeeRepository.findAllByModuleIdsContaining(moduleId);
+                
+                // Update roles for each employee
+                for (EmployeeModel employee : employees) {
+                    Set<String> roles = employee.getRoles();
+                    if (roles == null) {
+                        roles = new HashSet<>();
+                    }
+                    roles.add("HRADMIN");
+                    employee.setRoles(roles);
+                    employeeRepository.save(employee);
+                }
+            }
         }
         if (updatedModule.getDescription() != null) {
             existingModule.setDescription(updatedModule.getDescription());
@@ -152,6 +174,17 @@ public class ModuleService {
                 }
                 if (!employee.getModuleIds().contains(moduleId)) {
                     employee.getModuleIds().add(moduleId);
+                    
+                    // If module name contains "HR", add HRADMIN role
+                    if (existingModule.getModuleName().toUpperCase().contains("HR")) {
+                        Set<String> roles = employee.getRoles();
+                        if (roles == null) {
+                            roles = new HashSet<>();
+                        }
+                        roles.add("HRADMIN");
+                        employee.setRoles(roles);
+                    }
+                    
                     employeeRepository.save(employee);
                 }
             }
@@ -171,6 +204,10 @@ public class ModuleService {
                 employeeRepository.findByEmployeeId(employeeId).ifPresent(employee -> {
                     if (employee.getModuleIds() != null) {
                         employee.getModuleIds().remove(moduleId);
+                        // If moduleIds is now empty and employee has HRADMIN role, remove HRADMIN role
+                        if (employee.getModuleIds().isEmpty() && employee.getRoles() != null && employee.getRoles().contains("HRADMIN")) {
+                            employee.getRoles().remove("HRADMIN");
+                        }
                         employeeRepository.save(employee);
                     }
                 });

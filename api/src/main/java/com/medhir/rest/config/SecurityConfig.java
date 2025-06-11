@@ -16,6 +16,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,20 +42,55 @@ public class SecurityConfig {
                         // Publicly accessible endpoints
                         .requestMatchers(
                                 "/auth/**",
+                                "/api/auth/**",
                                 "/employee/id/*",
                                 "/employee/update-request",
                                 "/payslip/generate/**",
-                                "/employee/{employeeId}/attendance-details"
+                                "/leads/**",
+                                "/api/attendance/upload",
+                                "/employee/**"
                         ).permitAll()
 
                         // Only HR Admin can access /hradmin/**
-                        .requestMatchers("/hradmin/**").hasAnyAuthority("ROLE_HRADMIN", "ROLE_SUPERADMIN")
+                        .requestMatchers("/hradmin/**").hasAnyAuthority("HRADMIN", "SUPERADMIN")
 
                         // Only Super Admin can access /superadmin/**
-                        .requestMatchers("/superadmin/**").hasAuthority("ROLE_SUPERADMIN")
+                        .requestMatchers("/superadmin/**").hasAuthority("SUPERADMIN")
+
+                        // Manager endpoints can be accessed by MANAGER and HRADMIN
+                        .requestMatchers("/manager/**", "/employees/manager/**").hasAnyAuthority("MANAGER", "HRADMIN")
+
+                        // Attendance endpoints can be accessed by MANAGER, HRADMIN, or SUPERADMIN
+                        .requestMatchers("/api/attendance/**").hasAnyAuthority("EMPLOYEE", "MANAGER", "HRADMIN", "SUPERADMIN")
+
+                        // Leave balance endpoints can be accessed by any authenticated user
+                        .requestMatchers("/api/leave-balance/**").authenticated()
+
+                        // Public holidays endpoints can be accessed by any authenticated user
+                        .requestMatchers("/public-holidays/**").authenticated()
+
+                        // Leave update status can be accessed by MANAGER or HRADMIN
+//                        .requestMatchers("/leave/update-status").hasAnyAuthority("MANAGER", "HRADMIN")
+                        .requestMatchers("/leave/update-status").permitAll()
+
+                        // Leave apply can be accessed by EMPLOYEE, MANAGER, or HRADMIN
+                        .requestMatchers("/leave/apply").hasAnyAuthority("EMPLOYEE", "MANAGER", "HRADMIN")
+
+                        // Leave endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
+                        .requestMatchers("/leave/employee/**").hasAnyAuthority("EMPLOYEE", "MANAGER", "HRADMIN")
+                        
+                        // Expense endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
+                        .requestMatchers("/expenses/employee/**").hasAuthority("EMPLOYEE")
+                        .requestMatchers("/expenses/manager/**").hasAuthority("MANAGER")
+                        .requestMatchers("/expenses/**").hasAuthority("HRADMIN")
+
+                        // Income endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
+                        .requestMatchers("/income/employee/**").hasAuthority("EMPLOYEE")
+                        .requestMatchers("/income/manager/**").hasAuthority("MANAGER")
+                        .requestMatchers("/income/**").hasAuthority("HRADMIN")
 
                         // All other routes can be accessed by HR or Super Admin
-                        .anyRequest().hasAnyAuthority("ROLE_HRADMIN", "ROLE_SUPERADMIN")
+                        .anyRequest().hasAnyAuthority("HRADMIN", "SUPERADMIN")
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint()) // 401 handler
@@ -63,8 +100,6 @@ public class SecurityConfig {
 
         return http.build();
     }
-
-
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -95,5 +130,10 @@ public class SecurityConfig {
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return new CustomAuthenticationEntryPoint();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(12); // Using strength 12 for better security
     }
 }

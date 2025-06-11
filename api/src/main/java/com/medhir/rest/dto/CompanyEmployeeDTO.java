@@ -1,9 +1,11 @@
 package com.medhir.rest.dto;
 
-import com.medhir.rest.employee.EmployeeModel;
+import com.medhir.rest.model.EmployeeModel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -12,6 +14,9 @@ public class CompanyEmployeeDTO extends EmployeeModel {
     private String departmentName;
     private String designationName;
     private String reportingManagerName;
+    private String leavePolicyName;
+    private List<String> leaveTypeNames;
+    private List<String> leaveTypeIds;
 
     public CompanyEmployeeDTO(EmployeeModel employee) {
         // Copy all fields from EmployeeModel
@@ -42,5 +47,7 @@ public class CompanyEmployeeDTO extends EmployeeModel {
         this.setIdProofs(employee.getIdProofs());
         this.setBankDetails(employee.getBankDetails());
         this.setSalaryDetails(employee.getSalaryDetails());
+        this.setLeavePolicyId(employee.getLeavePolicyId());
+        this.setLeaveTypeIds(List.of());
     }
 } 

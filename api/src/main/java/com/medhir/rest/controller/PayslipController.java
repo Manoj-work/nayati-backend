@@ -1,7 +1,7 @@
 package com.medhir.rest.controller;
 
-import com.medhir.rest.payslip.PayslipModel;
-import com.medhir.rest.payslip.PayslipService;
+import com.medhir.rest.model.PayslipModel;
+import com.medhir.rest.service.PayslipService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
