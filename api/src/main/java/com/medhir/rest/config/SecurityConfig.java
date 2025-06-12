@@ -70,15 +70,14 @@ public class SecurityConfig {
                         .requestMatchers("/public-holidays/**").authenticated()
 
                         // Leave update status can be accessed by MANAGER or HRADMIN
-//                        .requestMatchers("/leave/update-status").hasAnyAuthority("MANAGER", "HRADMIN")
-                        .requestMatchers("/leave/update-status").permitAll()
+                        .requestMatchers("/leave/update-status").hasAnyAuthority("MANAGER", "HRADMIN")
 
                         // Leave apply can be accessed by EMPLOYEE, MANAGER, or HRADMIN
                         .requestMatchers("/leave/apply").hasAnyAuthority("EMPLOYEE", "MANAGER", "HRADMIN")
 
                         // Leave endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
                         .requestMatchers("/leave/employee/**").hasAnyAuthority("EMPLOYEE", "MANAGER", "HRADMIN")
-                        
+
                         // Expense endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
                         .requestMatchers("/expenses/employee/**").hasAuthority("EMPLOYEE")
                         .requestMatchers("/expenses/manager/**").hasAuthority("MANAGER")

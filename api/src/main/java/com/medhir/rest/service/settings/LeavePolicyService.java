@@ -3,9 +3,9 @@ package com.medhir.rest.service.settings;
 import com.medhir.rest.exception.BadRequestException;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
+import com.medhir.rest.model.settings.LeavePolicyModel;
 import com.medhir.rest.repository.settings.LeavePolicyRepository;
 import com.medhir.rest.service.CompanyService;
-import com.medhir.rest.model.settings.LeavePolicyModel;
 import com.medhir.rest.utils.GeneratedId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,14 +31,14 @@ public class LeavePolicyService {
     public LeavePolicyModel createLeavePolicy(LeavePolicyModel leavePolicy) {
         // Check if company exists
         companyService.getCompanyById(leavePolicy.getCompanyId())
-            .orElseThrow(() -> new ResourceNotFoundException("Company not found with id: " + leavePolicy.getCompanyId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with id: " + leavePolicy.getCompanyId()));
 
         if (leavePolicyRepository.existsByName(leavePolicy.getName())) {
             throw new DuplicateResourceException("Leave policy with name " + leavePolicy.getName() + " already exists");
         }
 
         validateLeaveAllocations(leavePolicy.getLeaveAllocations());
-        
+
         // Generate new leave policy ID
         String newLeavePolicyId = generatedId.generateId("LP", LeavePolicyModel.class, "leavePolicyId");
         leavePolicy.setLeavePolicyId(newLeavePolicyId);
@@ -72,15 +72,15 @@ public class LeavePolicyService {
 
     public LeavePolicyModel updateLeavePolicy(String id, LeavePolicyModel leavePolicy) {
         LeavePolicyModel existingPolicy = getLeavePolicyById(id);
-        
+
         // Check if company exists if companyId is being updated
         if (leavePolicy.getCompanyId() != null && !leavePolicy.getCompanyId().equals(existingPolicy.getCompanyId())) {
             companyService.getCompanyById(leavePolicy.getCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found with id: " + leavePolicy.getCompanyId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Company not found with id: " + leavePolicy.getCompanyId()));
         }
-        
-        if (!existingPolicy.getName().equals(leavePolicy.getName()) && 
-            leavePolicyRepository.existsByName(leavePolicy.getName())) {
+
+        if (!existingPolicy.getName().equals(leavePolicy.getName()) &&
+                leavePolicyRepository.existsByName(leavePolicy.getName())) {
             throw new DuplicateResourceException("Leave policy with name " + leavePolicy.getName() + " already exists");
         }
 
@@ -89,7 +89,7 @@ public class LeavePolicyService {
         existingPolicy.setName(leavePolicy.getName());
         existingPolicy.setLeaveAllocations(leavePolicy.getLeaveAllocations());
         existingPolicy.setUpdatedAt(LocalDateTime.now().toString());
-        
+
         // Update companyId if provided
         if (leavePolicy.getCompanyId() != null) {
             existingPolicy.setCompanyId(leavePolicy.getCompanyId());
@@ -111,6 +111,31 @@ public class LeavePolicyService {
         for (LeavePolicyModel.LeaveAllocation allocation : allocations) {
             // Verify leave type exists
             leaveTypeService.getLeaveTypeById(allocation.getLeaveTypeId());
+
+            // Validate days per year
+            if (allocation.getDaysPerYear() == null || allocation.getDaysPerYear() <= 0) {
+                throw new BadRequestException("Days per year must be greater than 0");
+            }
+
+            // Validate consecutive allowed flag - if null, it will use the default value of false
+            if (allocation.getConsecutiveAllowed() == null) {
+                allocation.setConsecutiveAllowed(false);
+            }
+
+            // Validate restrictions if present
+            if (allocation.getRestrictions() != null && !allocation.getRestrictions().isEmpty()) {
+                for (LeavePolicyModel.LeaveRestriction restriction : allocation.getRestrictions()) {
+                    if (restriction.getRestrictedDays() == null || restriction.getRestrictedDays().isEmpty()) {
+                        throw new BadRequestException("Restricted days cannot be empty");
+                    }
+                    // Set default value for allowedValue if not provided
+                    if (restriction.getAllowedValue() == null) {
+                        restriction.setAllowedValue(1);
+                    } else if (restriction.getAllowedValue() <= 0) {
+                        throw new BadRequestException("Allowed value must be greater than 0");
+                    }
+                }
+            }
         }
     }
 } 

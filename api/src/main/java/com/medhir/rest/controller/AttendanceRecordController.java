@@ -1,18 +1,22 @@
 package com.medhir.rest.controller;
 
-import com.medhir.rest.model.AttendanceRecord;
-import com.medhir.rest.service.AttendanceRecordService;
 import com.medhir.rest.dto.attendance.DailyAttendanceDTO;
 import com.medhir.rest.dto.attendance.FilteredAttendanceDTO;
+import com.medhir.rest.exception.ResourceNotFoundException;
+import com.medhir.rest.model.AttendanceRecord;
+import com.medhir.rest.service.AttendanceRecordService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.http.HttpStatus;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/api/attendance")
@@ -35,8 +39,8 @@ public class AttendanceRecordController {
         try {
             List<AttendanceRecord> records = attendanceRecordService.processAndSaveAttendanceRecords(file, month, year);
             return ResponseEntity.ok(Map.of(
-                "message", "Attendance records uploaded successfully",
-                "count", records.size()
+                    "message", "Attendance records uploaded successfully",
+                    "count", records.size()
             ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -80,8 +84,14 @@ public class AttendanceRecordController {
             String cleanMonth = month.split("-")[0];
             AttendanceRecord record = attendanceRecordService.getAttendanceRecordByEmployeeAndMonth(employeeId, cleanMonth, year);
             return ResponseEntity.ok(record);
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of(
+                            "error", "No attendance record found",
+                            "message", "No attendance data found for employee " + employeeId + " for " + month + " " + year
+                    ));
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

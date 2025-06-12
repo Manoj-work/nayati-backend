@@ -34,12 +34,24 @@ public class LeavePolicyModel {
     private String createdAt;
     private String updatedAt;
 
+
     @Data
-    public static class LeaveAllocation {
+    public class LeaveAllocation {
         @NotBlank(message = "Leave type ID is required")
         private String leaveTypeId;
 
         @NotNull(message = "Days per year is required")
         private Integer daysPerYear;
+
+        @NotNull(message = "Consecutive allowed flag is required")
+        private Boolean consecutiveAllowed = false;
+
+        private List<LeaveRestriction> restrictions;
+    }
+
+    @Data
+    public class LeaveRestriction {
+        private List<String> restrictedDays;
+        private Integer allowedValue;
     }
 } 
