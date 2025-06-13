@@ -25,23 +25,14 @@ public class ExpenseController {
     @Autowired
     private ExpenseService expenseService;
 
-    @PostMapping(value = "/employee", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ExpenseModel> createExpense(@Valid @RequestBody ExpenseModel expense, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            List<String> errors = bindingResult.getFieldErrors()
-                .stream()
-                .map(FieldError::getDefaultMessage)
-                .collect(Collectors.toList());
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Validation failed: " + String.join(", ", errors));
-        }
-        try {
-            return ResponseEntity.ok(expenseService.createExpense(expense));
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-        }
+    @PostMapping("/employee")
+    public ResponseEntity<Map<String, Object>> createExpense(@Valid @RequestBody ExpenseModel expense) {
+        ExpenseModel savedExpense = expenseService.createExpense(expense);
+        return ResponseEntity.ok(Map.of(
+                "message", "Expense created successfully!"
+        ));
     }
+
 
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<ExpenseModel>> getAllExpenses() {
