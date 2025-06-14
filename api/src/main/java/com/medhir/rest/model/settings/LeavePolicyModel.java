@@ -36,7 +36,7 @@ public class LeavePolicyModel {
 
 
     @Data
-    public class LeaveAllocation {
+    public static class LeaveAllocation {
         @NotBlank(message = "Leave type ID is required")
         private String leaveTypeId;
 
@@ -50,7 +50,7 @@ public class LeavePolicyModel {
     }
 
     @Data
-    public class LeaveRestriction {
+    public static class LeaveRestriction {
         private List<String> restrictedDays;
         private Integer allowedValue;
     }
