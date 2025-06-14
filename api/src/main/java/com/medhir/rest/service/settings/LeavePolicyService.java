@@ -7,6 +7,8 @@ import com.medhir.rest.model.settings.LeavePolicyModel;
 import com.medhir.rest.repository.settings.LeavePolicyRepository;
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.utils.GeneratedId;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -103,7 +105,7 @@ public class LeavePolicyService {
         leavePolicyRepository.deleteById(leavePolicy.getId());
     }
 
-    private void validateLeaveAllocations(List<LeavePolicyModel.LeaveAllocation> allocations) {
+    private void validateLeaveAllocations(@NotEmpty @Valid List<LeavePolicyModel.LeaveAllocation> allocations) {
         if (allocations == null || allocations.isEmpty()) {
             throw new BadRequestException("Leave allocations cannot be empty");
         }
