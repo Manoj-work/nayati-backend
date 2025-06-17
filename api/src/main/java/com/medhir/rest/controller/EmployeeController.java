@@ -9,6 +9,7 @@ import com.medhir.rest.dto.UpdateEmployeeRoles;
 import com.medhir.rest.dto.UserCompanyDTO;
 import com.medhir.rest.dto.EmployeeAttendanceDetailsDTO;
 import com.medhir.rest.dto.EmployeeWithLeaveDetailsDTO;
+import com.medhir.rest.dto.EmployeeLeavePolicyWeeklyOffsDTO;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.EmployeeModel;
 import com.medhir.rest.repository.ModuleRepository;
@@ -252,4 +253,9 @@ public class EmployeeController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/employee/{employeeId}/leave-policy")
+    public ResponseEntity<EmployeeLeavePolicyWeeklyOffsDTO> getEmployeeLeavePolicy(@PathVariable String employeeId) {
+        return ResponseEntity.ok(employeeService.getEmployeeLeavePolicy(employeeId));
+    }
+    
 }

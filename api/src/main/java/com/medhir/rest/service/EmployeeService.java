@@ -1,12 +1,7 @@
 package com.medhir.rest.service;
 
+import com.medhir.rest.dto.*;
 import com.medhir.rest.service.auth.EmployeeAuthService;
-import com.medhir.rest.dto.CompanyEmployeeDTO;
-import com.medhir.rest.dto.ManagerEmployeeDTO;
-import com.medhir.rest.dto.RegisterAdminRequest;
-import com.medhir.rest.dto.UserCompanyDTO;
-import com.medhir.rest.dto.EmployeeAttendanceDetailsDTO;
-import com.medhir.rest.dto.EmployeeWithLeaveDetailsDTO;
 import com.medhir.rest.model.EmployeeModel;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
@@ -1188,6 +1183,29 @@ public class EmployeeService {
                 employeeRepository.save(manager);
             }
         });
+    }
+
+    public EmployeeLeavePolicyWeeklyOffsDTO getEmployeeLeavePolicy(String employeeId) {
+        EmployeeModel employee = employeeRepository.findByEmployeeId(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found with ID: " + employeeId));
+
+        EmployeeLeavePolicyWeeklyOffsDTO dto = new EmployeeLeavePolicyWeeklyOffsDTO();
+        dto.setEmployeeId(employee.getEmployeeId());
+        dto.setEmployeeName(employee.getName());
+        dto.setWeeklyOffs(employee.getWeeklyOffs());
+
+        if (employee.getLeavePolicyId() != null) {
+            try {
+                LeavePolicyModel leavePolicy = leavePolicyService.getLeavePolicyById(employee.getLeavePolicyId());
+                dto.setLeavePolicyId(leavePolicy.getLeavePolicyId());
+                dto.setLeavePolicyName(leavePolicy.getName());
+                dto.setLeaveAllocations(leavePolicy.getLeaveAllocations());
+            } catch (Exception e) {
+                // If leave policy not found, leave policy details will be null
+            }
+        }
+
+        return dto;
     }
 
 }
