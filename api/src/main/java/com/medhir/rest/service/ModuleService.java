@@ -65,6 +65,22 @@ public class ModuleService {
                 roles.add("HRADMIN");
                 employee.setRoles(roles);
             }
+            if (savedModule.getModuleName().toUpperCase().contains("ACCOUNT")) {
+                Set<String> roles = employee.getRoles();
+                if (roles == null) {
+                    roles = new HashSet<>();
+                }
+                roles.add("ACCOUNTANT");
+                employee.setRoles(roles);
+            }
+            if (savedModule.getModuleName().toUpperCase().contains("PROJECT")) {
+                Set<String> roles = employee.getRoles();
+                if (roles == null) {
+                    roles = new HashSet<>();
+                }
+                roles.add("PROJECTMANAGER");
+                employee.setRoles(roles);
+            }
             
             employeeRepository.save(employee);
         }
