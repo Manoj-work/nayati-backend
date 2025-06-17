@@ -15,6 +15,7 @@ import com.medhir.rest.service.settings.DepartmentService;
 import com.medhir.rest.service.settings.LeaveTypeService;
 import com.medhir.rest.service.settings.LeavePolicyService;
 import com.medhir.rest.utils.GeneratedId;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -65,8 +66,9 @@ public class LeaveApplicationService {
     @Value("${attendance.service.url}")
     private String ATTENDANCE_SERVICE_URL;
 
+
     public LeaveModel applyLeave(LeaveModel request) {
-        // Validate employee exists and get their details
+        // Validate employee exists
         Optional<EmployeeWithLeaveDetailsDTO> employeeOpt = employeeService.getEmployeeById(request.getEmployeeId());
         if (employeeOpt.isEmpty()) {
             throw new ResourceNotFoundException("Employee not found with ID: " + request.getEmployeeId());
@@ -76,47 +78,25 @@ public class LeaveApplicationService {
         companyService.getCompanyById(request.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + request.getCompanyId()));
 
-        // Set end date equal to start date if not provided
-        if (request.getEndDate() == null) {
-            request.setEndDate(request.getStartDate());
+        // Validate leave dates
+        if (request.getLeaveDates() == null || request.getLeaveDates().isEmpty()) {
+            throw new IllegalArgumentException("Leave dates cannot be empty");
         }
 
-        // Create leave record
+        // Create new leave object
         LeaveModel leave = new LeaveModel();
-        leave.setLeaveId(generatedId.generateId("LID", LeaveModel.class, "leaveId"));
-        leave.setEmployeeId(request.getEmployeeId());
-        leave.setCompanyId(request.getCompanyId()); // Set companyId from request
-        leave.setLeaveName(request.getLeaveName());
-        leave.setLeaveType(request.getLeaveType());
-        leave.setStartDate(request.getStartDate());
-        leave.setEndDate(request.getEndDate());
-        leave.setShiftType(request.getShiftType()); // Store as string
-        leave.setReason(request.getReason());
-        leave.setStatus("Pending");
 
-        // Check balance and add warning if insufficient (only for regular leaves)
-        if ("Leave".equals(request.getLeaveName())) {
-            checkAndAddWarning(leave);
-        }
+        // Copy all properties except leaveId and status
+        BeanUtils.copyProperties(request, leave, "leaveId", "status");
+
+        // Set system-generated values
+        leave.setLeaveId(generatedId.generateId("LID", LeaveModel.class, "leaveId"));
+        leave.setStatus("Pending");
 
         return leaveRepository.save(leave);
     }
 
-    private void checkAndAddWarning(LeaveModel leave) {
-        double requestedDays = calculateLeaveDays(leave);
-        LeaveBalance currentBalance = leaveBalanceService.getCurrentMonthBalance(leave.getEmployeeId());
 
-        // First check comp-off balance
-        double compOffBalance = currentBalance.getRemainingCompOffLeaves();
-        double annualBalance = currentBalance.getRemainingAnnualLeaves();
-        double totalAvailable = compOffBalance + annualBalance;
-
-        if (requestedDays > totalAvailable) {
-            leave.setRemarks("WARNING: Insufficient leave balance. This will be marked as LOP if approved. " +
-                    String.format("Requested: %.1f days, Available: %.1f days (Comp-off: %.1f, Annual: %.1f)",
-                            requestedDays, totalAvailable, compOffBalance, annualBalance));
-        }
-    }
 
     public LeaveModel updateLeaveStatus(UpdateLeaveStatusRequest request) {
         Optional<LeaveModel> leaveOpt = leaveRepository.findByLeaveId(request.getLeaveId());
@@ -142,9 +122,7 @@ public class LeaveApplicationService {
             if ("Leave".equals(leave.getLeaveName())) {
                 handleRegularLeaveApproval(leave);
             } else if ("Comp-Off".equals(leave.getLeaveName())) {
-                // For comp-off, use the new balance update method
-                double days = calculateLeaveDays(leave);
-                updateCompOffBalance(leave.getEmployeeId(), days);
+                handleCompOffApproval(leave);
             }
         }
 
@@ -152,108 +130,41 @@ public class LeaveApplicationService {
     }
 
     private void handleRegularLeaveApproval(LeaveModel leave) {
-        double requestedDays = calculateLeaveDays(leave);
+        // Calculate the number of days for this leave
+        double leaveDays = calculateLeaveDays(leave);
+        
+        // Get current month's leave balance
         LeaveBalance currentBalance = leaveBalanceService.getCurrentMonthBalance(leave.getEmployeeId());
-
-        double compOffBalance = currentBalance.getRemainingCompOffLeaves();
-        double annualBalance = currentBalance.getRemainingAnnualLeaves();
-        double totalAvailable = compOffBalance + annualBalance;
-
-        // First use comp-off balance if available
-        if (compOffBalance > 0) {
-            leaveBalanceService.updateCompOffLeavesTaken(leave.getEmployeeId(), compOffBalance);
-            requestedDays -= compOffBalance;
-        }
-
-        // Then use annual leave balance (can go negative)
-        if (requestedDays > 0) {
-            leaveBalanceService.updateLeavesTaken(leave.getEmployeeId(), requestedDays);
-        }
-
-        // Calculate how many days we can mark as present with approved leave
-        double daysWithLeave = Math.min(totalAvailable, requestedDays + compOffBalance);
-        double daysAsLOP = Math.max(0, requestedDays - totalAvailable);
-
-        if (daysWithLeave > 0) {
-            // Calculate dates for days with leave
-            LocalDate leaveStartDate = leave.getStartDate();
-            LocalDate leaveEndDate = leaveStartDate.plusDays((long)daysWithLeave - 1);
-
-            // Mark days with available leave as present with approved leave
-            markPresentWithApprovedLeaveInAttendance(
-                    leave.getEmployeeId(),
-                    leaveStartDate,
-                    leaveEndDate,
-                    leave.getReason(),
-                    leave.getLeaveId()
-            );
-
-            // If there are days to mark as LOP
-            if (daysAsLOP > 0) {
-                LocalDate lopStartDate = leaveEndDate.plusDays(1);
-                markApprovedLOPInAttendance(
-                        leave.getEmployeeId(),
-                        lopStartDate,
-                        leave.getEndDate(),
-                        leave.getReason(),
-                        leave.getLeaveId()
-                );
-            }
-        } else {
-            // All days are LOP
-            markApprovedLOPInAttendance(
-                    leave.getEmployeeId(),
-                    leave.getStartDate(),
-                    leave.getEndDate(),
-                    leave.getReason(),
-                    leave.getLeaveId()
-            );
-        }
+        
+        // Update leaves taken
+        currentBalance.setLeavesTakenInThisMonth(currentBalance.getLeavesTakenInThisMonth() + leaveDays);
+        currentBalance.setLeavesTakenThisYear(currentBalance.getLeavesTakenThisYear() + leaveDays);
+        
+        // Save the updated balance
+        leaveBalanceRepository.save(currentBalance);
     }
 
-    private void updateCompOffBalance(String employeeId, double compOffDays) {
-        LeaveBalance currentBalance = leaveBalanceService.getCurrentMonthBalance(employeeId);
+    private void handleCompOffApproval(LeaveModel leave) {
+        // Calculate the number of comp-off days
+        double compOffDays = calculateLeaveDays(leave);
         
-        // Get initial values
-        double remainingAnnualLeaves = currentBalance.getRemainingAnnualLeaves();
-        double remainingCompOffLeaves = currentBalance.getRemainingCompOffLeaves();
+        // Get current month's leave balance
+        LeaveBalance currentBalance = leaveBalanceService.getCurrentMonthBalance(leave.getEmployeeId());
         
-        // Update comp-off earned fields
-        currentBalance.setCompOffLeavesEarned(compOffDays);
+        // Update comp-off earned
+        currentBalance.setCompOffLeavesEarned(currentBalance.getCompOffLeavesEarned() + compOffDays);
         currentBalance.setTotalCompOffLeavesEarnedSinceJanuary(
             currentBalance.getTotalCompOffLeavesEarnedSinceJanuary() + compOffDays
         );
-        
-        // Add new comp-off days
-        double totalCompOffAvailable = remainingCompOffLeaves + compOffDays;
-        
-        // If there's a negative leave balance, use comp-off to compensate
-        if (remainingAnnualLeaves < 0) {
-            double negativeBalance = Math.abs(remainingAnnualLeaves);
-            double compOffUsed = Math.min(negativeBalance, totalCompOffAvailable);
-            
-            // Update remaining comp-off (only what's left after compensation)
-            remainingCompOffLeaves = totalCompOffAvailable - compOffUsed;
-        } else {
-            // If no negative balance, just add the new comp-off
-            remainingCompOffLeaves = totalCompOffAvailable;
-        }
-        
-        // Calculate new leave balance as sum of remaining annual leaves and comp-off earned
-        double newLeaveBalance = remainingAnnualLeaves + compOffDays;
-        
-        // Update the balances
-        currentBalance.setRemainingCompOffLeaves(remainingCompOffLeaves);
-        currentBalance.setNewLeaveBalance(newLeaveBalance);
         
         // Save the updated balance
         leaveBalanceRepository.save(currentBalance);
     }
 
     private double calculateLeaveDays(LeaveModel leave) {
-        long totalDays = ChronoUnit.DAYS.between(leave.getStartDate(), leave.getEndDate()) + 1;
-
+        double totalDays = leave.getLeaveDates().size();
         String shiftType = leave.getShiftType();
+        
         if ("FULL_DAY".equals(shiftType)) {
             return totalDays;
         } else if ("FIRST_HALF".equals(shiftType) || "SECOND_HALF".equals(shiftType)) {
@@ -284,13 +195,12 @@ public class LeaveApplicationService {
 
             // Copy all fields from LeaveModel to LeaveWithEmployeeDetails
             leaveWithDetails.setId(leave.getId());
+            leaveWithDetails.setLeaveDates(leave.getLeaveDates());
             leaveWithDetails.setLeaveId(leave.getLeaveId());
             leaveWithDetails.setEmployeeId(leave.getEmployeeId());
             leaveWithDetails.setCompanyId(leave.getCompanyId());
             leaveWithDetails.setLeaveName(leave.getLeaveName());
             leaveWithDetails.setLeaveType(leave.getLeaveType());
-            leaveWithDetails.setStartDate(leave.getStartDate());
-            leaveWithDetails.setEndDate(leave.getEndDate());
             leaveWithDetails.setShiftType(leave.getShiftType());
             leaveWithDetails.setReason(leave.getReason());
             leaveWithDetails.setStatus(leave.getStatus());
@@ -407,9 +317,8 @@ public class LeaveApplicationService {
             leaveWithDetails.setEmployeeId(leave.getEmployeeId());
             leaveWithDetails.setCompanyId(leave.getCompanyId());
             leaveWithDetails.setLeaveName(leave.getLeaveName());
+            leaveWithDetails.setLeaveDates(leave.getLeaveDates());
             leaveWithDetails.setLeaveType(leave.getLeaveType());
-            leaveWithDetails.setStartDate(leave.getStartDate());
-            leaveWithDetails.setEndDate(leave.getEndDate());
             leaveWithDetails.setShiftType(leave.getShiftType());
             leaveWithDetails.setReason(leave.getReason());
             leaveWithDetails.setStatus(leave.getStatus());

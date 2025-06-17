@@ -23,17 +23,20 @@ public class LeaveApplicationController {
     @PostMapping("/apply")
     public ResponseEntity<?> applyLeave(@Valid @RequestBody LeaveModel request) {
         try {
+            // Validate leave dates
+            if (request.getLeaveDates() == null || request.getLeaveDates().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Leave dates cannot be empty"));
+            }
+
             // Validate leave type for regular leave
-            // if ("Leave".equals(request.getLeaveName()) && (request.getLeaveType() == null
-            // || request.getLeaveType().isEmpty())) {
-            // return ResponseEntity.badRequest().body(Map.of("error", "Leave type is
-            // required for regular leave"));
-            // }
-            request.setLeaveType("Annual Leave");
+            if ("Leave".equals(request.getLeaveName()) && (request.getLeaveType() == null || request.getLeaveType().isEmpty())) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Leave type is required for regular leave"));
+            }
 
             LeaveModel leave = leaveApplicationService.applyLeave(request);
             return ResponseEntity.ok(Map.of(
-                    "message", "Leave application submitted successfully"));
+                    "message", "Leave application submitted successfully",
+                    "leaveId", leave.getLeaveId()));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -24,10 +25,6 @@ public class LeaveBalance {
     private double annualLeavesEarned;
     private double compOffLeavesEarned;
 
-    // Yearly totals (since January)
-    private double totalAnnualLeavesEarnedSinceJanuary;
-    private double totalCompOffLeavesEarnedSinceJanuary;
-
     // Carry forward from previous month
     private double annualLeavesCarryForwarded;
     private double compOffLeavesCarryForwarded;
@@ -35,19 +32,24 @@ public class LeaveBalance {
     // Leaves taken in current month
     private double leavesTakenInThisMonth;
 
-    // Remaining leaves after calculations
-    private double remainingAnnualLeaves;
-    private double remainingCompOffLeaves;
-
-    // Balance tracking
-    private double newLeaveBalance;
-    private double oldLeaveBalance;
-
-    // New fields
+    // Yearly totals (since January)
+    private double totalAnnualLeavesEarnedSinceJanuary;
+    private double totalCompOffLeavesEarnedSinceJanuary;
     private double leavesTakenThisYear;
     private double leavesCarriedFromPreviousYear;
 
     @CreatedDate
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Kolkata")
     private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Kolkata")
+    private LocalDateTime updatedAt;
+
+    // Computed field for total available balance
+    public double getTotalAvailableBalance() {
+        double totalEarned = annualLeavesEarned + compOffLeavesEarned;
+        double totalCarryForwarded = annualLeavesCarryForwarded + compOffLeavesCarryForwarded;
+        return totalEarned + totalCarryForwarded - leavesTakenInThisMonth;
+    }
 } 

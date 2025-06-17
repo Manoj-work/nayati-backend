@@ -8,7 +8,7 @@ import com.medhir.rest.repository.leave.LeaveBalanceRepository;
 import com.medhir.rest.service.settings.DepartmentService;
 import com.medhir.rest.service.settings.LeaveTypeService;
 import com.medhir.rest.service.settings.LeavePolicyService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -16,22 +16,14 @@ import java.time.Month;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class LeaveBalanceService {
 
-    @Autowired
-    private LeaveBalanceRepository leaveBalanceRepository;
-
-    @Autowired
-    private EmployeeService employeeService;
-
-    @Autowired
-    private DepartmentService departmentService;
-
-    @Autowired
-    private LeavePolicyService leavePolicyService;
-
-    @Autowired
-    private LeaveTypeService leaveTypeService;
+    private final LeaveBalanceRepository leaveBalanceRepository;
+    private final EmployeeService employeeService;
+    private final DepartmentService departmentService;
+    private final LeavePolicyService leavePolicyService;
+    private final LeaveTypeService leaveTypeService;
 
     private double calculateMonthlyLeaves(String employeeId) {
         // Get employee's department
@@ -93,65 +85,70 @@ public class LeaveBalanceService {
         newBalance.setNumericMonth(Month.valueOf(month.toUpperCase()).getValue());
         newBalance.setYear(year);
 
-        // Get previous month's balance
-        LeaveBalance previousBalance = getPreviousMonthBalance(employeeId, month, year);
-
-        if (previousBalance != null) {
-            // Set old balance from previous month's new balance
-            newBalance.setOldLeaveBalance(previousBalance.getNewLeaveBalance());
-
-            // Carry forward leaves from previous month
-            newBalance.setAnnualLeavesCarryForwarded(previousBalance.getRemainingAnnualLeaves());
-            newBalance.setCompOffLeavesCarryForwarded(previousBalance.getRemainingCompOffLeaves());
-
-            // Carry forward yearly totals
-            newBalance.setTotalAnnualLeavesEarnedSinceJanuary(previousBalance.getTotalAnnualLeavesEarnedSinceJanuary());
-            newBalance.setTotalCompOffLeavesEarnedSinceJanuary(previousBalance.getTotalCompOffLeavesEarnedSinceJanuary());
-
-            // Accumulate leaves taken this year
-            newBalance.setLeavesTakenThisYear(previousBalance.getLeavesTakenThisYear() + previousBalance.getLeavesTakenInThisMonth());
-        } else {
-            newBalance.setOldLeaveBalance(0.0);
-            newBalance.setAnnualLeavesCarryForwarded(0.0);
-            newBalance.setCompOffLeavesCarryForwarded(0.0);
-            newBalance.setTotalAnnualLeavesEarnedSinceJanuary(0.0);
-            newBalance.setTotalCompOffLeavesEarnedSinceJanuary(0.0);
-            newBalance.setLeavesTakenThisYear(0.0);
-        }
-
-        // Handle leaves carried from previous year
-        if (Month.valueOf(month.toUpperCase()) == Month.JANUARY) {
-            // For January, get December of previous year
-            Optional<LeaveBalance> decemberBalance = leaveBalanceRepository.findByEmployeeIdAndNumericMonthAndYear(
-                    employeeId,
-                    12,  // December
-                    year - 1  // Previous year
-            );
-
-            if (decemberBalance.isPresent()) {
-                newBalance.setLeavesCarriedFromPreviousYear(decemberBalance.get().getRemainingAnnualLeaves());
-            } else {
-                newBalance.setLeavesCarriedFromPreviousYear(0.0);
-            }
-        } else {
-            // For other months, carry forward from previous month
-            newBalance.setLeavesCarriedFromPreviousYear(previousBalance != null ?
-                    previousBalance.getLeavesCarriedFromPreviousYear() : 0.0);
-        }
-
         // Calculate earned leaves based on policy
         double earnedLeaves = calculateMonthlyLeaves(employeeId);
         newBalance.setAnnualLeavesEarned(earnedLeaves);
         newBalance.setCompOffLeavesEarned(0.0);
         newBalance.setLeavesTakenInThisMonth(0.0);
 
-        // Update yearly totals
-        newBalance.setTotalAnnualLeavesEarnedSinceJanuary(
-                newBalance.getTotalAnnualLeavesEarnedSinceJanuary() + earnedLeaves
-        );
+        // Get previous month's balance
+        LeaveBalance previousBalance = getPreviousMonthBalance(employeeId, month, year);
 
-        // Calculate remaining leaves
-        updateRemainingLeaves(newBalance);
+        if (previousBalance == null) {
+            // Case 1: No previous balance exists
+            newBalance.setAnnualLeavesCarryForwarded(0.0);
+            newBalance.setCompOffLeavesCarryForwarded(0.0);
+            newBalance.setTotalAnnualLeavesEarnedSinceJanuary(earnedLeaves);
+            newBalance.setTotalCompOffLeavesEarnedSinceJanuary(0.0);
+            newBalance.setLeavesTakenThisYear(0.0);
+            newBalance.setLeavesCarriedFromPreviousYear(0.0);
+        } else {
+            // Case 2: Previous balance exists - Calculate carry forward
+            double totalCompOff = previousBalance.getCompOffLeavesEarned() + previousBalance.getCompOffLeavesCarryForwarded();
+            double totalAnnual = previousBalance.getAnnualLeavesEarned() + previousBalance.getAnnualLeavesCarryForwarded();
+            double leavesTaken = previousBalance.getLeavesTakenInThisMonth();
+
+            // First deduct from comp-off
+            if (leavesTaken <= totalCompOff) {
+                // All leaves taken from comp-off
+                newBalance.setCompOffLeavesCarryForwarded(totalCompOff - leavesTaken);
+                newBalance.setAnnualLeavesCarryForwarded(totalAnnual);
+            } else {
+                // Comp-off fully used, remaining from annual
+                newBalance.setCompOffLeavesCarryForwarded(0.0);
+                newBalance.setAnnualLeavesCarryForwarded(totalAnnual - (leavesTaken - totalCompOff));
+            }
+
+            // Carry forward yearly totals
+            newBalance.setTotalAnnualLeavesEarnedSinceJanuary(previousBalance.getTotalAnnualLeavesEarnedSinceJanuary() + earnedLeaves);
+            newBalance.setTotalCompOffLeavesEarnedSinceJanuary(previousBalance.getTotalCompOffLeavesEarnedSinceJanuary());
+            newBalance.setLeavesTakenThisYear(previousBalance.getLeavesTakenThisYear() + previousBalance.getLeavesTakenInThisMonth());
+
+            // Handle leaves carried from previous year for January
+            if (Month.valueOf(month.toUpperCase()) == Month.JANUARY) {
+                Optional<LeaveBalance> decemberBalance = leaveBalanceRepository.findByEmployeeIdAndNumericMonthAndYear(
+                        employeeId,
+                        12,  // December
+                        year - 1  // Previous year
+                );
+
+                if (decemberBalance.isPresent()) {
+                    double decTotalCompOff = decemberBalance.get().getCompOffLeavesEarned() + decemberBalance.get().getCompOffLeavesCarryForwarded();
+                    double decTotalAnnual = decemberBalance.get().getAnnualLeavesEarned() + decemberBalance.get().getAnnualLeavesCarryForwarded();
+                    double decLeavesTaken = decemberBalance.get().getLeavesTakenInThisMonth();
+
+                    // Calculate remaining leaves from December
+                    double remainingCompOff = Math.max(0, decTotalCompOff - decLeavesTaken);
+                    double remainingAnnual = decTotalAnnual - Math.max(0, decLeavesTaken - decTotalCompOff);
+
+                    newBalance.setLeavesCarriedFromPreviousYear(remainingAnnual);
+                } else {
+                    newBalance.setLeavesCarriedFromPreviousYear(0.0);
+                }
+            } else {
+                newBalance.setLeavesCarriedFromPreviousYear(previousBalance.getLeavesCarriedFromPreviousYear());
+            }
+        }
 
         return leaveBalanceRepository.save(newBalance);
     }
@@ -170,64 +167,9 @@ public class LeaveBalanceService {
                 .orElse(null);
     }
 
-    private void updateRemainingLeaves(LeaveBalance balance) {
-        // Calculate remaining annual leaves (can be negative)
-        balance.setRemainingAnnualLeaves(
-                balance.getAnnualLeavesCarryForwarded() +
-                        balance.getAnnualLeavesEarned() -
-                        balance.getLeavesTakenInThisMonth()
-        );
-
-        // Calculate remaining comp-off leaves (should not be negative)
-        balance.setRemainingCompOffLeaves(
-                Math.max(0, balance.getCompOffLeavesCarryForwarded() +
-                        balance.getCompOffLeavesEarned())
-        );
-
-        // Calculate new balance (can be negative if annual leaves are negative)
-        balance.setNewLeaveBalance(
-                balance.getRemainingAnnualLeaves() +
-                        balance.getRemainingCompOffLeaves()
-        );
-    }
-
     public LeaveBalance getCurrentMonthBalance(String employeeId) {
         LocalDate now = LocalDate.now();
         return getOrCreateLeaveBalance(employeeId, now.getMonth().toString(), now.getYear());
     }
 
-    public void updateLeavesTaken(String employeeId, double days) {
-        LeaveBalance balance = getCurrentMonthBalance(employeeId);
-        // Update leaves taken in this month
-        balance.setLeavesTakenInThisMonth(balance.getLeavesTakenInThisMonth() + days);
-        // Update leaves taken this year
-        balance.setLeavesTakenThisYear(balance.getLeavesTakenThisYear() + days);
-        // Update remaining annual leaves
-        balance.setRemainingAnnualLeaves(balance.getRemainingAnnualLeaves() - days);
-        // Update new balance
-        balance.setNewLeaveBalance(balance.getRemainingAnnualLeaves() + balance.getRemainingCompOffLeaves());
-        leaveBalanceRepository.save(balance);
-    }
-
-    public void updateCompOffLeavesTaken(String employeeId, double days) {
-        LeaveBalance balance = getCurrentMonthBalance(employeeId);
-        // Reduce comp-off leaves earned by the days taken
-        // balance.setCompOffLeavesEarned(balance.getCompOffLeavesEarned() - days);
-        balance.setRemainingCompOffLeaves(balance.getRemainingCompOffLeaves() - days);
-        updateRemainingLeaves(balance);
-        leaveBalanceRepository.save(balance);
-    }
-
-    public void addCompOffEarned(String employeeId, double days) {
-        LeaveBalance balance = getCurrentMonthBalance(employeeId);
-        // Add to comp-off earned fields
-        balance.setCompOffLeavesEarned(balance.getCompOffLeavesEarned() + days);
-        balance.setRemainingCompOffLeaves(balance.getRemainingCompOffLeaves() + days);
-        // Update yearly total for comp-off
-        balance.setTotalCompOffLeavesEarnedSinceJanuary(
-                balance.getTotalCompOffLeavesEarnedSinceJanuary() + days
-        );
-        updateRemainingLeaves(balance);
-        leaveBalanceRepository.save(balance);
-    }
 } 
