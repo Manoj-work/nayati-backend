@@ -54,5 +54,8 @@ public class Expense {
     @NotBlank(message = "Status is required")
     private String status = "pending"; //
 
-    // Getters and Setters
+    private String paymentProof;
+
+    private String rejectionComment;
+
 }

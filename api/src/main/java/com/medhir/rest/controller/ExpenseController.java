@@ -32,7 +32,10 @@ public class ExpenseController {
             @RequestParam BigDecimal reimbursementAmount,
             @RequestParam String gstCredit,
             @RequestParam String notesDescription,
-            @RequestParam MultipartFile receiptInvoiceAttachment) {
+            @RequestParam MultipartFile receiptInvoiceAttachment,
+            @RequestParam(required = false) MultipartFile paymentProof,
+            @RequestParam(required = false) String rejectionComment,
+            @RequestParam(required = false) String status) {
         
         Expense expense = new Expense();
         expense.setExpenseType(expenseType);
@@ -44,8 +47,10 @@ public class ExpenseController {
         expense.setReimbursementAmount(reimbursementAmount);
         expense.setGstCredit(gstCredit);
         expense.setNotesDescription(notesDescription);
+        expense.setRejectionComment(rejectionComment);
+        expense.setStatus(status != null ? status : "pending");
         
-        Expense savedExpense = expenseService.createExpense(expense, receiptInvoiceAttachment);
+        Expense savedExpense = expenseService.createExpense(expense, receiptInvoiceAttachment, paymentProof);
         return ResponseEntity.ok(Map.of(
                 "message", "Expense created successfully!"
 //                "expense", savedExpense
@@ -75,7 +80,10 @@ public class ExpenseController {
             @RequestParam BigDecimal reimbursementAmount,
             @RequestParam String gstCredit,
             @RequestParam String notesDescription,
-            @RequestParam(required = false) MultipartFile receiptInvoiceAttachment) {
+            @RequestParam(required = false) MultipartFile receiptInvoiceAttachment,
+            @RequestParam(required = false) MultipartFile paymentProof,
+            @RequestParam(required = false) String rejectionComment,
+            @RequestParam(required = false) String status) {
         
         Expense expense = new Expense();
         expense.setExpenseType(expenseType);
@@ -87,8 +95,10 @@ public class ExpenseController {
         expense.setReimbursementAmount(reimbursementAmount);
         expense.setGstCredit(gstCredit);
         expense.setNotesDescription(notesDescription);
+        expense.setRejectionComment(rejectionComment);
+        expense.setStatus(status);
         
-        Expense updatedExpense = expenseService.updateExpense(expenseId, expense, receiptInvoiceAttachment);
+        Expense updatedExpense = expenseService.updateExpense(expenseId, expense, receiptInvoiceAttachment, paymentProof);
         return ResponseEntity.ok(Map.of(
                 "message", "Expense updated successfully!"
 //                "expense", updatedExpense

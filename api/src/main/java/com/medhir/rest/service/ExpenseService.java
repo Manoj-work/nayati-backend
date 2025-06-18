@@ -25,13 +25,19 @@ public class ExpenseService {
     @Autowired
     private MinioService minioService;
 
-    public Expense createExpense(Expense expense, MultipartFile receiptInvoiceAttachment) {
+    public Expense createExpense(Expense expense, MultipartFile receiptInvoiceAttachment, MultipartFile paymentProof) {
 
         expense.setExpenseId("EXP-" + snowflakeIdGenerator.nextId());
         
-        // Upload file to MinIO and get URL
+        // Upload receipt/invoice file to MinIO and get URL
         String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
         expense.setReceiptInvoiceAttachmentUrl(fileUrl);
+        
+        // Upload payment proof file to MinIO if provided
+        if (paymentProof != null && !paymentProof.isEmpty()) {
+            String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
+            expense.setPaymentProof(paymentProofUrl);
+        }
         
         return expenseRepository.insert(expense);
     }
@@ -40,7 +46,7 @@ public class ExpenseService {
         return expenseRepository.findAll();
     }
 
-    public Expense updateExpense(String expenseId, Expense updatedExpense, MultipartFile receiptInvoiceAttachment) {
+    public Expense updateExpense(String expenseId, Expense updatedExpense, MultipartFile receiptInvoiceAttachment, MultipartFile paymentProof) {
         Optional<Expense> existing = expenseRepository.findByExpenseId(expenseId);
         if (existing.isEmpty()) {
             throw new ResourceNotFoundException("Expense not found with ID: " + expenseId);
@@ -57,11 +63,18 @@ public class ExpenseService {
         expense.setGstCredit(updatedExpense.getGstCredit());
         expense.setNotesDescription(updatedExpense.getNotesDescription());
         expense.setStatus(updatedExpense.getStatus());
+        expense.setRejectionComment(updatedExpense.getRejectionComment());
         
-        // If a new file is provided, upload it to MinIO and update the URL
+        // If a new receipt/invoice file is provided, upload it to MinIO and update the URL
         if (receiptInvoiceAttachment != null && !receiptInvoiceAttachment.isEmpty()) {
             String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
             expense.setReceiptInvoiceAttachmentUrl(fileUrl);
+        }
+        
+        // If a new payment proof file is provided, upload it to MinIO and update the URL
+        if (paymentProof != null && !paymentProof.isEmpty()) {
+            String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
+            expense.setPaymentProof(paymentProofUrl);
         }
         
         return expenseRepository.save(expense);
