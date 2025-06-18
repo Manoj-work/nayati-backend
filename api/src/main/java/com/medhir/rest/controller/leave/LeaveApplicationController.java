@@ -29,9 +29,9 @@ public class LeaveApplicationController {
             }
 
             // Validate leave type for regular leave
-            if ("Leave".equals(request.getLeaveName()) && (request.getLeaveType() == null || request.getLeaveType().isEmpty())) {
-                return ResponseEntity.badRequest().body(Map.of("error", "Leave type is required for regular leave"));
-            }
+//            if ("Leave".equals(request.getLeaveName()) && (request.getLeaveType() == null || request.getLeaveType().isEmpty())) {
+//                return ResponseEntity.badRequest().body(Map.of("error", "Leave type is required for regular leave"));
+//            }
 
             LeaveModel leave = leaveApplicationService.applyLeave(request);
             return ResponseEntity.ok(Map.of(
