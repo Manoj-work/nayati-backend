@@ -21,6 +21,9 @@ public class MinioService {
     @Value("${minio.attendanceBucketName}")
     private String attendanceBucketName;
 
+    @Value("${minio.expenseBucketName}")
+    private String expenseBucketName;
+
     @Value("${minio.documentBucketName}")
     private String documentBucketName;
 
@@ -56,5 +59,8 @@ public class MinioService {
 
     public String uploadDocumentsImg(MultipartFile file, String employeeId){
         return uploadFile(documentBucketName,file,employeeId);
+    }
+    public String UploadexpensesImg(MultipartFile file, String projectId){
+        return uploadFile(expenseBucketName,file,projectId);
     }
 }

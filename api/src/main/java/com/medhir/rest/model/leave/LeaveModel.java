@@ -24,7 +24,7 @@ public class LeaveModel {
     @NotBlank(message = "Company id cannot be empty")
     private String companyId; // Added companyId field
     private String leaveName; // "Leave",  "Comp Off"
-    private String leaveType; // "Casual Leave", "Medical Leave", "Comp Off"
+//    private String leaveType; // "Casual Leave", "Medical Leave", "Comp Off"
     private List<LocalDate> leaveDates; // List of dates for which leave is requested
     private String shiftType; // Will be converted to enum in the service layer
     private String reason;

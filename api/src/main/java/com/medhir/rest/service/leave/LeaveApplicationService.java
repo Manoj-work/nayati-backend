@@ -200,7 +200,7 @@ public class LeaveApplicationService {
             leaveWithDetails.setEmployeeId(leave.getEmployeeId());
             leaveWithDetails.setCompanyId(leave.getCompanyId());
             leaveWithDetails.setLeaveName(leave.getLeaveName());
-            leaveWithDetails.setLeaveType(leave.getLeaveType());
+//            leaveWithDetails.setLeaveType(leave.getLeaveType());
             leaveWithDetails.setShiftType(leave.getShiftType());
             leaveWithDetails.setReason(leave.getReason());
             leaveWithDetails.setStatus(leave.getStatus());
@@ -318,7 +318,7 @@ public class LeaveApplicationService {
             leaveWithDetails.setCompanyId(leave.getCompanyId());
             leaveWithDetails.setLeaveName(leave.getLeaveName());
             leaveWithDetails.setLeaveDates(leave.getLeaveDates());
-            leaveWithDetails.setLeaveType(leave.getLeaveType());
+//            leaveWithDetails.setLeaveType(leave.getLeaveType());
             leaveWithDetails.setShiftType(leave.getShiftType());
             leaveWithDetails.setReason(leave.getReason());
             leaveWithDetails.setStatus(leave.getStatus());

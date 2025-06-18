@@ -1,239 +1,81 @@
 package com.medhir.rest.service;
 
-import com.medhir.rest.model.ExpenseModel;
+import com.medhir.rest.exception.DuplicateResourceException;
+import com.medhir.rest.exception.ResourceNotFoundException;
+import com.medhir.rest.model.Expense;
 import com.medhir.rest.repository.ExpenseRepository;
+import com.medhir.rest.utils.MinioService;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.medhir.rest.utils.GeneratedId;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.util.StringUtils;
-import com.medhir.rest.model.EmployeeModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.ArrayList;
 
 @Service
 public class ExpenseService {
+
     @Autowired
     private ExpenseRepository expenseRepository;
 
     @Autowired
-    private EmployeeRepository employeeRepository;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
-    private GeneratedId generatedId;
+    private MinioService minioService;
 
-    public ExpenseModel createExpense(ExpenseModel expense) {
-        try {
-            // Validate submittedBy
-            if (!StringUtils.hasText(expense.getSubmittedBy())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Submitted by (employeeId) is required");
-            }
+    public Expense createExpense(Expense expense, MultipartFile receiptInvoiceAttachment) {
 
-            expense.setGeneratedId(generatedId);
-            expense.generateExpenseId();
-            return expenseRepository.save(expense);
-        } catch (ResponseStatusException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error creating expense: " + e.getMessage());
-        }
+        expense.setExpenseId("EXP-" + snowflakeIdGenerator.nextId());
+        
+        // Upload file to MinIO and get URL
+        String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
+        expense.setReceiptInvoiceAttachmentUrl(fileUrl);
+        
+        return expenseRepository.insert(expense);
     }
 
-    public List<ExpenseModel> getAllExpenses() {
+    public List<Expense> getAllExpenses() {
         return expenseRepository.findAll();
     }
 
-    public List<ExpenseModel> getExpensesByEmployee(String employeeId) {
-        if (!StringUtils.hasText(employeeId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Employee ID is required");
-        }
-        return expenseRepository.findBySubmittedBy(employeeId);
-    }
-
-    public List<ExpenseModel> getExpensesByManagerAndStatus(String managerId, String status) {
-        if (!StringUtils.hasText(managerId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Manager ID is required");
-        }
-        if (!StringUtils.hasText(status)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
+    public Expense updateExpense(String expenseId, Expense updatedExpense, MultipartFile receiptInvoiceAttachment) {
+        Optional<Expense> existing = expenseRepository.findByExpenseId(expenseId);
+        if (existing.isEmpty()) {
+            throw new ResourceNotFoundException("Expense not found with ID: " + expenseId);
         }
 
-        // Find all employees who have this manager as their reporting manager
-        List<EmployeeModel> employees = employeeRepository.findByReportingManager(managerId);
+        Expense expense = existing.get();
+        expense.setExpenseType(updatedExpense.getExpenseType());
+        expense.setClientName(updatedExpense.getClientName());
+        expense.setProjectId(updatedExpense.getProjectId());
+        expense.setExpenseCategory(updatedExpense.getExpenseCategory());
+        expense.setVendorName(updatedExpense.getVendorName());
+        expense.setTotalExpenseAmount(updatedExpense.getTotalExpenseAmount());
+        expense.setReimbursementAmount(updatedExpense.getReimbursementAmount());
+        expense.setGstCredit(updatedExpense.getGstCredit());
+        expense.setNotesDescription(updatedExpense.getNotesDescription());
+        expense.setStatus(updatedExpense.getStatus());
         
-        // If no employees found, return empty list instead of throwing error
-        if (employees.isEmpty()) {
-            return new ArrayList<>();
+        // If a new file is provided, upload it to MinIO and update the URL
+        if (receiptInvoiceAttachment != null && !receiptInvoiceAttachment.isEmpty()) {
+            String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
+            expense.setReceiptInvoiceAttachmentUrl(fileUrl);
         }
-
-        // Get all employee IDs
-        List<String> employeeIds = employees.stream()
-            .map(EmployeeModel::getEmployeeId)
-            .collect(Collectors.toList());
-
-        // Get expenses for all these employees with the specified status
-        return expenseRepository.findBySubmittedByInAndStatusOrderBySubmittedBy(employeeIds, status);
-    }
-
-    public List<ExpenseModel> getExpensesByCompanyAndStatus(String companyId, String status) {
-        if (!StringUtils.hasText(companyId)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Company ID is required");
-        }
-        if (!StringUtils.hasText(status)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
-        }
-
-        return expenseRepository.findByCompanyIdAndStatusOrderBySubmittedBy(companyId, status);
-    }
-
-    public Optional<ExpenseModel> getExpenseById(String expenseId) {
-        return expenseRepository.findByExpenseId(expenseId);
-    }
-
-    public ExpenseModel updateExpense(String expenseId, ExpenseModel expense) {
-        Optional<ExpenseModel> existingExpense = expenseRepository.findByExpenseId(expenseId);
-        if (existingExpense.isPresent()) {
-            ExpenseModel currentExpense = existingExpense.get();
-            
-            // Check if the expense status is Pending
-            if (!"Pending".equals(currentExpense.getStatus())) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
-                    "Cannot update expense. Only expenses with 'Pending' status can be updated.");
-            }
-            
-            // Create a new expense object with existing values
-            ExpenseModel updatedExpense = new ExpenseModel();
-            updatedExpense.setId(currentExpense.getId());
-            updatedExpense.setExpenseId(currentExpense.getExpenseId());
-            
-            // Copy all existing values
-            updatedExpense.setMainHead(currentExpense.getMainHead());
-            updatedExpense.setExpenseHead(currentExpense.getExpenseHead());
-            updatedExpense.setVendor(currentExpense.getVendor());
-            updatedExpense.setInitiated(currentExpense.getInitiated());
-            updatedExpense.setStatus(currentExpense.getStatus());
-            updatedExpense.setCategory(currentExpense.getCategory());
-            updatedExpense.setGstCredit(currentExpense.getGstCredit());
-            updatedExpense.setFile(currentExpense.getFile());
-            updatedExpense.setTotalAmount(currentExpense.getTotalAmount());
-            updatedExpense.setAmountRequested(currentExpense.getAmountRequested());
-            updatedExpense.setComments(currentExpense.getComments());
-            updatedExpense.setSubmittedBy(currentExpense.getSubmittedBy()); // Always keep original submittedBy
-            updatedExpense.setCompanyId(currentExpense.getCompanyId());
-            
-            // Update only the fields that are present in the request (except submittedBy)
-            if (expense.getMainHead() != null) updatedExpense.setMainHead(expense.getMainHead());
-            if (expense.getExpenseHead() != null) updatedExpense.setExpenseHead(expense.getExpenseHead());
-            if (expense.getVendor() != null) updatedExpense.setVendor(expense.getVendor());
-            // Prevent changes to initiated and status fields
-            // if (expense.getInitiated() != null) updatedExpense.setInitiated(expense.getInitiated());
-            // if (expense.getStatus() != null) updatedExpense.setStatus(expense.getStatus());
-            if (expense.getCategory() != "") updatedExpense.setCategory(expense.getCategory());
-            if (expense.getGstCredit() != "") updatedExpense.setGstCredit(expense.getGstCredit());
-            if (expense.getFile() != "") updatedExpense.setFile(expense.getFile());
-            if (expense.getTotalAmount() != null) updatedExpense.setTotalAmount(expense.getTotalAmount());
-            if (expense.getAmountRequested() != null) updatedExpense.setAmountRequested(expense.getAmountRequested());
-            if (expense.getComments() != "") updatedExpense.setComments(expense.getComments());
-            
-            return expenseRepository.save(updatedExpense);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense with ID '" + expenseId + "' not found");
-        }
+        
+        return expenseRepository.save(expense);
     }
 
     public void deleteExpense(String expenseId) {
-        Optional<ExpenseModel> expense = expenseRepository.findByExpenseId(expenseId);
-        if (expense.isPresent()) {
-            try {
-                expenseRepository.delete(expense.get());
-            } catch (Exception e) {
-                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error deleting expense: " + e.getMessage());
-            }
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense with ID '" + expenseId + "' not found");
+        if (!expenseRepository.existsByExpenseId(expenseId)) {
+            throw new ResourceNotFoundException("Expense not found with ID: " + expenseId);
         }
+        expenseRepository.deleteByExpenseId(expenseId);
     }
 
-    public ExpenseModel updateExpenseStatusByHrAdmin(String expenseId, String status, String remarks) {
-        Optional<ExpenseModel> existingExpense = expenseRepository.findByExpenseId(expenseId);
-        if (existingExpense.isPresent()) {
-            ExpenseModel expense = existingExpense.get();
-            
-            // Validate status
-            if (!StringUtils.hasText(status)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
-            }
-            
-            // Update status and status remarks
-            expense.setStatus(status);
-            if (remarks != null) {
-                expense.setStatusRemarks(remarks);
-            }
-            
-            return expenseRepository.save(expense);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense with ID '" + expenseId + "' not found");
-        }
-    }
-
-    public ExpenseModel updateExpenseStatusByManager(String expenseId, String status, String remarks, String managerId) {
-        Optional<ExpenseModel> existingExpense = expenseRepository.findByExpenseId(expenseId);
-        if (existingExpense.isPresent()) {
-            ExpenseModel expense = existingExpense.get();
-            
-            // Validate status
-            if (!StringUtils.hasText(status)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Status is required");
-            }
-
-            // Check if manager can update this expense
-            if (!canManagerUpdateExpense(managerId, expense)) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, 
-                    "You don't have permission to update this expense. You can only update expenses of your team members.");
-            }
-            
-            // Update status and status remarks
-            expense.setStatus(status);
-            if (remarks != null) {
-                expense.setStatusRemarks(remarks);
-            }
-            
-            return expenseRepository.save(expense);
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense with ID '" + expenseId + "' not found");
-        }
-    }
-
-    // Keep the existing updateExpenseStatus method for backward compatibility
-    // public Expense updateExpenseStatus(String expenseId, String status, String remarks, String currentUserRole, String currentUserId) {
-    //     if ("HRADMIN".equals(currentUserRole)) {
-    //         return updateExpenseStatusByHrAdmin(expenseId, status, remarks);
-    //     } else if ("MANAGER".equals(currentUserRole)) {
-    //         return updateExpenseStatusByManager(expenseId, status, remarks, currentUserId);
-    //     } else {
-    //         throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only HRADMIN and MANAGER roles can update expense status");
-    //     }
-    // }
-
-    private boolean canManagerUpdateExpense(String managerId, ExpenseModel expense) {
-        // First check if the manager exists and has the MANAGER role
-        Optional<EmployeeModel> managerOpt = employeeRepository.findByEmployeeId(managerId);
-        if (managerOpt.isEmpty() || !managerOpt.get().getRoles().contains("MANAGER")) {
-            return false;
-        }
-
-        // Find the employee who submitted the expense
-        Optional<EmployeeModel> employeeOpt = employeeRepository.findByEmployeeId(expense.getSubmittedBy());
-        if (employeeOpt.isEmpty()) {
-            return false;
-        }
-
-        // Check if the manager is the reporting manager of the employee
-        return managerId.equals(employeeOpt.get().getReportingManager());
+    public Optional<Expense> getExpenseByExpenseId(String expenseId) {
+        return Optional.ofNullable(expenseRepository.findByExpenseId(expenseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with ID: " + expenseId)));
     }
 }
