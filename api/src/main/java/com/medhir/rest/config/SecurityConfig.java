@@ -77,7 +77,7 @@ public class SecurityConfig {
 
                         // Leave endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
                         .requestMatchers("/leave/employee/**").hasAnyAuthority("EMPLOYEE", "MANAGER", "HRADMIN")
-
+                        .requestMatchers(("employee/**")).hasAuthority("EMPLOYEE")
                         // Expense endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
                         .requestMatchers("/expenses/employee/**").hasAuthority("EMPLOYEE")
                         .requestMatchers("/expenses/manager/**").hasAuthority("MANAGER")

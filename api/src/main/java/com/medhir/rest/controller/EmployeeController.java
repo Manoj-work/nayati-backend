@@ -53,6 +53,12 @@ public class EmployeeController {
 
     // Get all companies associated with admins
     @GetMapping("/hradmin/companies/{employeeId}")
+    public ResponseEntity<List<UserCompanyDTO>> getCompaniesForAdmin(@PathVariable String employeeId) {
+        List<UserCompanyDTO> companies = employeeService.getEmployeeCompanies(employeeId);
+        return ResponseEntity.ok(companies);
+    }
+    // Get all companies associated with admins
+    @GetMapping("/employee/companies/{employeeId}")
     public ResponseEntity<List<UserCompanyDTO>> getUserCompanies(@PathVariable String employeeId) {
         List<UserCompanyDTO> companies = employeeService.getEmployeeCompanies(employeeId);
         return ResponseEntity.ok(companies);
