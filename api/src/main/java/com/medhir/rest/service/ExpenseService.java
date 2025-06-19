@@ -28,31 +28,36 @@ public class ExpenseService {
     public Expense createExpense(Expense expense, MultipartFile receiptInvoiceAttachment, MultipartFile paymentProof) {
 
         expense.setExpenseId("EXP-" + snowflakeIdGenerator.nextId());
-        
-        // Upload receipt/invoice file to MinIO and get URL
-        String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
-        expense.setReceiptInvoiceAttachmentUrl(fileUrl);
-        
-        // Upload payment proof file to MinIO if provided
-        if (paymentProof != null && !paymentProof.isEmpty()) {
-            String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
-            expense.setPaymentProof(paymentProofUrl);
+
+        if (receiptInvoiceAttachment == null || receiptInvoiceAttachment.isEmpty()) {
+            throw new IllegalArgumentException("Receipt/Invoice file is required");
         }
-        
+
+        try {
+            String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
+            expense.setReceiptInvoiceAttachmentUrl(fileUrl);
+
+            if (paymentProof != null && !paymentProof.isEmpty()) {
+                String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
+                expense.setPaymentProof(paymentProofUrl);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("File upload failed", e);
+        }
+
         return expenseRepository.insert(expense);
     }
+
 
     public List<Expense> getAllExpenses() {
         return expenseRepository.findAll();
     }
 
     public Expense updateExpense(String expenseId, Expense updatedExpense, MultipartFile receiptInvoiceAttachment, MultipartFile paymentProof) {
-        Optional<Expense> existing = expenseRepository.findByExpenseId(expenseId);
-        if (existing.isEmpty()) {
-            throw new ResourceNotFoundException("Expense not found with ID: " + expenseId);
-        }
+        Expense expense = expenseRepository.findByExpenseId(expenseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with ID: " + expenseId));
 
-        Expense expense = existing.get();
+        // Set basic fields
         expense.setExpenseType(updatedExpense.getExpenseType());
         expense.setClientName(updatedExpense.getClientName());
         expense.setProjectId(updatedExpense.getProjectId());
@@ -62,23 +67,33 @@ public class ExpenseService {
         expense.setReimbursementAmount(updatedExpense.getReimbursementAmount());
         expense.setGstCredit(updatedExpense.getGstCredit());
         expense.setNotesDescription(updatedExpense.getNotesDescription());
-        expense.setStatus(updatedExpense.getStatus());
-        expense.setRejectionComment(updatedExpense.getRejectionComment());
-        
-        // If a new receipt/invoice file is provided, upload it to MinIO and update the URL
-        if (receiptInvoiceAttachment != null && !receiptInvoiceAttachment.isEmpty()) {
-            String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
-            expense.setReceiptInvoiceAttachmentUrl(fileUrl);
+
+        if (updatedExpense.getStatus() != null) {
+            expense.setStatus(updatedExpense.getStatus());
         }
-        
-        // If a new payment proof file is provided, upload it to MinIO and update the URL
-        if (paymentProof != null && !paymentProof.isEmpty()) {
-            String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
-            expense.setPaymentProof(paymentProofUrl);
+
+        if (updatedExpense.getRejectionComment() != null) {
+            expense.setRejectionComment(updatedExpense.getRejectionComment());
         }
-        
+
+        // Upload files if provided
+        try {
+            if (receiptInvoiceAttachment != null && !receiptInvoiceAttachment.isEmpty()) {
+                String fileUrl = minioService.UploadexpensesImg(receiptInvoiceAttachment, expense.getProjectId());
+                expense.setReceiptInvoiceAttachmentUrl(fileUrl);
+            }
+
+            if (paymentProof != null && !paymentProof.isEmpty()) {
+                String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
+                expense.setPaymentProof(paymentProofUrl);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("File upload failed", e);
+        }
+
         return expenseRepository.save(expense);
     }
+
 
     public void deleteExpense(String expenseId) {
         if (!expenseRepository.existsByExpenseId(expenseId)) {
@@ -87,8 +102,8 @@ public class ExpenseService {
         expenseRepository.deleteByExpenseId(expenseId);
     }
 
-    public Optional<Expense> getExpenseByExpenseId(String expenseId) {
-        return Optional.ofNullable(expenseRepository.findByExpenseId(expenseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with ID: " + expenseId)));
+    public Expense getExpenseByExpenseId(String expenseId) {
+        return expenseRepository.findByExpenseId(expenseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with ID: " + expenseId));
     }
 }

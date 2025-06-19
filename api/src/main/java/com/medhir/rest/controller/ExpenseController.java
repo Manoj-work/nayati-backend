@@ -21,41 +21,56 @@ public class ExpenseController {
     @Autowired
     private ExpenseService expenseService;
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Map<String, Object>> createExpense(
-            @RequestParam String expenseType,
-            @RequestParam String clientName,
-            @RequestParam String projectId,
-            @RequestParam String expenseCategory,
-            @RequestParam String vendorName,
-            @RequestParam BigDecimal totalExpenseAmount,
-            @RequestParam BigDecimal reimbursementAmount,
-            @RequestParam String gstCredit,
-            @RequestParam String notesDescription,
-            @RequestParam MultipartFile receiptInvoiceAttachment,
-            @RequestParam(required = false) MultipartFile paymentProof,
-            @RequestParam(required = false) String rejectionComment,
-            @RequestParam(required = false) String status) {
-        
-        Expense expense = new Expense();
-        expense.setExpenseType(expenseType);
-        expense.setClientName(clientName);
-        expense.setProjectId(projectId);
-        expense.setExpenseCategory(expenseCategory);
-        expense.setVendorName(vendorName);
-        expense.setTotalExpenseAmount(totalExpenseAmount);
-        expense.setReimbursementAmount(reimbursementAmount);
-        expense.setGstCredit(gstCredit);
-        expense.setNotesDescription(notesDescription);
-        expense.setRejectionComment(rejectionComment);
-        expense.setStatus(status != null ? status : "pending");
-        
-        Expense savedExpense = expenseService.createExpense(expense, receiptInvoiceAttachment, paymentProof);
-        return ResponseEntity.ok(Map.of(
+//    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<Map<String, Object>> createExpense(
+//            @RequestParam String expenseType,
+//            @RequestParam String clientName,
+//            @RequestParam String projectId,
+//            @RequestParam String expenseCategory,
+//            @RequestParam String vendorName,
+//            @RequestParam BigDecimal totalExpenseAmount,
+//            @RequestParam BigDecimal reimbursementAmount,
+//            @RequestParam String gstCredit,
+//            @RequestParam String notesDescription,
+//            @RequestParam MultipartFile receiptInvoiceAttachment,
+//            @RequestParam(required = false) MultipartFile paymentProof,
+//            @RequestParam(required = false) String rejectionComment,
+//            @RequestParam(required = false) String status) {
+//
+//        Expense expense = new Expense();
+//        expense.setExpenseType(expenseType);
+//        expense.setClientName(clientName);
+//        expense.setProjectId(projectId);
+//        expense.setExpenseCategory(expenseCategory);
+//        expense.setVendorName(vendorName);
+//        expense.setTotalExpenseAmount(totalExpenseAmount);
+//        expense.setReimbursementAmount(reimbursementAmount);
+//        expense.setGstCredit(gstCredit);
+//        expense.setNotesDescription(notesDescription);
+//        expense.setRejectionComment(rejectionComment);
+//        expense.setStatus(status != null ? status : "pending");
+//
+//        Expense savedExpense = expenseService.createExpense(expense, receiptInvoiceAttachment, paymentProof);
+//        return ResponseEntity.ok(Map.of(
+//                "message", "Expense created successfully!"
+////                "expense", savedExpense
+//        ));
+//    }
+
+@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public ResponseEntity<Map<String, Object>> createExpense(
+        @Valid @ModelAttribute Expense expense,
+        @RequestParam MultipartFile receiptInvoiceAttachment,
+        @RequestParam(required = false) MultipartFile paymentProof) {
+
+    Expense savedExpense = expenseService.createExpense(expense, receiptInvoiceAttachment, paymentProof);
+
+    return ResponseEntity.ok(Map.of(
                 "message", "Expense created successfully!"
 //                "expense", savedExpense
-        ));
-    }
+    ));
+}
+
 
     @GetMapping
     public List<Expense> getAllExpenses() {
@@ -63,47 +78,23 @@ public class ExpenseController {
     }
     
     @GetMapping("/{expenseId}")
-    public ResponseEntity<Optional<Expense>> getExpenseByExpenseId(@PathVariable String expenseId) {
-        Optional<Expense> expense = expenseService.getExpenseByExpenseId(expenseId);
+    public ResponseEntity<Expense> getExpenseByExpenseId(@PathVariable String expenseId) {
+        Expense expense = expenseService.getExpenseByExpenseId(expenseId);
         return ResponseEntity.ok(expense);
     }
 
-    @PutMapping(value = "/{expenseId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping("/{expenseId}")
     public ResponseEntity<Map<String, Object>> updateExpense(
             @PathVariable String expenseId,
-            @RequestParam String expenseType,
-            @RequestParam String clientName,
-            @RequestParam String projectId,
-            @RequestParam String expenseCategory,
-            @RequestParam String vendorName,
-            @RequestParam BigDecimal totalExpenseAmount,
-            @RequestParam BigDecimal reimbursementAmount,
-            @RequestParam String gstCredit,
-            @RequestParam String notesDescription,
+            @Valid @ModelAttribute Expense expense,
             @RequestParam(required = false) MultipartFile receiptInvoiceAttachment,
-            @RequestParam(required = false) MultipartFile paymentProof,
-            @RequestParam(required = false) String rejectionComment,
-            @RequestParam(required = false) String status) {
-        
-        Expense expense = new Expense();
-        expense.setExpenseType(expenseType);
-        expense.setClientName(clientName);
-        expense.setProjectId(projectId);
-        expense.setExpenseCategory(expenseCategory);
-        expense.setVendorName(vendorName);
-        expense.setTotalExpenseAmount(totalExpenseAmount);
-        expense.setReimbursementAmount(reimbursementAmount);
-        expense.setGstCredit(gstCredit);
-        expense.setNotesDescription(notesDescription);
-        expense.setRejectionComment(rejectionComment);
-        expense.setStatus(status);
-        
-        Expense updatedExpense = expenseService.updateExpense(expenseId, expense, receiptInvoiceAttachment, paymentProof);
-        return ResponseEntity.ok(Map.of(
-                "message", "Expense updated successfully!"
-//                "expense", updatedExpense
-        ));
+            @RequestParam(required = false) MultipartFile paymentProof) {
+
+        expenseService.updateExpense(expenseId, expense, receiptInvoiceAttachment, paymentProof);
+
+        return ResponseEntity.ok(Map.of("message", "Expense updated successfully!"));
     }
+
 
     @DeleteMapping("/{expenseId}")
     public ResponseEntity<Map<String, String>> deleteExpense(@PathVariable String expenseId) {
