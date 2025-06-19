@@ -7,6 +7,7 @@ import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.model.settings.DesignationModel;
 import com.medhir.rest.repository.settings.DesignationRepository;
 import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
@@ -24,8 +25,9 @@ public class DesignationService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
     private DepartmentService departmentService;
@@ -38,8 +40,8 @@ public class DesignationService {
         // Verify leave policy exists
         departmentService.getDepartmentById(designation.getDepartment());
 
-        // Generate new designation ID using the utility class
-        String newDesignationId = generatedId.generateId("DES", DesignationModel.class, "designationId");
+        String newDesignationId = "DES" + snowflakeIdGenerator.nextId();
+
         designation.setDesignationId(newDesignationId);
 
         designation.setCreatedAt(LocalDateTime.now().toString());

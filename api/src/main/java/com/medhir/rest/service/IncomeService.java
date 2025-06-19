@@ -2,6 +2,7 @@ package com.medhir.rest.service;
 
 import com.medhir.rest.model.IncomeModel;
 import com.medhir.rest.repository.IncomeRepository;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.medhir.rest.utils.GeneratedId;
@@ -26,6 +27,8 @@ public class IncomeService {
 
     @Autowired
     private GeneratedId generatedId;
+    @Autowired
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     public IncomeModel createIncome(IncomeModel income) {
         try {
@@ -35,6 +38,8 @@ public class IncomeService {
             }
 
             income.setGeneratedId(generatedId);
+//             income.setIncomeId("INC" + snowflakeIdGenerator.nextId());
+
             income.generateIncomeId();
             return incomeRepository.save(income);
         } catch (ResponseStatusException e) {

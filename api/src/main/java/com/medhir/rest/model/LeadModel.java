@@ -130,7 +130,9 @@ public class LeadModel {
     public void setGeneratedId(GeneratedId generatedId) {
         this.generatedId = generatedId;
     }
-
+//    public void setLeadId(String LeadId) {
+//        this.LeadId = LeadId;
+//    }
     public void generateLeadId() {
         if (this.leadId == null && this.generatedId != null) {
             this.leadId = generatedId.generateId("LEAD", LeadModel.class, "leadId");

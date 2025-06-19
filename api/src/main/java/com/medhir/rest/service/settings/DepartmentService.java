@@ -6,6 +6,7 @@ import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.repository.settings.DepartmentRepository;
 import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +22,9 @@ public class DepartmentService {
     @Autowired
     private LeavePolicyService leavePolicyService;
 
+
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
     private CompanyService companyService;
@@ -39,8 +41,8 @@ public class DepartmentService {
         // Verify leave policy exists
         leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
 
-        // Generate new department ID using the utility class
-        String newDepartmentId = generatedId.generateId("DEPT", DepartmentModel.class, "departmentId");
+
+        String newDepartmentId = "DEPT" + snowflakeIdGenerator.nextId();
         department.setDepartmentId(newDepartmentId);
 
         department.setCreatedAt(LocalDateTime.now().toString());
