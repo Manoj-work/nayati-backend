@@ -7,6 +7,7 @@ import com.medhir.rest.model.settings.LeavePolicyModel;
 import com.medhir.rest.repository.settings.LeavePolicyRepository;
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,10 @@ public class LeavePolicyService {
     @Autowired
     private LeaveTypeService leaveTypeService;
 
+//    @Autowired
+//    private GeneratedId generatedId;
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
     private CompanyService companyService;
@@ -42,7 +45,9 @@ public class LeavePolicyService {
         validateLeaveAllocations(leavePolicy.getLeaveAllocations());
 
         // Generate new leave policy ID
-        String newLeavePolicyId = generatedId.generateId("LP", LeavePolicyModel.class, "leavePolicyId");
+//      //  String newLeavePolicyId = generatedId.generateId("LP", LeavePolicyModel.class, "leavePolicyId");
+        String newLeavePolicyId = "LP" + snowflakeIdGenerator.nextId();
+
         leavePolicy.setLeavePolicyId(newLeavePolicyId);
 
         leavePolicy.setCreatedAt(LocalDateTime.now().toString());

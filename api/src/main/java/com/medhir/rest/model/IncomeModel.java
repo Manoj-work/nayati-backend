@@ -79,7 +79,9 @@ public class IncomeModel {
     public void setGeneratedId(GeneratedId generatedId) {
         this.generatedId = generatedId;
     }
-
+//    public void setIncomeId(String incomeId) {
+//        this.incomeId = incomeId;
+//    }
     public void generateIncomeId() {
         if (this.incomeId == null && this.generatedId != null) {
             this.incomeId = generatedId.generateId("INC", IncomeModel.class, "incomeId");

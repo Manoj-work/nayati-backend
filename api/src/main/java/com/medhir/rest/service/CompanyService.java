@@ -4,7 +4,7 @@ import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.CompanyModel;
 import com.medhir.rest.repository.CompanyRepository;
-import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,10 @@ public class CompanyService {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+
     @Autowired
-    GeneratedId generatedId;;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     public CompanyModel createCompany(CompanyModel company) {
         // Check if email already exists
@@ -28,7 +30,9 @@ public class CompanyService {
         if (companyRepository.findByPhone(company.getPhone()).isPresent()) {
             throw new DuplicateResourceException("Phone number already exists: " + company.getPhone());
         }
-        company.setCompanyId(generatedId.generateId("CID", CompanyModel.class, "companyId"));
+//        company.setCompanyId(generatedId.generateId("CID", CompanyModel.class, "companyId"));
+        company.setCompanyId("CID" + snowflakeIdGenerator.nextId());
+
 
         return companyRepository.save(company);
     }

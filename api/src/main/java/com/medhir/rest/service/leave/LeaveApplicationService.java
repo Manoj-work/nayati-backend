@@ -14,7 +14,8 @@ import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.service.settings.DepartmentService;
 import com.medhir.rest.service.settings.LeaveTypeService;
 import com.medhir.rest.service.settings.LeavePolicyService;
-import com.medhir.rest.utils.GeneratedId;
+//import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,8 +41,11 @@ public class LeaveApplicationService {
     @Autowired
     private EmployeeService employeeService;
 
+//    @Autowired
+//    private GeneratedId generatedId;
+
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
     private LeaveBalanceService leaveBalanceService;
@@ -90,7 +94,9 @@ public class LeaveApplicationService {
         BeanUtils.copyProperties(request, leave, "leaveId", "status");
 
         // Set system-generated values
-        leave.setLeaveId(generatedId.generateId("LID", LeaveModel.class, "leaveId"));
+//        leave.setLeaveId(generatedId.generateId("LID", LeaveModel.class, "leaveId"));
+
+        leave.setLeaveId("LID" + snowflakeIdGenerator.nextId());
         leave.setStatus("Pending");
 
         return leaveRepository.save(leave);

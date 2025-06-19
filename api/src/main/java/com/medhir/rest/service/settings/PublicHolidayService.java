@@ -5,6 +5,7 @@ import com.medhir.rest.repository.settings.PublicHolidayRepository;
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.model.settings.PublicHolidayModel;
 import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +16,10 @@ public class PublicHolidayService {
 
     private final PublicHolidayRepository publicHolidayRepository;
 
+//    @Autowired
+//    private GeneratedId generatedId;
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
     private CompanyService companyService;
@@ -39,7 +42,9 @@ public class PublicHolidayService {
         }
 
         // Generate new public holiday ID
-        String newHolidayId = generatedId.generateId("PH", PublicHolidayModel.class, "holidayId");
+//        String newHolidayId = generatedId.generateId("PH", PublicHolidayModel.class, "holidayId");
+        String newHolidayId = "PH" + snowflakeIdGenerator.nextId();
+
         holiday.setHolidayId(newHolidayId);
 
         return publicHolidayRepository.save(holiday);

@@ -8,6 +8,7 @@ import com.medhir.rest.model.CompanyModel;
 import com.medhir.rest.model.ModuleModel;
 import com.medhir.rest.repository.ModuleRepository;
 import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,8 +27,10 @@ public class ModuleService {
     @Autowired
     private CompanyService companyService;
 
+//    @Autowired
+//    private GeneratedId generatedId;
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     public ModuleModel createModule(ModuleModel moduleModel) {
         // Validate company exists
@@ -44,7 +47,8 @@ public class ModuleService {
         }
 
         // Generate module ID
-        moduleModel.setModuleId(generatedId.generateId("MID", ModuleModel.class, "moduleId"));
+//        moduleModel.setModuleId(generatedId.generateId("MID", ModuleModel.class, "moduleId"));
+        moduleModel.setModuleId("MOD" + snowflakeIdGenerator.nextId());
 
         // Save the module
         ModuleModel savedModule = moduleRepository.save(moduleModel);

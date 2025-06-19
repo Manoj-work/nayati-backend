@@ -6,6 +6,7 @@ import com.medhir.rest.repository.settings.LeaveTypeRepository;
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.model.settings.LeaveTypeModel;
 import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,8 +18,10 @@ public class LeaveTypeService {
     @Autowired
     private LeaveTypeRepository leaveTypeRepository;
 
+//    @Autowired
+//    private GeneratedId generatedId;
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
     private CompanyService companyService;
@@ -33,7 +36,9 @@ public class LeaveTypeService {
         }
 
         // Generate new leave type ID
-        String newLeaveTypeId = generatedId.generateId("LT", LeaveTypeModel.class, "leaveTypeId");
+//        String newLeaveTypeId = generatedId.generateId("LT", LeaveTypeModel.class, "leaveTypeId");
+        String newLeaveTypeId = "LT" + snowflakeIdGenerator.nextId();
+
         leaveType.setLeaveTypeId(newLeaveTypeId);
 
         return leaveTypeRepository.save(leaveType);

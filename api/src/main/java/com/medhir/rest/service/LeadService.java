@@ -2,6 +2,7 @@ package com.medhir.rest.service;
 
 import com.medhir.rest.model.LeadModel;
 import com.medhir.rest.repository.LeadRepository;
+import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.medhir.rest.utils.GeneratedId;
@@ -17,8 +18,10 @@ public class LeadService {
     @Autowired
     private LeadRepository leadRepository;
 
+//    @Autowired
+//    private GeneratedId generatedId;
     @Autowired
-    private GeneratedId generatedId;
+    private SnowflakeIdGenerator snowflakeIdGenerator;
 
     public LeadModel createLead(LeadModel lead) {
         // Check if lead with same name exists
@@ -30,8 +33,10 @@ public class LeadService {
         }
 
         try {
-            lead.setGeneratedId(generatedId);
-            lead.generateLeadId();
+//            lead.setGeneratedId(generatedId);
+//            lead.generateLeadId();
+            lead.setLeadId("LID" + snowflakeIdGenerator.nextId());
+
             return leadRepository.save(lead);
         } catch (DuplicateKeyException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "A lead with this contact number or email already exists");
