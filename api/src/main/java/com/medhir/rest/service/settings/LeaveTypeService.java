@@ -35,8 +35,7 @@ public class LeaveTypeService {
             throw new DuplicateResourceException("Leave type with this name " + leaveType.getLeaveTypeName() +" already exists");
         }
 
-        // Generate new leave type ID
-//        String newLeaveTypeId = generatedId.generateId("LT", LeaveTypeModel.class, "leaveTypeId");
+
         String newLeaveTypeId = "LT" + snowflakeIdGenerator.nextId();
 
         leaveType.setLeaveTypeId(newLeaveTypeId);

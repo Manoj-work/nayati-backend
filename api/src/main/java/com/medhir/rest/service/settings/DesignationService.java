@@ -25,8 +25,7 @@ public class DesignationService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-//    @Autowired
-//    private GeneratedId generatedId;
+
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
@@ -41,8 +40,6 @@ public class DesignationService {
         // Verify leave policy exists
         departmentService.getDepartmentById(designation.getDepartment());
 
-        // Generate new designation ID using the utility class
-//        String newDesignationId = generatedId.generateId("DES", DesignationModel.class, "designationId");
         String newDesignationId = "DES" + snowflakeIdGenerator.nextId();
 
         designation.setDesignationId(newDesignationId);

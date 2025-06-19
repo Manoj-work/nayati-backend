@@ -18,10 +18,8 @@ public class LeadService {
     @Autowired
     private LeadRepository leadRepository;
 
-//    @Autowired
-//    private GeneratedId generatedId;
     @Autowired
-    private SnowflakeIdGenerator snowflakeIdGenerator;
+    private GeneratedId generatedId;
 
     public LeadModel createLead(LeadModel lead) {
         // Check if lead with same name exists
@@ -33,9 +31,9 @@ public class LeadService {
         }
 
         try {
-//            lead.setGeneratedId(generatedId);
-//            lead.generateLeadId();
-            lead.setLeadId("LID" + snowflakeIdGenerator.nextId());
+            lead.setGeneratedId(generatedId);
+            lead.generateLeadId();
+//            lead.setLeadId("LID" + snowflakeIdGenerator.nextId());
 
             return leadRepository.save(lead);
         } catch (DuplicateKeyException e) {

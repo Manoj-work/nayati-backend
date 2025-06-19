@@ -22,8 +22,7 @@ public class DepartmentService {
     @Autowired
     private LeavePolicyService leavePolicyService;
 
-//    @Autowired
-//    private GeneratedId generatedId;
+
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
@@ -42,8 +41,7 @@ public class DepartmentService {
         // Verify leave policy exists
         leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
 
-        // Generate new department ID using the utility class
-//        String newDepartmentId = generatedId.generateId("DEPT", DepartmentModel.class, "departmentId");
+
         String newDepartmentId = "DEPT" + snowflakeIdGenerator.nextId();
         department.setDepartmentId(newDepartmentId);
 

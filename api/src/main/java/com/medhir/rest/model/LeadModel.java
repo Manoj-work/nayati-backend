@@ -127,9 +127,9 @@ public class LeadModel {
         if (bookingFormFileName == null) bookingFormFileName = "";
     }
 
-//    public void setGeneratedId(GeneratedId generatedId) {
-//        this.generatedId = generatedId;
-//    }
+    public void setGeneratedId(GeneratedId generatedId) {
+        this.generatedId = generatedId;
+    }
 //    public void setLeadId(String LeadId) {
 //        this.LeadId = LeadId;
 //    }

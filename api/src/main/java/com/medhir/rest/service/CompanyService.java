@@ -30,7 +30,7 @@ public class CompanyService {
         if (companyRepository.findByPhone(company.getPhone()).isPresent()) {
             throw new DuplicateResourceException("Phone number already exists: " + company.getPhone());
         }
-//        company.setCompanyId(generatedId.generateId("CID", CompanyModel.class, "companyId"));
+
         company.setCompanyId("CID" + snowflakeIdGenerator.nextId());
 
 

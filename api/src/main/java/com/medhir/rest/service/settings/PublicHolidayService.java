@@ -41,8 +41,7 @@ public class PublicHolidayService {
             throw new IllegalArgumentException("A holiday already exists on this date");
         }
 
-        // Generate new public holiday ID
-//        String newHolidayId = generatedId.generateId("PH", PublicHolidayModel.class, "holidayId");
+
         String newHolidayId = "PH" + snowflakeIdGenerator.nextId();
 
         holiday.setHolidayId(newHolidayId);

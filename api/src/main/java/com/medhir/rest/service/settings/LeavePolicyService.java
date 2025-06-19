@@ -25,8 +25,7 @@ public class LeavePolicyService {
     @Autowired
     private LeaveTypeService leaveTypeService;
 
-//    @Autowired
-//    private GeneratedId generatedId;
+
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
@@ -44,8 +43,8 @@ public class LeavePolicyService {
 
         validateLeaveAllocations(leavePolicy.getLeaveAllocations());
 
-        // Generate new leave policy ID
-//      //  String newLeavePolicyId = generatedId.generateId("LP", LeavePolicyModel.class, "leavePolicyId");
+
+
         String newLeavePolicyId = "LP" + snowflakeIdGenerator.nextId();
 
         leavePolicy.setLeavePolicyId(newLeavePolicyId);
