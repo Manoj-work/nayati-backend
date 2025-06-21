@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/expenses")
+//@Tag(name = "Expense API", description = "Endpoints related to expense operations")
 public class ExpenseController {
 
     @Autowired
@@ -66,8 +67,8 @@ public ResponseEntity<Map<String, Object>> createExpense(
     Expense savedExpense = expenseService.createExpense(expense, receiptInvoiceAttachment, paymentProof);
 
     return ResponseEntity.ok(Map.of(
-                "message", "Expense created successfully!"
-//                "expense", savedExpense
+                "message", "Expense created successfully!",
+                "expense", savedExpense
     ));
 }
 
@@ -75,6 +76,12 @@ public ResponseEntity<Map<String, Object>> createExpense(
     @GetMapping
     public List<Expense> getAllExpenses() {
         return expenseService.getAllExpenses();
+    }
+
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<List<Expense>> getExpenseByCompanyId(@PathVariable String companyId){
+    List<Expense> expenseList = expenseService.getAllExpensesByCompanyId(companyId);
+    return ResponseEntity.ok(expenseList);
     }
     
     @GetMapping("/{expenseId}")
@@ -94,7 +101,6 @@ public ResponseEntity<Map<String, Object>> createExpense(
 
         return ResponseEntity.ok(Map.of("message", "Expense updated successfully!"));
     }
-
 
     @DeleteMapping("/{expenseId}")
     public ResponseEntity<Map<String, String>> deleteExpense(@PathVariable String expenseId) {

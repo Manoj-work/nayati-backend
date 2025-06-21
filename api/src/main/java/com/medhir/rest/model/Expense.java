@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document(collection = "expenses")
+//@Schema(description = "Expense model for managing employee expense claims")
 public class Expense {
 
     @Id
@@ -20,6 +21,12 @@ public class Expense {
 
     @Indexed(unique = true)
     private String expenseId;
+
+    @NotBlank(message = "company Id cannot be empty")
+    private String companyId;
+
+    @NotBlank(message = "Created by  is required")
+    private String createdBy;
 
     @NotBlank(message = "Expense type is required")
     private String expenseType;
@@ -45,7 +52,6 @@ public class Expense {
     @NotBlank(message = "GST credit available is required")
     private String gstCredit;
 
-    @NotBlank(message = "Receipt/Invoice attachment URL is required")
     private String receiptInvoiceAttachmentUrl;
 
     @NotBlank(message = "Notes/Description is required")
@@ -54,7 +60,7 @@ public class Expense {
     @NotBlank(message = "Status is required")
     private String status = "pending"; //
 
-    private String paymentProof;
+    private String paymentProofUrl;
 
     private String rejectionComment;
 

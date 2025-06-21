@@ -3,6 +3,7 @@ package com.medhir.rest.service;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.Expense;
+import com.medhir.rest.repository.CompanyRepository;
 import com.medhir.rest.repository.ExpenseRepository;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
@@ -20,12 +21,20 @@ public class ExpenseService {
     private ExpenseRepository expenseRepository;
 
     @Autowired
+    private CompanyRepository companyRepository;
+
+    @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Autowired
     private MinioService minioService;
 
     public Expense createExpense(Expense expense, MultipartFile receiptInvoiceAttachment, MultipartFile paymentProof) {
+
+        boolean exists = companyRepository.existsByCompanyId(expense.getCompanyId());
+        if (!exists) {
+            throw new ResourceNotFoundException("Company not found with CompanyId: " + expense.getCompanyId());
+        }
 
         expense.setExpenseId("EXP-" + snowflakeIdGenerator.nextId());
 
@@ -39,7 +48,7 @@ public class ExpenseService {
 
             if (paymentProof != null && !paymentProof.isEmpty()) {
                 String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
-                expense.setPaymentProof(paymentProofUrl);
+                expense.setPaymentProofUrl(paymentProofUrl);
             }
         } catch (Exception e) {
             throw new RuntimeException("File upload failed", e);
@@ -85,7 +94,7 @@ public class ExpenseService {
 
             if (paymentProof != null && !paymentProof.isEmpty()) {
                 String paymentProofUrl = minioService.UploadexpensesImg(paymentProof, expense.getProjectId());
-                expense.setPaymentProof(paymentProofUrl);
+                expense.setPaymentProofUrl(paymentProofUrl);
             }
         } catch (Exception e) {
             throw new RuntimeException("File upload failed", e);
@@ -105,5 +114,13 @@ public class ExpenseService {
     public Expense getExpenseByExpenseId(String expenseId) {
         return expenseRepository.findByExpenseId(expenseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found with ID: " + expenseId));
+    }
+
+    public List<Expense> getAllExpensesByCompanyId(String companyId) {
+        boolean exists = companyRepository.existsByCompanyId(companyId);
+        if (!exists) {
+            throw new ResourceNotFoundException("Company not found with CompanyId: " + companyId);
+        }
+        return expenseRepository.findByCompanyId(companyId);
     }
 }
