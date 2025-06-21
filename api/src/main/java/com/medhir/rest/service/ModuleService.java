@@ -59,9 +59,9 @@ public class ModuleService {
                 employee.setModuleIds(new ArrayList<>());
             }
             employee.getModuleIds().add(savedModule.getModuleId());
-            
-            // If module name contains "HR", add HRADMIN role
-            if (savedModule.getModuleName().toUpperCase().contains("HR")) {
+
+            String moduleNameUpper = savedModule.getModuleName().toUpperCase();
+            if (moduleNameUpper.contains("HR") || moduleNameUpper.contains("HUMAN RESOURCE") || moduleNameUpper.contains("HUMANRESOURCE")) {
                 Set<String> roles = employee.getRoles();
                 if (roles == null) {
                     roles = new HashSet<>();
@@ -197,7 +197,7 @@ public class ModuleService {
                     roles = new HashSet<>();
                 }
                 String moduleName = existingModule.getModuleName().toUpperCase();
-                if (moduleName.contains("HR")) {
+                if (moduleName.contains("HR") || moduleName.contains("HUMAN RESOURCE") || moduleName.contains("HUMANRESOURCE")) {
                     roles.add("HRADMIN");
                 }
                 if (moduleName.contains("ACCOUNT")) {
