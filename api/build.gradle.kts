@@ -43,6 +43,8 @@ dependencies {
     implementation(libs.springboot.starter.webflux)
     implementation(libs.springboot.starter.outh.server)
     implementation(libs.springboot.starter.outh.client)
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
+
 
     // JWT Dependencies
     implementation(libs.jwt.api)

@@ -18,7 +18,6 @@ public class CompanyModel {
 
     @Id
     @JsonIgnore
-
     private String id; //  MongoDB uses String IDs by default
 
     private String companyId;

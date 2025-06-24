@@ -27,6 +27,9 @@ public class MinioService {
     @Value("${minio.documentBucketName}")
     private String documentBucketName;
 
+    @Value("${minio.billsBucketName}")
+    private String billsBucketName;
+
     RestTemplate restTemplate = new RestTemplate();
 
     public String generateUUID() {
@@ -62,5 +65,13 @@ public class MinioService {
     }
     public String UploadexpensesImg(MultipartFile file, String projectId){
         return uploadFile(expenseBucketName,file,projectId);
+    }
+
+    public String uploadBillAttachment(MultipartFile file, String billId) {
+        return uploadFile(billsBucketName, file, billId);
+    }
+
+    public String uploadPaymentProof(MultipartFile file, String paymentId) {
+        return uploadFile(billsBucketName, file, paymentId);
     }
 }
