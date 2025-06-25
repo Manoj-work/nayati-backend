@@ -19,7 +19,7 @@
 ### 1. Clone the Repository
 
 ```sh
-git clone <your-repo-url>
+git clone https://github.com/Manoj-work/nayati-backend
 cd nayati-main-backend
 ```
 
