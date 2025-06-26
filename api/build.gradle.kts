@@ -55,6 +55,7 @@ dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
+
     // Development Tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
