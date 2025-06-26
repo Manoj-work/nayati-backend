@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medhir.rest.model.accountantModule.BillModel;
 import com.medhir.rest.service.accountantModule.BillService;
+import com.medhir.rest.dto.BillDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -35,15 +36,12 @@ public class BillController {
         ));
     }
 
-
-
     @PutMapping("/{billId}")
     public ResponseEntity<Map<String, Object>> updateBill(
             @PathVariable String billId,
             @RequestPart("bill") @Valid String billJson,
             @RequestPart(value = "attachment", required = false) MultipartFile attachment) throws JsonProcessingException {
        ObjectMapper mapper = new ObjectMapper();
-
        BillModel bill = mapper.readValue(billJson, BillModel.class);
 
         BillModel updated = billService.updateBill(billId, bill, attachment);
@@ -54,22 +52,22 @@ public class BillController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BillModel>> getAllBills() {
-        return ResponseEntity.ok(billService.getAllBills());
+    public ResponseEntity<List<BillDTO>> getAllBills() {
+        return ResponseEntity.ok(billService.getAllBillDTOs());
     }
 
     @GetMapping("/{billId}")
-    public ResponseEntity<BillModel> getBillById(@PathVariable String billId) {
-        return ResponseEntity.ok(billService.getBillById(billId));
+    public ResponseEntity<BillDTO> getBillById(@PathVariable String billId) {
+        return ResponseEntity.ok(billService.getBillDTOById(billId));
     }
 
     @GetMapping("/company/{companyId}")
-    public ResponseEntity<List<BillModel>> getBillsByCompanyId(@PathVariable String companyId) {
-        return ResponseEntity.ok(billService.getBillsByCompanyId(companyId));
+    public ResponseEntity<List<BillDTO>> getBillsByCompanyId(@PathVariable String companyId) {
+        return ResponseEntity.ok(billService.getBillDTOsByCompanyId(companyId));
     }
 
     @GetMapping("/vendor/{vendorId}")
-    public ResponseEntity<List<BillModel>> getBillsByVendorId(@PathVariable String vendorId) {
-        return ResponseEntity.ok(billService.getBillsByVendorId(vendorId));
+    public ResponseEntity<List<BillDTO>> getBillsByVendorId(@PathVariable String vendorId) {
+        return ResponseEntity.ok(billService.getBillDTOsByVendorId(vendorId));
     }
 }

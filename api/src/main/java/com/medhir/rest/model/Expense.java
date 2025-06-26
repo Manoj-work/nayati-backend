@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @AllArgsConstructor
@@ -27,6 +28,9 @@ public class Expense {
 
     @NotBlank(message = "Created by  is required")
     private String createdBy;
+
+    @NotBlank(message = "Date cannot be empty")
+    private LocalDate date;
 
     @NotBlank(message = "Expense type is required")
     private String expenseType;
@@ -58,10 +62,15 @@ public class Expense {
     private String notesDescription;
 
     @NotBlank(message = "Status is required")
-    private String status = "pending"; //
+    private Status status = Status.PENDING; //
 
     private String paymentProofUrl;
 
     private String rejectionComment;
 
+    public static enum Status {
+        PENDING,
+        PAID,
+        REJECTED
+    }
 }

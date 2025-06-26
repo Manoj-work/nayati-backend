@@ -14,6 +14,10 @@ import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
+import com.medhir.rest.dto.BillDTO;
+import com.medhir.rest.model.accountantModule.BillModel.BillLineItem;
+import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.accountantModule.VendorModel;
 
 @Service
 @RequiredArgsConstructor
@@ -61,9 +65,9 @@ public class BillService {
         }
         // Update only non-null fields
         if (updatedBill.getCompanyId() != null) existing.setCompanyId(updatedBill.getCompanyId());
-        if (updatedBill.getCompanyName() != null) existing.setCompanyName(updatedBill.getCompanyName());
+//        if (updatedBill.getCompanyName() != null) existing.setCompanyName(updatedBill.getCompanyName());
         if (updatedBill.getVendorId() != null) existing.setVendorId(updatedBill.getVendorId());
-        if (updatedBill.getVendorName() != null) existing.setVendorName(updatedBill.getVendorName());
+//        if (updatedBill.getVendorName() != null) existing.setVendorName(updatedBill.getVendorName());
         if (updatedBill.getGstin() != null) existing.setGstin(updatedBill.getGstin());
         if (updatedBill.getGstTreatment() != null) existing.setGstTreatment(updatedBill.getGstTreatment());
         existing.setReverseCharge(updatedBill.isReverseCharge());
@@ -141,6 +145,77 @@ public class BillService {
             bill.setPaymentStatus(BillModel.PaymentStatus.UN_PAID);
         }
         return billRepository.save(bill);
+    }
+
+    private BillDTO mapToDTO(BillModel bill) {
+        CompanyModel company = companyService.getCompanyById(bill.getCompanyId()).orElse(null);
+        VendorModel vendor = vendorService.getVendorById(bill.getVendorId());
+        return BillDTO.builder()
+                .billId(bill.getBillId())
+                .vendorId(bill.getVendorId())
+                .vendorName(vendor != null ? vendor.getVendorName() : null)
+                .gstin(bill.getGstin())
+                .gstTreatment(bill.getGstTreatment())
+                .reverseCharge(bill.isReverseCharge())
+                .billReference(bill.getBillReference())
+                .billDate(bill.getBillDate())
+                .dueDate(bill.getDueDate())
+                .placeOfSupply(bill.getPlaceOfSupply())
+                .companyId(bill.getCompanyId())
+                .companyName(company != null ? company.getName() : null)
+                .journal(bill.getJournal())
+                .currency(bill.getCurrency())
+                .status(bill.getStatus() != null ? bill.getStatus().name() : null)
+                .paymentStatus(bill.getPaymentStatus() != null ? bill.getPaymentStatus().name() : null)
+                .billLineItems(bill.getBillLineItems() != null ? bill.getBillLineItems().stream().map(this::mapLineItemToDTO).toList() : null)
+                .totalBeforeGST(bill.getTotalBeforeGST())
+                .totalGST(bill.getTotalGST())
+                .finalAmount(bill.getFinalAmount())
+                .totalPaid(bill.getTotalPaid())
+                .paymentId(bill.getPaymentId())
+                .paymentTerms(bill.getPaymentTerms())
+                .recipientBank(bill.getRecipientBank())
+                .ewayBillNumber(bill.getEwayBillNumber())
+                .transporter(bill.getTransporter())
+                .vehicleNumber(bill.getVehicleNumber())
+                .vendorReference(bill.getVendorReference())
+                .shippingAddress(bill.getShippingAddress())
+                .billingAddress(bill.getBillingAddress())
+                .internalNotes(bill.getInternalNotes())
+                .attachmentUrls(bill.getAttachmentUrls())
+                .dueAmount(bill.getDueAmount())
+                .build();
+    }
+
+    private BillDTO.BillLineItemDTO mapLineItemToDTO(BillLineItem item) {
+        return BillDTO.BillLineItemDTO.builder()
+                .productOrService(item.getProductOrService())
+                .hsnOrSac(item.getHsnOrSac())
+                .description(item.getDescription())
+                .quantity(item.getQuantity())
+                .uom(item.getUom())
+                .rate(item.getRate())
+                .gstPercent(item.getGstPercent())
+                .discountPercent(item.getDiscountPercent())
+                .amount(item.getAmount())
+                .build();
+    }
+
+    public BillDTO getBillDTOById(String billId) {
+        BillModel bill = getBillById(billId);
+        return mapToDTO(bill);
+    }
+
+    public List<BillDTO> getAllBillDTOs() {
+        return getAllBills().stream().map(this::mapToDTO).toList();
+    }
+
+    public List<BillDTO> getBillDTOsByCompanyId(String companyId) {
+        return getBillsByCompanyId(companyId).stream().map(this::mapToDTO).toList();
+    }
+
+    public List<BillDTO> getBillDTOsByVendorId(String vendorId) {
+        return getBillsByVendorId(vendorId).stream().map(this::mapToDTO).toList();
     }
 
 }

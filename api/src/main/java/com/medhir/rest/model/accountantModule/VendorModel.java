@@ -71,7 +71,7 @@ public class VendorModel {
 
     private String phone;
 
-    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid mobile number")
+    @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     private String mobile;
 
     @Email(message = "Invalid email format")
@@ -97,7 +97,7 @@ public class VendorModel {
         @NotBlank(message = "Contact type is required")
         private String type;
 
-        @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid contact phone number")
+        @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
         private String phone;
 
         @Email(message = "Invalid contact email format")
