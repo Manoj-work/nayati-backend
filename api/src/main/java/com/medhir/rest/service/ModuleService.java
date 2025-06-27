@@ -27,8 +27,7 @@ public class ModuleService {
     @Autowired
     private CompanyService companyService;
 
-//    @Autowired
-//    private GeneratedId generatedId;
+
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
@@ -47,7 +46,7 @@ public class ModuleService {
         }
 
         // Generate module ID
-//        moduleModel.setModuleId(generatedId.generateId("MID", ModuleModel.class, "moduleId"));
+
         moduleModel.setModuleId("MOD" + snowflakeIdGenerator.nextId());
 
         // Save the module

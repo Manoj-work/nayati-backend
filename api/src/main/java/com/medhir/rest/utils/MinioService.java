@@ -63,4 +63,9 @@ public class MinioService {
     public String UploadexpensesImg(MultipartFile file, String projectId){
         return uploadFile(expenseBucketName,file,projectId);
     }
+    public String getDocumentBucketName() {
+        return documentBucketName;
+    }
+
+
 }

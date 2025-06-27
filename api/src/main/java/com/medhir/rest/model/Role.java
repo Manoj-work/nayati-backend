@@ -4,4 +4,6 @@ public enum Role {
     SUPERADMIN,
     HRADMIN,
     EMPLOYEE,
+    SALES,
+    MANAGER
 }

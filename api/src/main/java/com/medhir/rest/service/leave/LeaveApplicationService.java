@@ -41,8 +41,7 @@ public class LeaveApplicationService {
     @Autowired
     private EmployeeService employeeService;
 
-//    @Autowired
-//    private GeneratedId generatedId;
+
 
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
@@ -94,7 +93,6 @@ public class LeaveApplicationService {
         BeanUtils.copyProperties(request, leave, "leaveId", "status");
 
         // Set system-generated values
-//        leave.setLeaveId(generatedId.generateId("LID", LeaveModel.class, "leaveId"));
 
         leave.setLeaveId("LID" + snowflakeIdGenerator.nextId());
         leave.setStatus("Pending");

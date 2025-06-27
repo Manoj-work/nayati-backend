@@ -16,8 +16,7 @@ public class PublicHolidayService {
 
     private final PublicHolidayRepository publicHolidayRepository;
 
-//    @Autowired
-//    private GeneratedId generatedId;
+
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 

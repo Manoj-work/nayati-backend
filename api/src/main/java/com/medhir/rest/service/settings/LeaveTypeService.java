@@ -18,8 +18,7 @@ public class LeaveTypeService {
     @Autowired
     private LeaveTypeRepository leaveTypeRepository;
 
-//    @Autowired
-//    private GeneratedId generatedId;
+
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 

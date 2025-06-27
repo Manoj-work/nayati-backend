@@ -88,6 +88,8 @@ public class SecurityConfig {
                         .requestMatchers("/income/manager/**").hasAuthority("MANAGER")
                         .requestMatchers("/income/**").hasAuthority("HRADMIN")
                         .requestMatchers("/expenses/**").hasAuthority("ACCOUNTANT")
+                        .requestMatchers("/sales/leads/**").hasAnyAuthority("EMPLOYEE","MANAGER","SALES")
+                        .requestMatchers("/accountant/vendors/**").hasAnyAuthority("EMPLOYEE","HRADMIN")
                         // All other routes can be accessed by HR or Super Admin
                         .anyRequest().hasAnyAuthority("HRADMIN", "SUPERADMIN")
                 )
