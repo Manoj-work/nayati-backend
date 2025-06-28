@@ -42,6 +42,7 @@ dependencies {
 
 
 	implementation 'io.minio:minio:8.5.7' // MinIO Client Library
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 }
 
 tasks.named('test') {
