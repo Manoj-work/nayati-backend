@@ -1,194 +1,14 @@
-//
-//package com.medhir.rest.sales;
-//
-//import com.medhir.rest.sales.dto.ConvertedLeadRequest;
-//import com.medhir.rest.sales.dto.LostLeadRequest;
-//import com.medhir.rest.sales.dto.JunkLeadRequest;
-//import com.medhir.rest.sales.dto.NoteRequest;
-//import jakarta.validation.Valid;
-//import lombok.Data;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.MediaType;
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.server.ResponseStatusException;
-//
-//import java.util.List;
-//
-//@RestController
-//@RequestMapping("/sales/leads")
-////@CrossOrigin(origins = "*")
-//public class LeadController {
-//
-//    @Autowired
-//    private LeadService leadService;
-//
-//    // ===================== Lead Endpoints =====================
-//
-//    @PostMapping
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public ModelLead createLead(@Valid @RequestBody ModelLead lead) {
-//        return leadService.createLead(lead);
-//    }
-//
-//    @GetMapping
-//    public List<ModelLead> getAllLeads() {
-//        return leadService.getAllLeads();
-//    }
-//
-//    @GetMapping("/{leadId}")
-//    public ModelLead getLeadById(@PathVariable String leadId) {
-//        return leadService.getLeadByLeadId(leadId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead with ID '" + leadId + "' not found"));
-//    }
-//
-//    @PutMapping("/{leadId}")
-//    public ModelLead updateLead(@PathVariable String leadId, @RequestBody ModelLead lead) {
-//        return leadService.updateLead(leadId, lead);
-//    }
-//
-//    // ==================== PATCH STATUS ENDPOINT ====================
-//    @PatchMapping("/{leadId}/status")
-//    public ResponseEntity<MessageResponse> updateLeadStatus(
-//            @PathVariable String leadId,
-//            @RequestBody StatusUpdateRequest statusUpdateRequest) {
-//        leadService.updateLeadStatus(leadId, statusUpdateRequest.getStatus());
-//        return ResponseEntity.ok(new MessageResponse("Status updated successfully"));
-//    }
-//    // ==================== END PATCH STATUS ENDPOINT ====================
-//
-//    @GetMapping("/status/{status}")
-//    public List<ModelLead> getLeadsByStatus(@PathVariable String status) {
-//        return leadService.getLeadsByStatus(status);
-//    }
-//
-//    // ==================== Notes Management ===================
-//    @PostMapping("/{leadId}/notes")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public ModelLead.Note addNoteToLead(
-//            @PathVariable String leadId,
-//            @Valid @RequestBody NoteRequest noteRequest) {
-//        return leadService.addNoteToLead(leadId, noteRequest.getContent());
-//    }
-//
-//    // ===================== Kanban Status-Specific Endpoints =====================
-//
-//    /**
-//     * PATCH /sales/leads/{leadId}/convert
-//     * For "Converted" form with file uploads (multipart/form-data)
-//     */
-//    @PatchMapping(value = "/{leadId}/convert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<MessageResponse> convertLead(
-//            @PathVariable String leadId,
-//            @ModelAttribute ConvertedLeadRequest request) {
-//        leadService.convertLead(leadId, request);
-//        return ResponseEntity.ok(new MessageResponse("Lead converted successfully"));
-//    }
-//
-//    /**
-//     * PATCH /sales/leads/{leadId}/lost
-//     * For "Lost" form (JSON)
-//     */
-//    @PatchMapping("/{leadId}/lost")
-//    public ResponseEntity<MessageResponse> markLeadAsLost(
-//            @PathVariable String leadId,
-//            @RequestBody LostLeadRequest request) {
-//        leadService.markLeadAsLost(leadId, request);
-//        return ResponseEntity.ok(new MessageResponse("Lead marked as lost"));
-//    }
-//
-//    /**
-//     * PATCH /sales/leads/{leadId}/junk
-//     * For "Junk" form (JSON)
-//     */
-//    @PatchMapping("/{leadId}/junk")
-//    public ResponseEntity<MessageResponse> markLeadAsJunk(
-//            @PathVariable String leadId,
-//            @RequestBody JunkLeadRequest request) {
-//        leadService.markLeadAsJunk(leadId, request);
-//        return ResponseEntity.ok(new MessageResponse("Lead marked as junk"));
-//    }
-//
-//    // ===================== Activity Management Endpoints =====================
-//
-//    @PostMapping("/{leadId}")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public ModelLead.ActivityDetails addActivity(
-//            @PathVariable String leadId,
-//            @Valid @RequestBody ModelLead.ActivityDetails activity) {
-//        return leadService.addActivity(leadId, activity);
-//    }
-//
-//    @GetMapping("/{leadId}/activities")
-//    public List<ModelLead.ActivityDetails> getAllActivities(@PathVariable String leadId) {
-//        return leadService.getAllActivities(leadId);
-//    }
-//
-//    @GetMapping("/{leadId}/{type}/{activityId}")
-//    public ModelLead.ActivityDetails getActivity(
-//            @PathVariable String leadId,
-//            @PathVariable String type,
-//            @PathVariable String activityId) {
-//
-//        return leadService.getActivity(leadId, type, activityId)
-//                .orElseThrow(() -> new ResponseStatusException(
-//                        HttpStatus.NOT_FOUND,
-//                        "Activity with ID '" + activityId + "' not found in lead '" + leadId + "'"
-//                ));
-//    }
-//
-//    @PutMapping("/{leadId}/{type}/{activityId}")
-//    public ModelLead.ActivityDetails updateActivity(
-//            @PathVariable String leadId,
-//            @PathVariable String type,
-//            @PathVariable String activityId,
-//            @Valid @RequestBody ModelLead.ActivityDetails activity) {
-//
-//        if (!type.equalsIgnoreCase(activity.getType())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Activity type in path and body do not match");
-//        }
-//
-//        return leadService.updateActivity(leadId, type, activityId, activity);
-//    }
-//
-//    @DeleteMapping("/{leadId}/{type}/{activityId}")
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    public void deleteActivity(
-//            @PathVariable String leadId,
-//            @PathVariable String type,
-//            @PathVariable String activityId) {
-//
-//        leadService.deleteActivity(leadId, type, activityId);
-//    }
-//
-//    // ==================== DTOs ====================
-//    @Data
-//    public static class StatusUpdateRequest {
-//        private String status;
-//    }
-//
-//    @Data
-//    public static class MessageResponse {
-//        private String message;
-//        public MessageResponse(String message) { this.message = message; }
-//    }
-//    // ==================== END DTOs ====================
-//}
 package com.medhir.rest.sales;
 
-import com.medhir.rest.sales.dto.ConvertedLeadRequest;
-import com.medhir.rest.sales.dto.LostLeadRequest;
-import com.medhir.rest.sales.dto.JunkLeadRequest;
 import com.medhir.rest.sales.dto.NoteRequest;
 import jakarta.validation.Valid;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import com.medhir.rest.sales.dto.StatusUpdateRequest;
+import com.medhir.rest.sales.dto.MessageResponse;
 
 import java.util.List;
 
@@ -202,21 +22,32 @@ public class LeadController {
     // ===================== Lead Endpoints =====================
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public ModelLead createLead(@Valid @RequestBody ModelLead lead) {
         return leadService.createLead(lead);
     }
 
-    @GetMapping
-    public List<ModelLead> getAllLeads() {
-        return leadService.getAllLeads();
-    }
+//    @GetMapping("/manager/{managerId}")
+//    public ResponseEntity<List<ModelLead>> getLeadsByManagerId(@PathVariable String managerId) {
+//        List<ModelLead> leads = leadService.getAllLeads(managerId);
+//        return ResponseEntity.ok(leads);
+//    }
+@GetMapping
+public List<ModelLead> getAllLeads() {
+    return leadService.getAllLeads();
+}
 
     @GetMapping("/{leadId}")
     public ModelLead getLeadById(@PathVariable String leadId) {
         return leadService.getLeadByLeadId(leadId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead with ID '" + leadId + "' not found"));
     }
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<List<ModelLead>> getLeadsByEmployeeId(@PathVariable String employeeId) {
+        List<ModelLead> leads = leadService.getLeadsByEmployeeId(employeeId);
+        return ResponseEntity.ok(leads);
+    }
+
 
     @PutMapping("/{leadId}")
     public ModelLead updateLead(@PathVariable String leadId, @RequestBody ModelLead lead) {
@@ -224,18 +55,25 @@ public class LeadController {
     }
 
     // ==================== PATCH STATUS ENDPOINT ====================
-    @PatchMapping("/{leadId}/status")
+    @PatchMapping("/{leadId}/stage")
     public ResponseEntity<MessageResponse> updateLeadStatus(
             @PathVariable String leadId,
-            @RequestBody StatusUpdateRequest statusUpdateRequest) {
-        leadService.updateLeadStatus(leadId, statusUpdateRequest.getStatus());
+            @RequestBody StatusUpdateRequest stageUpdateRequest) {
+
+        leadService.updateLeadStatusByStageId(leadId, stageUpdateRequest.getStageId());
         return ResponseEntity.ok(new MessageResponse("Status updated successfully"));
     }
 
-    @GetMapping("/status/{status}")
-    public List<ModelLead> getLeadsByStatus(@PathVariable String status) {
-        return leadService.getLeadsByStatus(status);
+
+//    @GetMapping("/status/{status}")
+//    public List<ModelLead> getLeadsByStatus(@PathVariable String status) {
+//        return leadService.getLeadsByStatus(status);
+//    }
+    @GetMapping("/stage/{stageId}")
+    public List<ModelLead> getLeadsByStage(@PathVariable String stageId) {
+        return leadService.getLeadsByStageId(stageId);
     }
+
 
     // ==================== Notes Management ===================
     @PostMapping("/{leadId}/notes")
@@ -253,29 +91,7 @@ public class LeadController {
 
     // ===================== Kanban Status-Specific Endpoints =====================
 
-    @PatchMapping(value = "/{leadId}/convert", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<MessageResponse> convertLead(
-            @PathVariable String leadId,
-            @ModelAttribute ConvertedLeadRequest request) {
-        leadService.convertLead(leadId, request);
-        return ResponseEntity.ok(new MessageResponse("Lead converted successfully"));
-    }
 
-    @PatchMapping("/{leadId}/lost")
-    public ResponseEntity<MessageResponse> markLeadAsLost(
-            @PathVariable String leadId,
-            @RequestBody LostLeadRequest request) {
-        leadService.markLeadAsLost(leadId, request);
-        return ResponseEntity.ok(new MessageResponse("Lead marked as lost"));
-    }
-
-    @PatchMapping("/{leadId}/junk")
-    public ResponseEntity<MessageResponse> markLeadAsJunk(
-            @PathVariable String leadId,
-            @RequestBody JunkLeadRequest request) {
-        leadService.markLeadAsJunk(leadId, request);
-        return ResponseEntity.ok(new MessageResponse("Lead marked as junk"));
-    }
 
     // ===================== Activity Management Endpoints =====================
 
@@ -284,7 +100,7 @@ public class LeadController {
     public ModelLead.ActivityDetails addActivity(
             @PathVariable String leadId,
             @Valid @RequestBody ModelLead.ActivityDetails activity) {
-        return leadService.addOrUpdateActivity(leadId, activity, null);
+        return leadService.addOrUpdateActivity(leadId, activity);
     }
 
     @GetMapping("/{leadId}/activities")
@@ -292,16 +108,6 @@ public class LeadController {
         return leadService.getAllActivities(leadId);
     }
 
-    @GetMapping("/{leadId}/activities/{activityId}")
-    public ModelLead.ActivityDetails getActivity(
-            @PathVariable String leadId,
-            @PathVariable String activityId) {
-        return leadService.getActivityById(leadId, activityId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Activity with ID '" + activityId + "' not found in lead '" + leadId + "'"
-                ));
-    }
 
     @PutMapping("/{leadId}/activities/{activityId}")
     public ModelLead.ActivityDetails updateActivity(
@@ -319,15 +125,21 @@ public class LeadController {
         leadService.deleteActivity(leadId, activityId);
     }
 
-    // ==================== DTOs ====================
-    @Data
-    public static class StatusUpdateRequest {
-        private String status;
+    //====================Activity Log===============
+    @GetMapping("/{leadId}/activity-log")
+    public ResponseEntity<List<ModelLead.ActivityLogEntry>> getActivityLogForLead(@PathVariable String leadId) {
+        List<ModelLead.ActivityLogEntry> logs = leadService.getActivityLogForLead(leadId);
+        return ResponseEntity.ok(logs);
     }
 
-    @Data
-    public static class MessageResponse {
-        private String message;
-        public MessageResponse(String message) { this.message = message; }
-    }
+
 }
+
+
+
+
+
+
+
+
+

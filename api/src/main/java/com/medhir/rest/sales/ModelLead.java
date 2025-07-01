@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.medhir.rest.model.Role;
-import jakarta.annotation.PostConstruct;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -15,6 +14,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.medhir.rest.model.EmployeeModel;
 
 import java.math.BigDecimal;// exact amount and no loss of decimal places
 import java.time.LocalDateTime;
@@ -33,6 +33,12 @@ public class ModelLead {
 
     @Indexed(unique = true)
     private String leadId;
+
+    private String managerId;
+    private String employeeId;
+    private String stageId;
+    private String stageName;
+
 
     @NotBlank(message = "Name is required")
     private String name;
@@ -58,14 +64,14 @@ public class ModelLead {
     @NotBlank(message = "Source is required")
     private String leadSource = "";
 
-    @JsonProperty(required = false)
-    private String status = "New";
+//    @JsonProperty(required = false)
+//    private String status = "New";
 
     private String designStyle;
     private Role role;
     private String assignedSalesPerson;
     private String assignedDesigner;
-
+    private String priority;
     // Nested schedule activity class
     private List<ActivityDetails> activities = new ArrayList<>();
 
@@ -75,25 +81,14 @@ public class ModelLead {
     private List<ActivityLogEntry> activityLog = new ArrayList<>();
 
 
-    @PostConstruct
-    public void init() {
-        if (name == null) name = "";
-        if (email == null) email = "";
-        if (contactNumber == null) contactNumber = "";
-        if (projectType == null) projectType = "";
-        if (propertyType == null) propertyType = "";
-        if (address == null) address = "";
-        if (leadSource == null) leadSource = "";
-        if (status == null) status = "New";
-        if (designStyle == null) designStyle = "";
-        if (notes == null) notes = new ArrayList<>();
-        if (activities == null) activities = new ArrayList<>();
-    }
+
 
     @Getter
     @Setter
     public static class ActivityDetails {
 
+        @Id
+        private String id;
         private String activityId;
         private String type;             // To-Do, Email, etc.
         private String summary;
@@ -110,9 +105,9 @@ public class ModelLead {
         private List<String> attendees;
     }
     // For "Converted"
-    private BigDecimal initialQuotedAmount;
-    private BigDecimal finalQuotation;
-    private BigDecimal signUpAmount;
+    private String initialQuotedAmount;
+    private String finalQuotation;
+    private String signUpAmount;
     private String paymentDate;
     private String paymentMode;
     private String panNumber;
@@ -134,21 +129,26 @@ public class ModelLead {
         @JsonIgnore
         private String noteId;
         private String content;
-        private String user;// Set from lead.role during note addition
+        private String user;
         private String timestamp;
     }
 
     @Getter
     @Setter
     public static class ActivityLogEntry {
+        @Id
         private String id;
-        private String type;              // "lead" or "activity"
-        private String previousStatus;   // Optional, previous status before change
-        private String status;
-        private String summary;       // Description or notes about the change
-        private String performedBy;       // User who performed the action
+        private String logId;
+        private String type;
+        private String previousStageId;
+        private String previousStageName;
+        private String newStageId;
+        private String newStageName;
+        private String summary;
+        private String performedBy;
         private String timestamp;
     }
+
 
 }
 
