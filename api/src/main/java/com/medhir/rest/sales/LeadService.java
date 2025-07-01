@@ -1,12 +1,14 @@
 package com.medhir.rest.sales;
 
 import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.sales.dto.ActivityDetailsDto;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.medhir.rest.service.EmployeeService;
 import java.util.Iterator;
@@ -55,7 +57,7 @@ public ModelLead createLead(ModelLead lead) {
         if (lead.getNotes() != null) {
             for (ModelLead.Note note : lead.getNotes()) {
                 note.setNoteId("NID" + snowflakeIdGenerator.nextId());
-                note.setUser(lead.getRole() != null ? lead.getRole().name() : "User");
+//                note.setUser(lead.getRole() != null ? lead.getRole().name() : "User");
                 if (note.getTimestamp() == null) {
                     note.setTimestamp(LocalDateTime.now().toString());
                 }
@@ -148,8 +150,9 @@ public ModelLead createLead(ModelLead lead) {
 //        existing.setReasonForLoss(updatedLead.getReasonForLoss());
 //        existing.setReasonForMarkingAsJunk(updatedLead.getReasonForMarkingAsJunk());
         existing.setPriority(updatedLead.getPriority());
+        existing.setDateOfCreation(updatedLead.getDateOfCreation());
         // DO NOT overwrite activities, notes, or activityLog!
-        validateManagerFields(existing);
+//        validateManagerFields(existing);
         return leadRepository.save(existing);
     }
 
@@ -230,7 +233,7 @@ public ModelLead createLead(ModelLead lead) {
         ModelLead.Note note = new ModelLead.Note();
         note.setNoteId("NID" + snowflakeIdGenerator.nextId());
         note.setContent(content);
-        note.setUser(lead.getRole() != null ? lead.getRole().name() : "User");
+//        note.setUser(lead.getRole() != null ? lead.getRole().name() : "User");
         note.setTimestamp(LocalDateTime.now().toString());
 
         if (lead.getNotes() == null) {
@@ -252,78 +255,51 @@ public ModelLead createLead(ModelLead lead) {
 
     // -------------------- Activity Management & Logging --------------------
 
-    public ModelLead.ActivityDetails addOrUpdateActivity(String leadId, ModelLead.ActivityDetails activity) {
-        // 1. Fetch the lead by leadId or throw 404 if not found
-        ModelLead lead = leadRepository.findByLeadId(leadId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
 
-        boolean isNew = (activity.getActivityId() == null);
+public ModelLead.ActivityDetails addActivity(String leadId, ActivityDetailsDto dto) {
+    ModelLead lead = leadRepository.findByLeadId(leadId)
+            .orElseThrow(() -> new RuntimeException("Lead not found"));
 
-        if (isNew) {
-            //  For new activity: generate unique ID and add to lead's activity list
-            activity.setActivityId("AID" + snowflakeIdGenerator.nextId());
+    ModelLead.ActivityDetails activity = new ModelLead.ActivityDetails();
+    activity.setActivityId("AID" + snowflakeIdGenerator.nextId());
+    activity.setType(dto.getType());
+    activity.setTitle(dto.getTitle());
+    activity.setPurposeOfTheCall(dto.getPurposeOfTheCall());
+    activity.setOutComeOfTheCall(dto.getOutComeOfTheCall());
+    activity.setDueDate(dto.getDueDate());
+    activity.setTime(dto.getTime());
+    activity.setNextFollowUp(dto.getNextFollowUp());
+    activity.setAssignedTo(dto.getAssignedTo());
+    activity.setStatus(dto.getStatus());
+    activity.setMeetingVenue(dto.getMeetingVenue());
+    activity.setMeetingLink(dto.getMeetingLink());
+    activity.setAttendees(dto.getAttendees());
 
-            if (lead.getActivities() == null) {
-                lead.setActivities(new ArrayList<>());
-            }
-            lead.getActivities().add(activity);
-
-            // 3a. Log the creation of the activity
-            addActivityLogEntry(
-                    lead,
-                    "activity",
-                    null, null, null, null,
-                    "Activity created: '" + activity.getSummary() + "'"
-//                    "Stage changed from '" + oldStageName + "' to '" + newStageName + "'. Form data: " + lead.getFormData(),
-            );
-
-        } else {
-            //  For existing activity: find and update it
-            List<ModelLead.ActivityDetails> activities = lead.getActivities();
-            boolean updated = false;
-
-            for (int i = 0; i < activities.size(); i++) {
-                if (activities.get(i).getActivityId().equals(activity.getActivityId())) {
-                    // Optionally, you can compare old vs new fields here for more detailed logs
-
-                    activities.set(i, activity);
-                    updated = true;
-
-                    // 3b. Log the update of the activity
-                    addActivityLogEntry(
-                            lead,
-                            "activity",
-                            null, null, null, null,
-                            "Activity updated: '" + activity.getSummary() + "'"
-                    );
-                    break;
-                }
-            }
-
-            if (!updated) {
-                // If activityId not found, optionally throw error or add as new
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Activity not found to update");
-            }
-        }
-
-        // log activity status changes
-        String status = activity.getStatus();
-        if ("pending".equalsIgnoreCase(status) || "done".equalsIgnoreCase(status)|| "delete".equalsIgnoreCase(status)) {
-            addActivityLogEntry(
-                    lead,
-                    "activity",
-                    null, null, null, null,
-                    "Activity '" + activity.getSummary() + "' marked as " + status
-
-            );
-        }
-
-        // 5. Save the lead with updated activities and logs
-        leadRepository.save(lead);
-
-        // 6. Return the saved/updated activity
-        return activity;
+    MultipartFile attachFile = dto.getAttachFile();
+    if (attachFile != null && !attachFile.isEmpty()) {
+        String bucketName = minioService.getDocumentBucketName();
+        String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
+        activity.setAttach(attachUrl);
     }
+
+    if (lead.getActivities() == null) {
+        lead.setActivities(new ArrayList<>());
+    }
+    lead.getActivities().add(activity);
+
+    // Add Activity Log Entry
+    ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
+    logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
+    logEntry.setType("Activity Added");
+    logEntry.setSummary("Activity '" + activity.getTitle() + "' added by " + activity.getAssignedTo());
+    logEntry.setPerformedBy(activity.getAssignedTo());
+    logEntry.setTimestamp(LocalDateTime.now().toString());
+    lead.getActivityLog().add(logEntry);
+
+    leadRepository.save(lead);
+    return activity;
+}
+
 
     public List<ModelLead.ActivityDetails> getAllActivities(String leadId) {
         ModelLead lead = leadRepository.findByLeadId(leadId)
@@ -332,13 +308,125 @@ public ModelLead createLead(ModelLead lead) {
     }
 
 
+//public ModelLead.ActivityDetails updateActivity(String leadId, String activityId, ActivityDetailsDto dto) {
+//    ModelLead lead = leadRepository.findByLeadId(leadId)
+//            .orElseThrow(() -> new RuntimeException("Lead not found"));
+//
+//    List<ModelLead.ActivityDetails> activities = lead.getActivities();
+//    if (activities == null) throw new RuntimeException("No activities found");
+//
+//    ModelLead.ActivityDetails existing = null;
+//    int idx = -1;
+//    for (int i = 0; i < activities.size(); i++) {
+//        if (activities.get(i).getActivityId().equals(activityId)) {
+//            existing = activities.get(i);
+//            idx = i;
+//            break;
+//        }
+//    }
+//    if (existing == null) throw new RuntimeException("Activity not found");
+//
+//    // Update fields
+//    existing.setType(dto.getType());
+//    existing.setTitle(dto.getTitle());
+//    existing.setPurposeOfTheCall(dto.getPurposeOfTheCall());
+//    existing.setOutComeOfTheCall(dto.getOutComeOfTheCall());
+//    existing.setDueDate(dto.getDueDate());
+//    existing.setTime(dto.getTime());
+//    existing.setNextFollowUp(dto.getNextFollowUp());
+//    existing.setAssignedTo(dto.getAssignedTo());
+//    existing.setStatus(dto.getStatus());
+//    existing.setMeetingVenue(dto.getMeetingVenue());
+//    existing.setMeetingLink(dto.getMeetingLink());
+//    existing.setAttendees(dto.getAttendees());
+//
+//    MultipartFile attachFile = dto.getAttachFile();
+//    if (attachFile != null && !attachFile.isEmpty()) {
+//        String bucketName = minioService.getDocumentBucketName();
+//        String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
+//        existing.setAttach(attachUrl);
+//    }
+//
+//    activities.set(idx, existing);
+//
+//    // Add Activity Log Entry
+//    ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
+//    logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
+//    logEntry.setType(dto.getType());
+////    logEntry.setSummary("Activity '" + existing.getTitle() + "' updated by " + existing.getAssignedTo());
+//    logEntry.setTitle(dto.getTitle());
+//    logEntry.setPerformedBy(existing.getAssignedTo());
+//    logEntry.setTimestamp(LocalDateTime.now().toString());
+//    lead.getActivityLog().add(logEntry);
+//
+//    leadRepository.save(lead);
+//    return existing;
+//}
+public ModelLead.ActivityDetails updateActivity(String leadId, String activityId, ActivityDetailsDto dto) {
+    ModelLead lead = leadRepository.findByLeadId(leadId)
+            .orElseThrow(() -> new RuntimeException("Lead not found"));
 
-    public ModelLead.ActivityDetails updateActivity(String leadId, String activityId, ModelLead.ActivityDetails activity) {
-        activity.setActivityId(activityId);
-        return addOrUpdateActivity(leadId, activity);
+    List<ModelLead.ActivityDetails> activities = lead.getActivities();
+    if (activities == null) throw new RuntimeException("No activities found");
+
+    ModelLead.ActivityDetails existing = null;
+    int idx = -1;
+    for (int i = 0; i < activities.size(); i++) {
+        if (activities.get(i).getActivityId().equals(activityId)) {
+            existing = activities.get(i);
+            idx = i;
+            break;
+        }
+    }
+    if (existing == null) throw new RuntimeException("Activity not found");
+
+    // Update fields
+    existing.setType(dto.getType());
+    existing.setTitle(dto.getTitle());
+    existing.setPurposeOfTheCall(dto.getPurposeOfTheCall());
+    existing.setOutComeOfTheCall(dto.getOutComeOfTheCall());
+    existing.setDueDate(dto.getDueDate());
+    existing.setTime(dto.getTime());
+    existing.setNextFollowUp(dto.getNextFollowUp());
+    existing.setAssignedTo(dto.getAssignedTo());
+    existing.setStatus(dto.getStatus());
+    existing.setMeetingVenue(dto.getMeetingVenue());
+    existing.setMeetingLink(dto.getMeetingLink());
+    existing.setAttendees(dto.getAttendees());
+
+    MultipartFile attachFile = dto.getAttachFile();
+    if (attachFile != null && !attachFile.isEmpty()) {
+        String bucketName = minioService.getDocumentBucketName();
+        String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
+        existing.setAttach(attachUrl);
     }
 
-//    public void deleteActivity(String leadId, String activityId) {
+    activities.set(idx, existing);
+
+    // Add Activity Log Entry
+    String status = existing.getStatus();
+    String logSummary;
+    if ("pending".equalsIgnoreCase(status) || "done".equalsIgnoreCase(status) || "delete".equalsIgnoreCase(status)) {
+        logSummary = "Activity '" + existing.getTitle() + "' marked as " + status;
+    } else {
+        logSummary = "Activity '" + existing.getTitle() + "' updated by " + existing.getAssignedTo();
+    }
+
+    ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
+    logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
+    logEntry.setType(existing.getType()); // e.g., To-Do, Email, etc.
+    logEntry.setTitle(existing.getTitle());
+    logEntry.setSummary(logSummary);
+    logEntry.setPerformedBy(existing.getAssignedTo());
+    logEntry.setTimestamp(LocalDateTime.now().toString());
+    lead.getActivityLog().add(logEntry);
+
+    leadRepository.save(lead);
+    return existing;
+}
+
+
+    //    public void deleteActivity(String leadId, String activityId) {
 //        ModelLead lead = leadRepository.findByLeadId(leadId)
 //                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
 //        if (lead.getActivities() != null) {
@@ -360,7 +448,7 @@ public void deleteActivity(String leadId, String activityId) {
                         lead,
                         "activity",
                         null, null, null, null,
-                        "Activity deleted: '" + activity.getSummary() + "'"
+                        "Activity deleted: '" + activity.getType() + "'"
 //                        lead.getRole() != null ? lead.getRole().name() : "SYSTEM"
                 );
                 iterator.remove();
@@ -372,28 +460,7 @@ public void deleteActivity(String leadId, String activityId) {
 }
 
     // -------------------- Activity Log Helper --------------------
-//    private void addActivityLogEntry(ModelLead lead, String type, String previousStatus, String status,
-//                                     String summary, String performedBy) {
-//        // 1. Get existing logs or initialize if null
-//        List<ModelLead.ActivityLogEntry> logs = lead.getActivityLog();
-//        if (logs == null) {
-//            logs = new ArrayList<>();
-//            lead.setActivityLog(logs); // Attach to lead if new
-//        }
-//
-//        // 2. Create new log entry
-//        ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
-//        logEntry.setId("LOG" + snowflakeIdGenerator.nextId());
-//        logEntry.setType(type);
-//        logEntry.setPreviousStatus(previousStatus);
-//        logEntry.setStatus(status);
-//        logEntry.setSummary(summary);
-//        logEntry.setPerformedBy(performedBy);
-//        logEntry.setTimestamp(LocalDateTime.now().toString());
-//
-//        // 3. Append to existing logs (not replace)
-//        logs.add(logEntry);
-//    }
+
     private void addActivityLogEntry(ModelLead lead, String type, String previousStageId, String previousStageName,
                                      String newStageId, String newStageName,
                                      String summary) {
@@ -413,6 +480,7 @@ public void deleteActivity(String leadId, String activityId) {
         logEntry.setNewStageId(newStageId);
         logEntry.setNewStageName(newStageName);
         logEntry.setSummary(summary);
+//        logEntry.setTitle(title);
 
         logEntry.setTimestamp(LocalDateTime.now().toString());
 
@@ -428,14 +496,14 @@ public void deleteActivity(String leadId, String activityId) {
     }
 
     // -------------------- Validation --------------------
-    private void validateManagerFields(ModelLead lead) {
-        if (lead.getRole() != null && lead.getRole().name().equalsIgnoreCase("MANAGER")) {
-            if (isEmpty(lead.getAssignedSalesPerson()) || isEmpty(lead.getAssignedDesigner())) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Manager must have both assignedSalesPerson and assignedDesigner.");
-            }
-        }
-    }
+//    private void validateManagerFields(ModelLead lead) {
+//        if (lead.getRole() != null && lead.getRole().name().equalsIgnoreCase("MANAGER")) {
+//            if (isEmpty(lead.getAssignedSalesPerson()) || isEmpty(lead.getAssignedDesigner())) {
+//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+//                        "Manager must have both assignedSalesPerson and assignedDesigner.");
+//            }
+//        }
+//    }
 
     private boolean isEmpty(String val) {
         return val == null || val.trim().isEmpty();

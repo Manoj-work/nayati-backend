@@ -1,15 +1,19 @@
 package com.medhir.rest.sales;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.medhir.rest.sales.dto.ActivityDetailsDto;
 import com.medhir.rest.sales.dto.NoteRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.medhir.rest.sales.dto.StatusUpdateRequest;
 import com.medhir.rest.sales.dto.MessageResponse;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -18,6 +22,10 @@ public class LeadController {
 
     @Autowired
     private LeadService leadService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
 
     // ===================== Lead Endpoints =====================
 
@@ -64,11 +72,6 @@ public List<ModelLead> getAllLeads() {
         return ResponseEntity.ok(new MessageResponse("Status updated successfully"));
     }
 
-
-//    @GetMapping("/status/{status}")
-//    public List<ModelLead> getLeadsByStatus(@PathVariable String status) {
-//        return leadService.getLeadsByStatus(status);
-//    }
     @GetMapping("/stage/{stageId}")
     public List<ModelLead> getLeadsByStage(@PathVariable String stageId) {
         return leadService.getLeadsByStageId(stageId);
@@ -89,19 +92,19 @@ public List<ModelLead> getAllLeads() {
         return leadService.getNotesForLead(leadId);
     }
 
-    // ===================== Kanban Status-Specific Endpoints =====================
-
-
-
     // ===================== Activity Management Endpoints =====================
 
+//    Add new activity to lead
+
     @PostMapping("/{leadId}/activities")
-    @ResponseStatus(HttpStatus.CREATED)
-    public ModelLead.ActivityDetails addActivity(
-            @PathVariable String leadId,
-            @Valid @RequestBody ModelLead.ActivityDetails activity) {
-        return leadService.addOrUpdateActivity(leadId, activity);
-    }
+    public ResponseEntity<ModelLead.ActivityDetails> addActivity(
+        @PathVariable String leadId,
+        @ModelAttribute ActivityDetailsDto activityDetailsDto) {
+    ModelLead.ActivityDetails created = leadService.addActivity(leadId, activityDetailsDto);
+    return ResponseEntity.ok(created);
+}
+
+
 
     @GetMapping("/{leadId}/activities")
     public List<ModelLead.ActivityDetails> getAllActivities(@PathVariable String leadId) {
@@ -109,13 +112,18 @@ public List<ModelLead> getAllLeads() {
     }
 
 
-    @PutMapping("/{leadId}/activities/{activityId}")
-    public ModelLead.ActivityDetails updateActivity(
-            @PathVariable String leadId,
-            @PathVariable String activityId,
-            @Valid @RequestBody ModelLead.ActivityDetails activity) {
-        return leadService.updateActivity(leadId, activityId, activity);
-    }
+
+// Update activity
+@PutMapping("/{leadId}/activities/{activityId}")
+public ResponseEntity<ModelLead.ActivityDetails> updateActivity(
+        @PathVariable String leadId,
+        @PathVariable String activityId,
+        @ModelAttribute ActivityDetailsDto activityDetailsDto) {
+    ModelLead.ActivityDetails updated = leadService.updateActivity(leadId, activityId, activityDetailsDto);
+    return ResponseEntity.ok(updated);
+}
+
+
 
     @DeleteMapping("/{leadId}/activities/{activityId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

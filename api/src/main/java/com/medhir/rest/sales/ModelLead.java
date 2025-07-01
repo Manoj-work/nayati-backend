@@ -68,10 +68,11 @@ public class ModelLead {
 //    private String status = "New";
 
     private String designStyle;
-    private Role role;
+//    private Role role;
     private String assignedSalesPerson;
     private String assignedDesigner;
     private String priority;
+    private String dateOfCreation;
     // Nested schedule activity class
     private List<ActivityDetails> activities = new ArrayList<>();
 
@@ -87,11 +88,11 @@ public class ModelLead {
     @Setter
     public static class ActivityDetails {
 
-        @Id
-        private String id;
+
+        @Indexed(unique = true)
         private String activityId;
         private String type;             // To-Do, Email, etc.
-        private String summary;
+        private String title;
         private String purposeOfTheCall;
         private String outComeOfTheCall;
         private String dueDate;
@@ -103,6 +104,7 @@ public class ModelLead {
         private String meetingVenue;
         private String meetingLink;
         private List<String> attendees;
+        private String attach;
     }
     // For "Converted"
     private String initialQuotedAmount;
@@ -126,6 +128,7 @@ public class ModelLead {
     @Setter
     public static class Note {
 
+
         @JsonIgnore
         private String noteId;
         private String content;
@@ -136,8 +139,8 @@ public class ModelLead {
     @Getter
     @Setter
     public static class ActivityLogEntry {
-        @Id
-        private String id;
+
+        @Indexed(unique = true)
         private String logId;
         private String type;
         private String previousStageId;
@@ -145,6 +148,7 @@ public class ModelLead {
         private String newStageId;
         private String newStageName;
         private String summary;
+        private String title;
         private String performedBy;
         private String timestamp;
     }
