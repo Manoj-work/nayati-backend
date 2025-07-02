@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
+import com.medhir.rest.dto.PaymentDTO;
 
 import java.util.List;
 
@@ -34,14 +35,14 @@ public class PaymentController {
         PaymentModel saved = paymentService.createPayment(payment, paymentProof);
         return ResponseEntity.ok(java.util.Map.of(
             "message", "Payment created successfully",
-            "paymentId", saved.getPaymentId(),
-            "paymentProofUrl", saved.getPaymentProofUrl()
+            "paymentId", saved.getPaymentId()
+            // "paymentProofUrl", saved.getPaymentProofUrl()
         ));
     }
 
     @GetMapping
-    public ResponseEntity<List<PaymentModel>> getAllPayments(){
-        List<PaymentModel> paymentList =  paymentService.getAllPayments();
+    public ResponseEntity<List<PaymentDTO>> getAllPayments(){
+        List<PaymentDTO> paymentList =  paymentService.getAllPaymentDTOs();
         return ResponseEntity.ok(paymentList);
     }
 } 

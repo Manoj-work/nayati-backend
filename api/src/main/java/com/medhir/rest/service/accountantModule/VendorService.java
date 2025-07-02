@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Service
 public class VendorService {
@@ -20,10 +21,24 @@ public class VendorService {
     @Autowired
     private CompanyService companyService;
 
+    private static final Pattern GSTIN_PATTERN = Pattern.compile("^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[0-9A-Z]{1}[Z]{1}[0-9A-Z]{1}$");
+
+    private void validateGstin(String gstin) {
+        if (gstin != null && !gstin.trim().isEmpty()) {
+            if (!GSTIN_PATTERN.matcher(gstin).matches()) {
+                throw new IllegalArgumentException("Invalid GST format. Must be a 15-character alphanumeric GSTIN.");
+            }
+        }
+    }
+
     public VendorModel createVendor(VendorModel vendor) {
         // Check if company exists
         companyService.getCompanyById(vendor.getCompanyId())
             .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + vendor.getCompanyId()));
+        
+        // Validate GSTIN if provided
+        validateGstin(vendor.getGstin());
+        
         vendor.setVendorId("VID" + snowflakeIdGenerator.nextId());
         return vendorRepository.save(vendor);
     }
@@ -36,25 +51,26 @@ public class VendorService {
             companyService.getCompanyById(updatedVendor.getCompanyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + updatedVendor.getCompanyId()));
         }
+        
+        // Validate GSTIN if provided
+        validateGstin(updatedVendor.getGstin());
+        
         // Update fields
         existingVendor.setCompanyId(updatedVendor.getCompanyId());
         existingVendor.setVendorName(updatedVendor.getVendorName());
-        existingVendor.setCompanyType(updatedVendor.getCompanyType());
         existingVendor.setGstin(updatedVendor.getGstin());
         existingVendor.setPan(updatedVendor.getPan());
+        existingVendor.setTaxTreatment(updatedVendor.getTaxTreatment());
+        existingVendor.setContactName(updatedVendor.getContactName());
         existingVendor.setAddressLine1(updatedVendor.getAddressLine1());
         existingVendor.setAddressLine2(updatedVendor.getAddressLine2());
         existingVendor.setCity(updatedVendor.getCity());
         existingVendor.setState(updatedVendor.getState());
-        existingVendor.setCountry(updatedVendor.getCountry());
         existingVendor.setPinCode(updatedVendor.getPinCode());
         existingVendor.setPhone(updatedVendor.getPhone());
         existingVendor.setMobile(updatedVendor.getMobile());
         existingVendor.setEmail(updatedVendor.getEmail());
-        existingVendor.setWebsite(updatedVendor.getWebsite());
-        existingVendor.setVendorTags(updatedVendor.getVendorTags());
         existingVendor.setBankDetails(updatedVendor.getBankDetails());
-        existingVendor.setContactAddresses(updatedVendor.getContactAddresses());
         return vendorRepository.save(existingVendor);
     }
 

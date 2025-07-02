@@ -9,6 +9,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.web.multipart.MultipartFile;
+import com.medhir.rest.dto.PaymentDTO;
+import lombok.Builder;
+import com.medhir.rest.service.accountantModule.VendorService;
+import com.medhir.rest.model.accountantModule.VendorModel;
 
 @Service
 public class PaymentService {
@@ -20,6 +24,8 @@ public class PaymentService {
     private SnowflakeIdGenerator snowflakeIdGenerator;
     @Autowired
     private MinioService minioService;
+    @Autowired
+    private VendorService vendorService;
 
     public PaymentModel createPayment(PaymentModel payment, MultipartFile paymentProof) {
         payment.setPaymentId("PAY" + snowflakeIdGenerator.nextId());
@@ -44,5 +50,45 @@ public class PaymentService {
     public PaymentModel getPaymentByPaymentId(String paymentId) {
         return paymentRepository.findByPaymentId(paymentId)
                 .orElseThrow(()-> new ResourceNotFoundException("Payment not found with id : " + paymentId));
+    }
+
+    public PaymentDTO getPaymentDTOById(String paymentId) {
+        PaymentModel payment = getPaymentByPaymentId(paymentId);
+        return mapToDTO(payment);
+    }
+
+    public List<PaymentDTO> getAllPaymentDTOs() {
+        return getAllPayments().stream().map(this::mapToDTO).toList();
+    }
+
+    private PaymentDTO mapToDTO(PaymentModel payment) {
+        VendorModel vendor = null;
+        String vendorName = null;
+        String gstin = payment.getGstin();
+        if (payment.getVendorId() != null) {
+            try {
+                vendor = vendorService.getVendorById(payment.getVendorId());
+                if (vendor != null) {
+                    vendorName = vendor.getVendorName();
+                    gstin = vendor.getGstin();
+                }
+            } catch (ResourceNotFoundException e) {
+                // vendorName remains null, gstin remains as in payment
+            }
+        }
+        return PaymentDTO.builder()
+                .paymentId(payment.getPaymentId())
+                .vendorId(payment.getVendorId())
+                .vendorName(vendorName)
+                .companyId(payment.getCompanyId())
+                .gstin(gstin)
+                .paymentMethod(payment.getPaymentMethod())
+                .bankAccount(payment.getBankAccount())
+                .paymentTransactionId(payment.getPaymentTransactionId())
+                .paymentDate(payment.getPaymentDate())
+                .totalAmount(payment.getTotalAmount())
+                .tdsApplied(payment.isTdsApplied())
+                .notes(payment.getNotes())
+                .build();
     }
 }
