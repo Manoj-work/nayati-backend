@@ -34,11 +34,11 @@ public class VendorService {
     public VendorModel createVendor(VendorModel vendor) {
         // Check if company exists
         companyService.getCompanyById(vendor.getCompanyId())
-            .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + vendor.getCompanyId()));
-        
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + vendor.getCompanyId()));
+
         // Validate GSTIN if provided
         validateGstin(vendor.getGstin());
-        
+
         vendor.setVendorId("VID" + snowflakeIdGenerator.nextId());
         return vendorRepository.save(vendor);
     }
@@ -49,12 +49,12 @@ public class VendorService {
         // Check if company exists (if companyId is being updated)
         if (updatedVendor.getCompanyId() != null && !updatedVendor.getCompanyId().equals(existingVendor.getCompanyId())) {
             companyService.getCompanyById(updatedVendor.getCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + updatedVendor.getCompanyId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + updatedVendor.getCompanyId()));
         }
-        
+
         // Validate GSTIN if provided
         validateGstin(updatedVendor.getGstin());
-        
+
         // Update fields
         existingVendor.setCompanyId(updatedVendor.getCompanyId());
         existingVendor.setVendorName(updatedVendor.getVendorName());
@@ -86,9 +86,9 @@ public class VendorService {
     public List<VendorModel> getVendorsByCompanyId(String companyId) {
         // Check if company exists
         companyService.getCompanyById(companyId)
-            .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + companyId));
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + companyId));
         return vendorRepository.findAll().stream()
                 .filter(v -> companyId.equals(v.getCompanyId()))
                 .toList();
     }
-} 
+}
