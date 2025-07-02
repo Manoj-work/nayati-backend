@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface EmployeeRepository extends MongoRepository<EmployeeModel, String> {
@@ -34,4 +35,6 @@ public interface EmployeeRepository extends MongoRepository<EmployeeModel, Strin
     List<EmployeeModel> findByModuleIdsContaining(String moduleId);
 
     List<EmployeeModel> findAllByModuleIdsContaining(String moduleId);
+
+    List<EmployeeModel> findByEmployeeIdIn(Set<String> employeeIds);
 }

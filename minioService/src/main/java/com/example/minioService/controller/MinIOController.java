@@ -28,4 +28,3 @@ public class MinIOController {
         return ResponseEntity.ok(generatedId);
     }
 }
-

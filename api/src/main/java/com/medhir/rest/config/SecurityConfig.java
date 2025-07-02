@@ -78,16 +78,14 @@ public class SecurityConfig {
                         // Leave endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
                         .requestMatchers("/leave/employee/**").hasAnyAuthority("EMPLOYEE", "MANAGER", "HRADMIN")
                         .requestMatchers(("employee/**")).hasAuthority("EMPLOYEE")
-                        // Expense endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
-                        .requestMatchers("/expenses/employee/**").hasAuthority("EMPLOYEE")
-                        .requestMatchers("/expenses/manager/**").hasAuthority("MANAGER")
-                        .requestMatchers("/expenses/**").hasAuthority("HRADMIN")
+
+                        .requestMatchers("/expenses/**").hasAnyAuthority("EMPLOYEE","ACCOUNTANT")
 
                         // Income endpoints can be accessed by EMPLOYEE, MANAGER, or HRADMIN
                         .requestMatchers("/income/employee/**").hasAuthority("EMPLOYEE")
                         .requestMatchers("/income/manager/**").hasAuthority("MANAGER")
                         .requestMatchers("/income/**").hasAuthority("HRADMIN")
-                        .requestMatchers("/expenses/**","/vendors/**","/payments/**","/bills/**").hasAuthority("ACCOUNTANT")
+                        .requestMatchers("/vendors/**","/payments/**","/bills/**").hasAuthority("ACCOUNTANT")
                         // All other routes can be accessed by HR or Super Admin
                         .anyRequest().hasAnyAuthority("HRADMIN", "SUPERADMIN")
                 )
