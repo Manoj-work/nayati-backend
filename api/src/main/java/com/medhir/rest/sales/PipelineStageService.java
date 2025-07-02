@@ -36,14 +36,14 @@ public class PipelineStageService {
         if (!stage.isFormRequired()) {
             stage.setFormFields(null);
         }
+
         Integer maxOrder = stageRepository.findAll()
                 .stream()
                 .map(PipelineStageModel::getOrder)
+                .filter(order -> order != null)  // This avoids null values causing errors
                 .max(Integer::compareTo)
                 .orElse(0);
-
-        // Assign next order
-        stage.setOrder(maxOrder + 1);
+                 stage.setOrder(maxOrder + 1);
 
         return stageRepository.save(stage);
     }
@@ -80,11 +80,11 @@ public class PipelineStageService {
         existingStage.setFormRequired(updatedStage.isFormRequired());
 
         // If formRequired is false, clear form fields
-        if (!updatedStage.isFormRequired()) {
-            existingStage.setFormFields(null);
-        } else {
-            existingStage.setFormFields(updatedStage.getFormFields());
-        }
+//        if (!updatedStage.isFormRequired()) {
+//            existingStage.setFormFields(null);
+//        } else {
+//            existingStage.setFormFields(updatedStage.getFormFields());
+//        }
 
         // Optionally update order if you want to allow changing the order here
         if (updatedStage.getOrder() != null) {

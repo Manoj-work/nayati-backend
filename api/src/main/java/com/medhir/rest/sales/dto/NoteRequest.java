@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 public class NoteRequest {
     @NotBlank(message = "Content is required")
-    private String content;
+    private String note;
     private String timestamp;
 
 }

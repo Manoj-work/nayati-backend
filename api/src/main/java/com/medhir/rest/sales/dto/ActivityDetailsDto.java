@@ -16,9 +16,10 @@ public class ActivityDetailsDto {
     private LocalDateTime nextFollowUp;
     private String assignedTo;
     private String status;
+    private String outcomeOfTheMeeting;
     private String meetingVenue;
     private String meetingLink;
     private List<String> attendees;
-    private MultipartFile attachFile; // For file upload
+    private MultipartFile attach; // For file upload
 }
 

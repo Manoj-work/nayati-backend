@@ -65,16 +65,16 @@ public ModelLead createLead(ModelLead lead) {
         }
 
         // Log creation in activity log
-        addActivityLogEntry(
-                lead,
-                "lead",
-                null,       // previousStageId (no previous stage)
-                null,       // previousStageName
-                stage.getStageId(),  // newStageId (current stage)
-                stage.getStageName(), // newStageName
-                "Lead created in stage: " + stage.getStageName()
-
-        );
+//        addActivityLogEntry(
+//                lead,
+//                "lead",
+//                null,       // previousStageId (no previous stage)
+//                null,       // previousStageName
+//                stage.getStageId(),  // newStageId (current stage)
+//                stage.getStageName(), // newStageName
+//                "Lead created in stage: " + stage.getStageName()
+//
+//        );
 
         return leadRepository.save(lead);
 
@@ -232,7 +232,7 @@ public ModelLead createLead(ModelLead lead) {
 
         ModelLead.Note note = new ModelLead.Note();
         note.setNoteId("NID" + snowflakeIdGenerator.nextId());
-        note.setContent(content);
+        note.setNote(content);
 //        note.setUser(lead.getRole() != null ? lead.getRole().name() : "User");
         note.setTimestamp(LocalDateTime.now().toString());
 
@@ -274,13 +274,24 @@ public ModelLead.ActivityDetails addActivity(String leadId, ActivityDetailsDto d
     activity.setMeetingVenue(dto.getMeetingVenue());
     activity.setMeetingLink(dto.getMeetingLink());
     activity.setAttendees(dto.getAttendees());
+    activity.setOutcomeOfTheMeeting(dto.getOutcomeOfTheMeeting());
 
-    MultipartFile attachFile = dto.getAttachFile();
+
+//    MultipartFile attachFile = dto.getAttachFile();
+//    if (attachFile != null && !attachFile.isEmpty()) {
+//        String bucketName = minioService.getDocumentBucketName();
+//        String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
+//        activity.setAttach(attachUrl);
+//    }
+    MultipartFile attachFile = dto.getAttach();
     if (attachFile != null && !attachFile.isEmpty()) {
-        String bucketName = minioService.getDocumentBucketName();
+        String bucketName = "lead";
         String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
         activity.setAttach(attachUrl);
     }
+
+
+
 
     if (lead.getActivities() == null) {
         lead.setActivities(new ArrayList<>());
@@ -290,8 +301,13 @@ public ModelLead.ActivityDetails addActivity(String leadId, ActivityDetailsDto d
     // Add Activity Log Entry
     ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
     logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
-    logEntry.setType("Activity Added");
-    logEntry.setSummary("Activity '" + activity.getTitle() + "' added by " + activity.getAssignedTo());
+    logEntry.setType(activity.getType());
+//    logEntry.setSummary("Activity '" + activity.getTitle() + "' added by " + activity.getAssignedTo());
+    String summary = activity.getTitle()  ;
+    if (activity.getAttach() != null && !activity.getAttach().isEmpty()) {
+        summary += "Attachment " + activity.getAttach();
+    }
+    logEntry.setSummary(summary);
     logEntry.setPerformedBy(activity.getAssignedTo());
     logEntry.setTimestamp(LocalDateTime.now().toString());
     lead.getActivityLog().add(logEntry);
@@ -308,60 +324,6 @@ public ModelLead.ActivityDetails addActivity(String leadId, ActivityDetailsDto d
     }
 
 
-//public ModelLead.ActivityDetails updateActivity(String leadId, String activityId, ActivityDetailsDto dto) {
-//    ModelLead lead = leadRepository.findByLeadId(leadId)
-//            .orElseThrow(() -> new RuntimeException("Lead not found"));
-//
-//    List<ModelLead.ActivityDetails> activities = lead.getActivities();
-//    if (activities == null) throw new RuntimeException("No activities found");
-//
-//    ModelLead.ActivityDetails existing = null;
-//    int idx = -1;
-//    for (int i = 0; i < activities.size(); i++) {
-//        if (activities.get(i).getActivityId().equals(activityId)) {
-//            existing = activities.get(i);
-//            idx = i;
-//            break;
-//        }
-//    }
-//    if (existing == null) throw new RuntimeException("Activity not found");
-//
-//    // Update fields
-//    existing.setType(dto.getType());
-//    existing.setTitle(dto.getTitle());
-//    existing.setPurposeOfTheCall(dto.getPurposeOfTheCall());
-//    existing.setOutComeOfTheCall(dto.getOutComeOfTheCall());
-//    existing.setDueDate(dto.getDueDate());
-//    existing.setTime(dto.getTime());
-//    existing.setNextFollowUp(dto.getNextFollowUp());
-//    existing.setAssignedTo(dto.getAssignedTo());
-//    existing.setStatus(dto.getStatus());
-//    existing.setMeetingVenue(dto.getMeetingVenue());
-//    existing.setMeetingLink(dto.getMeetingLink());
-//    existing.setAttendees(dto.getAttendees());
-//
-//    MultipartFile attachFile = dto.getAttachFile();
-//    if (attachFile != null && !attachFile.isEmpty()) {
-//        String bucketName = minioService.getDocumentBucketName();
-//        String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
-//        existing.setAttach(attachUrl);
-//    }
-//
-//    activities.set(idx, existing);
-//
-//    // Add Activity Log Entry
-//    ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
-//    logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
-//    logEntry.setType(dto.getType());
-////    logEntry.setSummary("Activity '" + existing.getTitle() + "' updated by " + existing.getAssignedTo());
-//    logEntry.setTitle(dto.getTitle());
-//    logEntry.setPerformedBy(existing.getAssignedTo());
-//    logEntry.setTimestamp(LocalDateTime.now().toString());
-//    lead.getActivityLog().add(logEntry);
-//
-//    leadRepository.save(lead);
-//    return existing;
-//}
 public ModelLead.ActivityDetails updateActivity(String leadId, String activityId, ActivityDetailsDto dto) {
     ModelLead lead = leadRepository.findByLeadId(leadId)
             .orElseThrow(() -> new RuntimeException("Lead not found"));
@@ -378,7 +340,7 @@ public ModelLead.ActivityDetails updateActivity(String leadId, String activityId
             break;
         }
     }
-    if (existing == null) throw new RuntimeException("Activity not found");
+//    if (existing == null) throw new RuntimeException("Activity not found");
 
     // Update fields
     existing.setType(dto.getType());
@@ -393,10 +355,11 @@ public ModelLead.ActivityDetails updateActivity(String leadId, String activityId
     existing.setMeetingVenue(dto.getMeetingVenue());
     existing.setMeetingLink(dto.getMeetingLink());
     existing.setAttendees(dto.getAttendees());
+    existing.setOutcomeOfTheMeeting(dto.getOutcomeOfTheMeeting());
 
-    MultipartFile attachFile = dto.getAttachFile();
+    MultipartFile attachFile = dto.getAttach();
     if (attachFile != null && !attachFile.isEmpty()) {
-        String bucketName = minioService.getDocumentBucketName();
+        String bucketName = "lead";
         String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
         existing.setAttach(attachUrl);
     }
@@ -407,7 +370,7 @@ public ModelLead.ActivityDetails updateActivity(String leadId, String activityId
     String status = existing.getStatus();
     String logSummary;
     if ("pending".equalsIgnoreCase(status) || "done".equalsIgnoreCase(status) || "delete".equalsIgnoreCase(status)) {
-        logSummary = "Activity '" + existing.getTitle() + "' marked as " + status;
+        logSummary = existing.getType() + existing.getTitle() + "' marked as " + status;
     } else {
         logSummary = "Activity '" + existing.getTitle() + "' updated by " + existing.getAssignedTo();
     }

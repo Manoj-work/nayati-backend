@@ -103,6 +103,7 @@ public class ModelLead {
         private String status;
         private String meetingVenue;
         private String meetingLink;
+        private String outcomeOfTheMeeting;
         private List<String> attendees;
         private String attach;
     }
@@ -131,7 +132,7 @@ public class ModelLead {
 
         @JsonIgnore
         private String noteId;
-        private String content;
+        private String note;
         private String user;
         private String timestamp;
     }

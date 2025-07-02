@@ -84,7 +84,7 @@ public List<ModelLead> getAllLeads() {
     public ModelLead.Note addNoteToLead(
             @PathVariable String leadId,
             @Valid @RequestBody NoteRequest noteRequest) {
-        return leadService.addNoteToLead(leadId, noteRequest.getContent());
+        return leadService.addNoteToLead(leadId, noteRequest.getNote());
     }
 
     @GetMapping("/{leadId}/notes")
