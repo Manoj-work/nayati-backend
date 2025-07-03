@@ -37,5 +37,5 @@ public interface EmployeeRepository extends MongoRepository<EmployeeModel, Strin
     List<EmployeeModel> findAllByModuleIdsContaining(String moduleId);
 
     List<EmployeeModel> findByEmployeeIdIn(Set<String> employeeIds);
-
+    boolean existsByEmployeeId(String employeeId);
 }

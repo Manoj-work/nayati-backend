@@ -122,24 +122,12 @@ public ModelLead createLead(ModelLead lead) {
 //    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
 //        return leadRepository.findByAssignedSalesPersonOrAssignedDesigner(employeeId, employeeId);
 //    }
-    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
-
-        return leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
-    }
 //    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
-//        boolean employeeExists = employeeRepository.existsById(employeeId);
-//        if (!employeeExists) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee ID not found: " + employeeId);
-//        }
 //
-//        List<ModelLead> leads = leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
-//
-//        if (leads.isEmpty()) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No leads found for employee ID: " + employeeId);
-//        }
-//
-//        return leads;
+//        return leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
 //    }
+
+
 
 
 
