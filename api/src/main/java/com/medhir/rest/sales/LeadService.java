@@ -122,10 +122,10 @@ public ModelLead createLead(ModelLead lead) {
 //    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
 //        return leadRepository.findByAssignedSalesPersonOrAssignedDesigner(employeeId, employeeId);
 //    }
-//    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
-//
-//        return leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
-//    }
+    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
+
+        return leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
+    }
 
 
 
