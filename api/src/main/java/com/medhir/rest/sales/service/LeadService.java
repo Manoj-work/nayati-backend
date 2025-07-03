@@ -76,8 +76,18 @@ public class LeadService {
         if (dto.getStageId() != null) lead.setStageId(dto.getStageId());
         if (dto.getRating() != null) lead.setRating(dto.getRating());
         if (dto.getPriority() != null) lead.setPriority(dto.getPriority());
-        if (dto.getSalesRep() != null) lead.setSalesRep(dto.getSalesRep());
-        if (dto.getDesigner() != null) lead.setDesigner(dto.getDesigner());
+        if (dto.getSalesRep() != null) {
+            if (!employeeService.getEmployeeById(dto.getSalesRep()).isPresent()) {
+                throw new RuntimeException("SalesRep with ID " + dto.getSalesRep() + " does not exist.");
+            }
+            lead.setSalesRep(dto.getSalesRep());
+        }
+        if (dto.getDesigner() != null) {
+            if (!employeeService.getEmployeeById(dto.getDesigner()).isPresent()) {
+                throw new RuntimeException("Designer with ID " + dto.getDesigner() + " does not exist.");
+            }
+            lead.setDesigner(dto.getDesigner());
+        }
         if (dto.getCallDescription() != null) lead.setCallDescription(dto.getCallDescription());
         if (dto.getCallHistory() != null) lead.setCallHistory(dto.getCallHistory());
         if (dto.getNextCall() != null) lead.setNextCall(dto.getNextCall());
@@ -335,13 +345,18 @@ public class LeadService {
     // 🎯 Lead Assignment Update Method
     public LeadModel updateLeadAssignment(String leadId, LeadAssignmentRequestDTO assignmentData, String manager) {
         LeadModel lead = getLeadByLeadId(leadId);
-        
-        // Update assignments
-        lead.setSalesRep(assignmentData.getAssignedSalesRep());
-        lead.setDesigner(assignmentData.getAssignedDesigner());
-        
-        // Removed: Only stage changes and activity completion are logged
-        
+        // Validate salesRep
+        String salesRepId = assignmentData.getAssignedSalesRep();
+        if (salesRepId != null && !employeeService.getEmployeeById(salesRepId).isPresent()) {
+            throw new RuntimeException("SalesRep with ID " + salesRepId + " does not exist.");
+        }
+        // Validate designer
+        String designerId = assignmentData.getAssignedDesigner();
+        if (designerId != null && !employeeService.getEmployeeById(designerId).isPresent()) {
+            throw new RuntimeException("Designer with ID " + designerId + " does not exist.");
+        }
+        lead.setSalesRep(salesRepId);
+        lead.setDesigner(designerId);
         return leadRepository.save(lead);
     }
 
@@ -798,5 +813,83 @@ public class LeadService {
         }
         createLead(lead); // Save updated lead
         return lead;
+    }
+
+    public LeadModel addActivitiesBulkWithFiles(String leadId, List<ActivityDTO> activities, List<MultipartFile> files, String user) {
+        LeadModel lead = getLeadByLeadId(leadId);
+        if (lead.getActivities() == null) {
+            lead.setActivities(new ArrayList<>());
+        }
+        for (int i = 0; i < activities.size(); i++) {
+            ActivityDTO activityDTO = activities.get(i);
+            LeadModel.Activity activity = new LeadModel.Activity();
+            activity.setId("ACT-" + snowflakeIdGenerator.nextId());
+            activity.setType(activityDTO.getType());
+            activity.setSummary(activityDTO.getSummary());
+            activity.setDueDate(activityDTO.getDueDate());
+            activity.setDueTime(activityDTO.getDueTime());
+            activity.setUser(user);
+            activity.setStatus(activityDTO.getStatus());
+            activity.setMeetingLink(activityDTO.getMeetingLink());
+            activity.setAttendees(activityDTO.getAttendees());
+            activity.setCallPurpose(activityDTO.getCallPurpose());
+            activity.setCallOutcome(activityDTO.getCallOutcome());
+            activity.setNextFollowUpDate(activityDTO.getNextFollowUpDate());
+            activity.setNextFollowUpTime(activityDTO.getNextFollowUpTime());
+            activity.setMeetingVenue(activityDTO.getMeetingVenue());
+            activity.setNote(activityDTO.getNote());
+            // Handle file upload if file is provided for this activity
+            if (files != null && files.size() > i && files.get(i) != null && !files.get(i).isEmpty()) {
+                String fileUrl = minioService.uploadDocumentsImg(files.get(i), leadId);
+                activity.setAttachment(fileUrl);
+            } else {
+                activity.setAttachment(activityDTO.getAttachment());
+            }
+            lead.getActivities().add(activity);
+        }
+        createLead(lead); // Save updated lead
+        return lead;
+    }
+
+    public LeadConversionResponseDTO convertLeadWithDocs(
+        String leadId,
+        ConvertLeadRequestDTO conversionData,
+        MultipartFile paymentDetailsFile,
+        MultipartFile bookingFormFile,
+        String user
+    ) {
+        LeadModel lead = getLeadByLeadId(leadId);
+
+        // Upload and set payment details file
+        if (paymentDetailsFile != null && !paymentDetailsFile.isEmpty()) {
+            String paymentFileUrl = minioService.uploadDocumentsImg(paymentDetailsFile, leadId);
+            lead.setPaymentDetailsFileName(paymentFileUrl);
+        }
+
+        // Upload and set booking form file
+        if (bookingFormFile != null && !bookingFormFile.isEmpty()) {
+            String bookingFileUrl = minioService.uploadDocumentsImg(bookingFormFile, leadId);
+            lead.setBookingFormFileName(bookingFileUrl);
+        }
+
+        // Existing conversion logic
+        LeadModel convertedLead = convertLead(leadId, conversionData, user);
+
+        // Build and return response DTO as before
+        LeadConversionResponseDTO response = new LeadConversionResponseDTO();
+        response.setLeadId(convertedLead.getLeadId());
+        response.setLeadName(convertedLead.getName());
+        response.setFinalQuotation(convertedLead.getFinalQuotation());
+        response.setSignupAmount(convertedLead.getSignupAmount());
+        response.setPaymentDate(convertedLead.getPaymentDate());
+        response.setPaymentMode(convertedLead.getPaymentMode());
+        response.setPanNumber(convertedLead.getPanNumber());
+        response.setDiscount(convertedLead.getDiscount());
+        response.setInitialQuote(convertedLead.getInitialQuote());
+        response.setProjectTimeline(convertedLead.getProjectTimeline());
+        response.setConversionNoteId(findConversionNoteId(convertedLead));
+        response.setConversionTimestamp(java.time.LocalDateTime.now().toString());
+        response.setConvertedBy(user);
+        return response;
     }
 }

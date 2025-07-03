@@ -42,7 +42,6 @@ public class LeadMapper {
             if (salesRepOpt.isPresent()) {
                 var salesRepDetails = salesRepOpt.get();
                 response.setSalesRepName(salesRepDetails.getName());
-                response.setSalesRepDesignation(salesRepDetails.getDesignation());
             }
         }
         if (lead.getDesigner() != null) {
@@ -51,7 +50,6 @@ public class LeadMapper {
             if (designerOpt.isPresent()) {
                 var designerDetails = designerOpt.get();
                 response.setDesignerName(designerDetails.getName());
-                response.setDesignerDesignation(designerDetails.getDesignation());
             }
         }
         if (lead.getSubmittedBy() != null) {

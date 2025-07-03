@@ -33,10 +33,8 @@ public class LeadResponseDTO {
     private String priority;
     private String salesRep;
     private String salesRepName;
-    private String salesRepDesignation;
     private String designer;
     private String designerName;
-    private String designerDesignation;
     private String submittedBy;
     private String submittedByName;
     private String callDescription;

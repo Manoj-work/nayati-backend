@@ -21,6 +21,7 @@ import com.medhir.rest.sales.model.LeadModel;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestPart;
 
 import java.util.List;
 
@@ -141,6 +142,16 @@ public class LeadController {
         return leadService.convertLeadWithResponse(leadId, conversionData, "Public User");
     }
 
+    @PostMapping(path = "/{leadId}/convert-with-docs", consumes = {"multipart/form-data"})
+    public LeadConversionResponseDTO convertLeadWithDocs(
+        @PathVariable String leadId,
+        @RequestPart("conversionData") ConvertLeadRequestDTO conversionData,
+        @RequestPart(value = "paymentDetailsFile", required = false) MultipartFile paymentDetailsFile,
+        @RequestPart(value = "bookingFormFile", required = false) MultipartFile bookingFormFile
+    ) {
+        return leadService.convertLeadWithDocs(leadId, conversionData, paymentDetailsFile, bookingFormFile, "Public User");
+    }
+
     // 📋 Activity Logs
     @GetMapping("/{leadId}/activity-logs")
     public List<ActivityLogDTO> getActivityLogs(@PathVariable String leadId) {
@@ -258,5 +269,17 @@ public class LeadController {
     @PostMapping("/{leadId}/activities/bulk")
     public LeadResponseDTO addActivitiesBulk(@PathVariable String leadId, @RequestBody List<ActivityDTO> activities) {
         return LeadMapper.mapToResponseDTO(leadService.addActivitiesBulk(leadId, activities, "Public User"), pipelineStageService, employeeService);
+    }
+
+    @PostMapping(path = "/{leadId}/activities/bulk-with-files", consumes = {"multipart/form-data"})
+    public LeadResponseDTO addActivitiesBulkWithFiles(
+        @PathVariable String leadId,
+        @RequestPart("activities") List<ActivityDTO> activities,
+        @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        return LeadMapper.mapToResponseDTO(
+            leadService.addActivitiesBulkWithFiles(leadId, activities, files, "Public User"),
+            pipelineStageService, employeeService
+        );
     }
 }
