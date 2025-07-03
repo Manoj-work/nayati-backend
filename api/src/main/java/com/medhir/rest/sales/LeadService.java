@@ -59,6 +59,26 @@ public ModelLead createLead(ModelLead lead) {
     // Set stage details on the lead
     lead.setStageId(stage.getStageId());
     lead.setStageName(stage.getStageName());
+    // Validate assignedSalesPerson by employeeId field
+    if (lead.getAssignedSalesPerson() != null &&
+            !employeeRepository.existsByEmployeeId(lead.getAssignedSalesPerson())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Assigned Sales Person ID does not exist: " + lead.getAssignedSalesPerson());
+    }
+
+    // Validate assignedDesigner by employeeId field
+    if (lead.getAssignedDesigner() != null &&
+            !employeeRepository.existsByEmployeeId(lead.getAssignedDesigner())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Assigned Designer ID does not exist: " + lead.getAssignedDesigner());
+    }
+
+    // Validate createdBy by employeeId field
+    if (lead.getCreatedBy() != null &&
+            !employeeRepository.existsByEmployeeId(lead.getCreatedBy())) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Created By ID does not exist: " + lead.getCreatedBy());
+    }
 
     try {
         lead.setLeadId("LID" + snowflakeIdGenerator.nextId());
@@ -101,13 +121,6 @@ public ModelLead createLead(ModelLead lead) {
 
 
     // -------------------- Lead Retrieval --------------------
-//    public List<ModelLead> getAllLeads(String managerId) {
-//        if (!leadRepository.existsByManagerId(managerId)) {
-//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Manager ID not found in any lead");
-//        }
-//
-//        return leadRepository.findByManagerId(managerId);
-//    }
 
     public List<ModelLead> getAllLeads() {
         return leadRepository.findAll();
@@ -119,14 +132,21 @@ public ModelLead createLead(ModelLead lead) {
     }
 
     //--------------Find Lead by Employee ID
-//    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
-//        return leadRepository.findByAssignedSalesPersonOrAssignedDesigner(employeeId, employeeId);
-//    }
+
     public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
+        boolean employeeExists = employeeRepository.existsByEmployeeId(employeeId);
+        if (!employeeExists) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee ID not found: " + employeeId);
+        }
 
-        return leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
+        List<ModelLead> leads = leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
+
+        if (leads.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No leads found for employee ID: " + employeeId);
+        }
+
+        return leads;
     }
-
 
 
 
@@ -156,7 +176,7 @@ public ModelLead createLead(ModelLead lead) {
         }
         existing.setStageName(updatedLead.getStageName());
         existing.setDesignStyle(updatedLead.getDesignStyle());
-//        existing.setRole(updatedLead.getRole());
+        existing.setArea(updatedLead.getArea());
         existing.setAssignedSalesPerson(updatedLead.getAssignedSalesPerson());
         existing.setAssignedDesigner(updatedLead.getAssignedDesigner());
         existing.setInitialQuotedAmount(updatedLead.getInitialQuotedAmount());
@@ -662,15 +682,6 @@ public void deleteActivity(String leadId, String activityId) {
         return log != null ? log : new ArrayList<>();
     }
 
-    // -------------------- Validation --------------------
-//    private void validateManagerFields(ModelLead lead) {
-//        if (lead.getRole() != null && lead.getRole().name().equalsIgnoreCase("MANAGER")) {
-//            if (isEmpty(lead.getAssignedSalesPerson()) || isEmpty(lead.getAssignedDesigner())) {
-//                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-//                        "Manager must have both assignedSalesPerson and assignedDesigner.");
-//            }
-//        }
-//    }
 
     private boolean isEmpty(String val) {
         return val == null || val.trim().isEmpty();

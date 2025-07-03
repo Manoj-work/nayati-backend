@@ -2,6 +2,7 @@ package com.medhir.rest.sales;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.medhir.rest.repository.EmployeeRepository;
 import com.medhir.rest.sales.dto.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class LeadController {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
 
     // ===================== Lead Endpoints =====================
