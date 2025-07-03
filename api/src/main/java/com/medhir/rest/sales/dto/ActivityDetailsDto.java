@@ -1,12 +1,16 @@
 package com.medhir.rest.sales.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 import org.springframework.web.multipart.MultipartFile;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ActivityDetailsDto {
+
+
     private String type;
     private String title;
     private String purposeOfTheCall;
@@ -21,5 +25,9 @@ public class ActivityDetailsDto {
     private String meetingLink;
     private List<String> attendees;
     private MultipartFile attach; // For file upload
+    private String callAttachmentUrl;
+    private String todoAttachmentUrl;
+    private String emailAttachmentUrl;
+    private String meetingAttachmentUrl;
 }
 

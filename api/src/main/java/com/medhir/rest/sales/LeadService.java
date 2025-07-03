@@ -4,6 +4,7 @@ import com.medhir.rest.repository.EmployeeRepository;
 import com.medhir.rest.sales.dto.ActivityDetailsDto;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
@@ -11,13 +12,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import com.medhir.rest.service.EmployeeService;
-import java.util.Iterator;
+import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.sales.dto.LeadResponseDTO;
+
+import java.util.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Slf4j
 @Service
 public class LeadService {
 
@@ -40,9 +44,15 @@ public class LeadService {
     @Autowired
     private PipelineStageRepository pipelineStageRepository;
 
+    @Autowired
+    private PipelineStageService stageService;
+
 
 public ModelLead createLead(ModelLead lead) {
-    // Always assign the "New" stage
+
+//    if (allStages.isEmpty()) {
+//        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No stages found. Please create stages before proceeding.");
+//    }
     PipelineStageModel stage = pipelineStageRepository.findByStageNameIgnoreCase("New")
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Default stage 'New' not found"));
 
@@ -76,6 +86,8 @@ public ModelLead createLead(ModelLead lead) {
 //
 //        );
 
+
+
         return leadRepository.save(lead);
 
     } catch (DuplicateKeyException e) {
@@ -107,9 +119,28 @@ public ModelLead createLead(ModelLead lead) {
     }
 
     //--------------Find Lead by Employee ID
+//    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
+//        return leadRepository.findByAssignedSalesPersonOrAssignedDesigner(employeeId, employeeId);
+//    }
     public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
-        return leadRepository.findByAssignedSalesPersonOrAssignedDesigner(employeeId, employeeId);
+
+        return leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
     }
+//    public List<ModelLead> getLeadsByEmployeeId(String employeeId) {
+//        boolean employeeExists = employeeRepository.existsById(employeeId);
+//        if (!employeeExists) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee ID not found: " + employeeId);
+//        }
+//
+//        List<ModelLead> leads = leadRepository.findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(employeeId, employeeId, employeeId);
+//
+//        if (leads.isEmpty()) {
+//            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No leads found for employee ID: " + employeeId);
+//        }
+//
+//        return leads;
+//    }
+
 
 
 
@@ -132,7 +163,10 @@ public ModelLead createLead(ModelLead lead) {
         existing.setAddress(updatedLead.getAddress());
         existing.setBudget(updatedLead.getBudget());
         existing.setLeadSource(updatedLead.getLeadSource());
-        existing.setStageId(updatedLead.getStageId());
+        if (updatedLead.getStageId() != null) {
+            existing.setStageId(updatedLead.getStageId());
+        }
+        existing.setStageName(updatedLead.getStageName());
         existing.setDesignStyle(updatedLead.getDesignStyle());
 //        existing.setRole(updatedLead.getRole());
         existing.setAssignedSalesPerson(updatedLead.getAssignedSalesPerson());
@@ -277,20 +311,13 @@ public ModelLead.ActivityDetails addActivity(String leadId, ActivityDetailsDto d
     activity.setOutcomeOfTheMeeting(dto.getOutcomeOfTheMeeting());
 
 
-//    MultipartFile attachFile = dto.getAttachFile();
-//    if (attachFile != null && !attachFile.isEmpty()) {
-//        String bucketName = minioService.getDocumentBucketName();
-//        String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
-//        activity.setAttach(attachUrl);
-//    }
+
     MultipartFile attachFile = dto.getAttach();
     if (attachFile != null && !attachFile.isEmpty()) {
         String bucketName = "lead";
         String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
         activity.setAttach(attachUrl);
     }
-
-
 
 
     if (lead.getActivities() == null) {
@@ -308,13 +335,116 @@ public ModelLead.ActivityDetails addActivity(String leadId, ActivityDetailsDto d
         summary += "Attachment " + activity.getAttach();
     }
     logEntry.setSummary(summary);
-    logEntry.setPerformedBy(activity.getAssignedTo());
+//    logEntry.setPerformedBy(activity.getAssignedTo());
     logEntry.setTimestamp(LocalDateTime.now().toString());
     lead.getActivityLog().add(logEntry);
 
     leadRepository.save(lead);
     return activity;
 }
+
+
+
+    // ADD THIS NEW METHOD FOR BULK ACTIVITIES WITH FILES
+
+    public List<ModelLead.ActivityDetails> addActivitiesWithFilesAndAttachments(
+            String leadId,
+            List<ActivityDetailsDto> activitiesDto,
+            MultipartFile callAttachment,
+            MultipartFile todoAttachment,
+            MultipartFile meetingAttachment,
+            MultipartFile emailAttachment) {
+
+        ModelLead lead = leadRepository.findByLeadId(leadId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
+
+        if (lead.getActivities() == null) {
+            lead.setActivities(new ArrayList<>());
+        }
+        if (lead.getActivityLog() == null) {
+            lead.setActivityLog(new ArrayList<>());
+        }
+
+        List<ModelLead.ActivityDetails> createdActivities = new ArrayList<>();
+        String bucketName = "lead";
+
+        for (ActivityDetailsDto dto : activitiesDto) {
+            ModelLead.ActivityDetails activity = new ModelLead.ActivityDetails();
+            activity.setActivityId("AID" + snowflakeIdGenerator.nextId());
+            activity.setType(dto.getType());
+            activity.setTitle(dto.getTitle());
+            activity.setPurposeOfTheCall(dto.getPurposeOfTheCall());
+            activity.setOutComeOfTheCall(dto.getOutComeOfTheCall());
+            activity.setDueDate(dto.getDueDate());
+            activity.setTime(dto.getTime());
+            activity.setNextFollowUp(dto.getNextFollowUp());
+            activity.setAssignedTo(dto.getAssignedTo());
+            activity.setStatus(dto.getStatus());
+            activity.setMeetingVenue(dto.getMeetingVenue());
+            activity.setMeetingLink(dto.getMeetingLink());
+            activity.setAttendees(dto.getAttendees());
+
+
+            String attachUrl = null;
+
+            switch (dto.getType().toLowerCase()) {
+                case "call":
+                    if (callAttachment != null && !callAttachment.isEmpty()) {
+                        attachUrl = minioService.uploadFile(bucketName, callAttachment, leadId);
+                        activity.setCallAttachmentUrl(attachUrl);
+                    }
+                    break;
+
+                case "to-do":
+                    if (todoAttachment != null && !todoAttachment.isEmpty()) {
+                        attachUrl = minioService.uploadFile(bucketName, todoAttachment, leadId);
+                        activity.setTodoAttachmentUrl(attachUrl);
+                    }
+                    break;
+
+                case "meeting":
+                    if (meetingAttachment != null && !meetingAttachment.isEmpty()) {
+                        attachUrl = minioService.uploadFile(bucketName, meetingAttachment, leadId);
+                        activity.setMeetingAttachmentUrl(attachUrl);  // Corrected setter
+                    }
+                    break;
+
+                case "email":
+                    if (emailAttachment != null && !emailAttachment.isEmpty()) {
+                        attachUrl = minioService.uploadFile(bucketName, emailAttachment, leadId);
+                        activity.setEmailAttachmentUrl(attachUrl);  // Corrected setter
+                    }
+                    break;
+
+                default:
+                    // No attachment or unknown type
+                    break;
+            }
+
+
+
+
+            lead.getActivities().add(activity);
+            createdActivities.add(activity);
+
+            // Add activity log entry
+            ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
+            logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
+            logEntry.setType("Activity Added");
+            String logSummary = "Activity '" + activity.getTitle() + "' (" + activity.getType() + ") added by " + activity.getAssignedTo();
+            if (activity.getAttach() != null && !activity.getAttach().isEmpty()) {
+                logSummary += ". Attached file: " + activity.getAttach();
+            }
+            logEntry.setSummary(logSummary);
+//            logEntry.setPerformedBy(activity.getAssignedTo());
+            logEntry.setTimestamp(LocalDateTime.now().toString());
+            lead.getActivityLog().add(logEntry);
+        }
+
+        leadRepository.save(lead);
+        return createdActivities;
+
+    }
 
 
     public List<ModelLead.ActivityDetails> getAllActivities(String leadId) {
@@ -380,7 +510,7 @@ public ModelLead.ActivityDetails updateActivity(String leadId, String activityId
     logEntry.setType(existing.getType()); // e.g., To-Do, Email, etc.
     logEntry.setTitle(existing.getTitle());
     logEntry.setSummary(logSummary);
-    logEntry.setPerformedBy(existing.getAssignedTo());
+//    logEntry.setPerformedBy(existing.getAssignedTo());
     logEntry.setTimestamp(LocalDateTime.now().toString());
     lead.getActivityLog().add(logEntry);
 
@@ -389,14 +519,100 @@ public ModelLead.ActivityDetails updateActivity(String leadId, String activityId
 }
 
 
-    //    public void deleteActivity(String leadId, String activityId) {
-//        ModelLead lead = leadRepository.findByLeadId(leadId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
-//        if (lead.getActivities() != null) {
-//            lead.getActivities().removeIf(a -> activityId.equals(a.getActivityId()));
-//            leadRepository.save(lead);
-//        }
-//    }
+    public ModelLead.ActivityDetails updateActivityWithTypeAttachment(
+            String leadId, String activityId, ActivityDetailsDto dto,
+            MultipartFile callAttachment, MultipartFile todoAttachment,
+            MultipartFile meetingAttachment, MultipartFile emailAttachment
+    ) {
+        ModelLead lead = leadRepository.findByLeadId(leadId)
+                .orElseThrow(() -> new RuntimeException("Lead not found"));
+
+        List<ModelLead.ActivityDetails> activities = lead.getActivities();
+        if (activities == null) throw new RuntimeException("No activities found");
+
+        ModelLead.ActivityDetails existing = null;
+        int idx = -1;
+        for (int i = 0; i < activities.size(); i++) {
+            if (activities.get(i).getActivityId().equals(activityId)) {
+                existing = activities.get(i);
+                idx = i;
+                break;
+            }
+        }
+        if (existing == null) throw new RuntimeException("Activity not found");
+
+        // Update fields
+        existing.setType(dto.getType());
+        existing.setTitle(dto.getTitle());
+        existing.setPurposeOfTheCall(dto.getPurposeOfTheCall());
+        existing.setOutComeOfTheCall(dto.getOutComeOfTheCall());
+        existing.setDueDate(dto.getDueDate());
+        existing.setTime(dto.getTime());
+        existing.setNextFollowUp(dto.getNextFollowUp());
+        existing.setAssignedTo(dto.getAssignedTo());
+        existing.setStatus(dto.getStatus());
+        existing.setMeetingVenue(dto.getMeetingVenue());
+        existing.setMeetingLink(dto.getMeetingLink());
+        existing.setAttendees(dto.getAttendees());
+        existing.setOutcomeOfTheMeeting(dto.getOutcomeOfTheMeeting());
+
+        // Map activity type to corresponding file attachment
+        MultipartFile attachFile = null;
+        if (dto.getType() != null) {
+            switch (dto.getType().toLowerCase()) {
+                case "call":
+                    attachFile = callAttachment;
+                    break;
+                case "to-do":
+                case "todo":
+                    attachFile = todoAttachment;
+                    break;
+                case "meeting":
+                    attachFile = meetingAttachment;
+                    break;
+                case "email":
+                    attachFile = emailAttachment;
+                    break;
+                default:
+                    // No attachment or unknown type
+                    break;
+            }
+        }
+
+        if (attachFile != null && !attachFile.isEmpty()) {
+            String bucketName = "lead";
+            String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
+            existing.setAttach(attachUrl);
+        }
+
+        activities.set(idx, existing);
+
+        // Add Activity Log Entry
+        if (lead.getActivityLog() == null) {
+            lead.setActivityLog(new java.util.ArrayList<>());
+        }
+        String status = existing.getStatus();
+        String logSummary;
+        if ("pending".equalsIgnoreCase(status) || "done".equalsIgnoreCase(status) || "delete".equalsIgnoreCase(status)) {
+            logSummary = existing.getType() + " " + existing.getTitle() + " marked as " + status;
+        } else {
+            logSummary = "Activity '" + existing.getTitle() + "' updated by " + existing.getAssignedTo();
+        }
+
+        ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
+        logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
+        logEntry.setType(existing.getType());
+        logEntry.setTitle(existing.getTitle());
+        logEntry.setSummary(logSummary);
+//        logEntry.setPerformedBy(existing.getAssignedTo());
+        logEntry.setTimestamp(LocalDateTime.now().toString());
+        lead.getActivityLog().add(logEntry);
+
+        leadRepository.save(lead);
+        return existing;
+    }
+
+
 public void deleteActivity(String leadId, String activityId) {
     ModelLead lead = leadRepository.findByLeadId(leadId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
@@ -470,6 +686,137 @@ public void deleteActivity(String leadId, String activityId) {
 
     private boolean isEmpty(String val) {
         return val == null || val.trim().isEmpty();
+    }
+
+
+    public LeadResponseDTO toLeadResponseDTO(ModelLead lead) {
+        Set<String> employeeIds = new HashSet<>();
+        if (lead.getCreatedBy() != null) employeeIds.add(lead.getCreatedBy());
+        if (lead.getAssignedSalesPerson() != null) employeeIds.add(lead.getAssignedSalesPerson());
+        if (lead.getAssignedDesigner() != null) employeeIds.add(lead.getAssignedDesigner());
+
+        List<EmployeeModel> employees = employeeRepository.findByEmployeeIdIn(employeeIds);
+        Map<String, EmployeeModel> employeeMap = employees.stream()
+                .collect(Collectors.toMap(EmployeeModel::getEmployeeId, e -> e));
+
+        return mapLeadToDTO(lead, employeeMap);
+    }
+
+    public List<LeadResponseDTO> toLeadResponseDTOList(List<ModelLead> leads) {
+        Set<String> employeeIds = leads.stream()
+                .flatMap(lead -> Stream.of(lead.getCreatedBy(), lead.getAssignedSalesPerson(), lead.getAssignedDesigner()))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<EmployeeModel> employees = employeeRepository.findByEmployeeIdIn(employeeIds);
+        Map<String, EmployeeModel> employeeMap = employees.stream()
+                .collect(Collectors.toMap(EmployeeModel::getEmployeeId, e -> e));
+
+        return leads.stream().map(lead -> mapLeadToDTO(lead, employeeMap)).collect(Collectors.toList());
+    }
+
+    private LeadResponseDTO mapLeadToDTO(ModelLead lead, Map<String, EmployeeModel> employeeMap) {
+        LeadResponseDTO dto = new LeadResponseDTO();
+        dto.setLeadId(lead.getLeadId());
+        dto.setName(lead.getName());
+        dto.setEmail(lead.getEmail());
+        dto.setContactNumber(lead.getContactNumber());
+        dto.setProjectType(lead.getProjectType());
+        dto.setPropertyType(lead.getPropertyType());
+        dto.setAddress(lead.getAddress());
+        dto.setBudget(lead.getBudget());
+        dto.setLeadSource(lead.getLeadSource());
+        dto.setDesignStyle(lead.getDesignStyle());
+        dto.setPriority(lead.getPriority());
+        dto.setDateOfCreation(lead.getDateOfCreation());
+        dto.setStageId(lead.getStageId());
+        dto.setStageName(lead.getStageName());
+        dto.setInitialQuotedAmount(lead.getInitialQuotedAmount());
+        dto.setFinalQuotation(lead.getFinalQuotation());
+        dto.setSignUpAmount(lead.getSignUpAmount());
+        dto.setPaymentDate(lead.getPaymentDate());
+        dto.setPaymentMode(lead.getPaymentMode());
+        dto.setPanNumber(lead.getPanNumber());
+        dto.setProjectTimeline(lead.getProjectTimeline());
+        dto.setDiscount(lead.getDiscount());
+        dto.setPaymentDetailsFile(lead.getPaymentDetailsFile());
+        dto.setBookingFormFile(lead.getBookingFormFile());
+        dto.setReasonForLoss(lead.getReasonForLoss());
+        dto.setReasonForMarkingAsJunk(lead.getReasonForMarkingAsJunk());
+
+        // Employee info
+        EmployeeModel creator = employeeMap.get(lead.getCreatedBy());
+        dto.setCreatedById(lead.getCreatedBy());
+        dto.setCreatedByName(creator != null ? creator.getName() : null);
+
+        EmployeeModel sales = employeeMap.get(lead.getAssignedSalesPerson());
+        dto.setAssignedSalesPersonId(lead.getAssignedSalesPerson());
+        dto.setAssignedSalesPersonName(sales != null ? sales.getName() : null);
+
+        EmployeeModel designer = employeeMap.get(lead.getAssignedDesigner());
+        dto.setAssignedDesignerId(lead.getAssignedDesigner());
+        dto.setAssignedDesignerName(designer != null ? designer.getName() : null);
+
+        // Activities
+        if (lead.getActivities() != null) {
+            dto.setActivities(
+                    lead.getActivities().stream().map(activity -> {
+                        LeadResponseDTO.ActivityDetailsDTO adto = new LeadResponseDTO.ActivityDetailsDTO();
+                        adto.setActivityId(activity.getActivityId());
+                        adto.setType(activity.getType());
+                        adto.setTitle(activity.getTitle());
+                        adto.setPurposeOfTheCall(activity.getPurposeOfTheCall());
+                        adto.setOutComeOfTheCall(activity.getOutComeOfTheCall());
+                        adto.setDueDate(activity.getDueDate());
+                        adto.setTime(activity.getTime());
+                        adto.setNextFollowUp(activity.getNextFollowUp());
+                        adto.setAssignedTo(activity.getAssignedTo());
+                        adto.setStatus(activity.getStatus());
+                        adto.setMeetingVenue(activity.getMeetingVenue());
+                        adto.setMeetingLink(activity.getMeetingLink());
+                        adto.setOutcomeOfTheMeeting(activity.getOutcomeOfTheMeeting());
+                        adto.setAttendees(activity.getAttendees());
+                        adto.setAttach(activity.getAttach());
+                        return adto;
+                    }).collect(Collectors.toList())
+            );
+        }
+
+        // Notes
+        if (lead.getNotes() != null) {
+            dto.setNotes(
+                    lead.getNotes().stream().map(note -> {
+                        LeadResponseDTO.NoteDTO ndto = new LeadResponseDTO.NoteDTO();
+                        ndto.setNoteId(note.getNoteId());
+                        ndto.setNote(note.getNote());
+                        ndto.setUser(note.getUser());
+                        ndto.setTimestamp(note.getTimestamp());
+                        return ndto;
+                    }).collect(Collectors.toList())
+            );
+        }
+
+        // Activity Log
+        if (lead.getActivityLog() != null) {
+            dto.setActivityLog(
+                    lead.getActivityLog().stream().map(log -> {
+                        LeadResponseDTO.ActivityLogEntryDTO ldto = new LeadResponseDTO.ActivityLogEntryDTO();
+                        ldto.setLogId(log.getLogId());
+                        ldto.setType(log.getType());
+                        ldto.setPreviousStageId(log.getPreviousStageId());
+                        ldto.setPreviousStageName(log.getPreviousStageName());
+                        ldto.setNewStageId(log.getNewStageId());
+                        ldto.setNewStageName(log.getNewStageName());
+                        ldto.setSummary(log.getSummary());
+                        ldto.setTitle(log.getTitle());
+//                        ldto.setPerformedBy(log.getPerformedBy());
+                        ldto.setTimestamp(log.getTimestamp());
+                        return ldto;
+                    }).collect(Collectors.toList())
+            );
+        }
+
+        return dto;
     }
 
 }

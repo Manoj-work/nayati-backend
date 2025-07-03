@@ -12,7 +12,7 @@ public interface LeadRepository extends MongoRepository<ModelLead, String> {
 
     Optional<ModelLead> findByEmail(String email);
 
-    Optional<ModelLead> findByContactNumber(String phoneNumber);
+
 
     Optional<ModelLead> findByLeadId(String leadId);
 
@@ -24,10 +24,16 @@ public interface LeadRepository extends MongoRepository<ModelLead, String> {
     List<ModelLead> findByAssignedDesigner(String employeeId);
 
     boolean existsByStageIdIn(List<String> stageIds);
-    List<ModelLead> findByManagerId(String managerId);
-    boolean existsByManagerId(String managerId);
+//    List<ModelLead> findByManagerId(String managerId);
+//    boolean existsByManagerId(String managerId);
     List<ModelLead> findByAssignedSalesPersonOrAssignedDesigner(String salesPersonId, String designerId);
+    List<ModelLead> findByAssignedSalesPersonOrAssignedDesignerOrCreatedBy(String assignedSalesPerson, String assignedDesigner, String createdBy);
 
     List<ModelLead> findByEmployeeId(String employeeId);
     boolean existsByStageId(String stageId);
+    List<ModelLead> findByCreatedByOrAssignedSalesPersonOrAssignedDesigner(String createdBy, String salesPerson, String designer);
+    ModelLead save(ModelLead lead);
+
+    List<ModelLead> findAll();
+
 }

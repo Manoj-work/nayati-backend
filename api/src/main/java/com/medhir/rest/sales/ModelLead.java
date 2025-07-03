@@ -23,8 +23,10 @@ import java.util.List;
 
 @Getter
 @Setter
-@Document(collection = "leads")
-@JsonInclude(JsonInclude.Include.ALWAYS)
+@Document(collection = "leadsbyMegha")
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+
 public class ModelLead {
 
     @Id
@@ -34,7 +36,7 @@ public class ModelLead {
     @Indexed(unique = true)
     private String leadId;
 
-    private String managerId;
+
     private String employeeId;
     private String stageId;
     private String stageName;
@@ -71,6 +73,8 @@ public class ModelLead {
 //    private Role role;
     private String assignedSalesPerson;
     private String assignedDesigner;
+    private String createdBy;
+    private String area;
     private String priority;
     private String dateOfCreation;
     // Nested schedule activity class
@@ -106,6 +110,11 @@ public class ModelLead {
         private String outcomeOfTheMeeting;
         private List<String> attendees;
         private String attach;
+        private String callAttachmentUrl;
+        private String todoAttachmentUrl;
+        private String emailAttachmentUrl;
+        private String meetingAttachmentUrl;
+
     }
     // For "Converted"
     private String initialQuotedAmount;
@@ -124,7 +133,7 @@ public class ModelLead {
 
     // For "Junk"
     private String reasonForMarkingAsJunk;
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Getter
     @Setter
     public static class Note {
@@ -136,7 +145,7 @@ public class ModelLead {
         private String user;
         private String timestamp;
     }
-
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @Getter
     @Setter
     public static class ActivityLogEntry {
@@ -150,7 +159,7 @@ public class ModelLead {
         private String newStageName;
         private String summary;
         private String title;
-        private String performedBy;
+//        private String performedBy;
         private String timestamp;
     }
 
