@@ -25,6 +25,7 @@ public class LeadResponseDTO {
     private String designStyle;
     private String priority;
     private String dateOfCreation;
+    private String area;
 
     // Employee info
     private String createdById;

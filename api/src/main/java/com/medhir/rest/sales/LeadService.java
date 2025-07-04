@@ -526,99 +526,98 @@ public ModelLead.ActivityDetails updateActivity(String leadId, String activityId
     return existing;
 }
 
+public ModelLead.ActivityDetails updateActivityWithTypeAttachment(
+        String leadId, String activityId, ActivityDetailsDto dto,
+        MultipartFile callAttachment, MultipartFile todoAttachment,
+        MultipartFile meetingAttachment, MultipartFile emailAttachment
+) {
+    ModelLead lead = leadRepository.findByLeadId(leadId)
+            .orElseThrow(() -> new RuntimeException("Lead not found"));
 
-    public ModelLead.ActivityDetails updateActivityWithTypeAttachment(
-            String leadId, String activityId, ActivityDetailsDto dto,
-            MultipartFile callAttachment, MultipartFile todoAttachment,
-            MultipartFile meetingAttachment, MultipartFile emailAttachment
-    ) {
-        ModelLead lead = leadRepository.findByLeadId(leadId)
-                .orElseThrow(() -> new RuntimeException("Lead not found"));
+    List<ModelLead.ActivityDetails> activities = lead.getActivities();
+    if (activities == null) throw new RuntimeException("No activities found");
 
-        List<ModelLead.ActivityDetails> activities = lead.getActivities();
-        if (activities == null) throw new RuntimeException("No activities found");
-
-        ModelLead.ActivityDetails existing = null;
-        int idx = -1;
-        for (int i = 0; i < activities.size(); i++) {
-            if (activities.get(i).getActivityId().equals(activityId)) {
-                existing = activities.get(i);
-                idx = i;
-                break;
-            }
+    ModelLead.ActivityDetails existing = null;
+    int idx = -1;
+    for (int i = 0; i < activities.size(); i++) {
+        if (activities.get(i).getActivityId().equals(activityId)) {
+            existing = activities.get(i);
+            idx = i;
+            break;
         }
-        if (existing == null) throw new RuntimeException("Activity not found");
-
-        // Update fields
-        existing.setType(dto.getType());
-        existing.setTitle(dto.getTitle());
-        existing.setPurposeOfTheCall(dto.getPurposeOfTheCall());
-        existing.setOutComeOfTheCall(dto.getOutComeOfTheCall());
-        existing.setDueDate(dto.getDueDate());
-        existing.setTime(dto.getTime());
-        existing.setNextFollowUp(dto.getNextFollowUp());
-        existing.setAssignedTo(dto.getAssignedTo());
-        existing.setStatus(dto.getStatus());
-        existing.setMeetingVenue(dto.getMeetingVenue());
-        existing.setMeetingLink(dto.getMeetingLink());
-        existing.setAttendees(dto.getAttendees());
-        existing.setOutcomeOfTheMeeting(dto.getOutcomeOfTheMeeting());
-
-        // Map activity type to corresponding file attachment
-        MultipartFile attachFile = null;
-        if (dto.getType() != null) {
-            switch (dto.getType().toLowerCase()) {
-                case "call":
-                    attachFile = callAttachment;
-                    break;
-                case "to-do":
-                case "todo":
-                    attachFile = todoAttachment;
-                    break;
-                case "meeting":
-                    attachFile = meetingAttachment;
-                    break;
-                case "email":
-                    attachFile = emailAttachment;
-                    break;
-                default:
-                    // No attachment or unknown type
-                    break;
-            }
-        }
-
-        if (attachFile != null && !attachFile.isEmpty()) {
-            String bucketName = "lead";
-            String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
-            existing.setAttach(attachUrl);
-        }
-
-        activities.set(idx, existing);
-
-        // Add Activity Log Entry
-        if (lead.getActivityLog() == null) {
-            lead.setActivityLog(new java.util.ArrayList<>());
-        }
-        String status = existing.getStatus();
-        String logSummary;
-        if ("pending".equalsIgnoreCase(status) || "done".equalsIgnoreCase(status) || "delete".equalsIgnoreCase(status)) {
-            logSummary = existing.getType() + " " + existing.getTitle() + " marked as " + status;
-        } else {
-            logSummary = "Activity '" + existing.getTitle() + "' updated by " + existing.getAssignedTo();
-        }
-
-        ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
-        logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
-        logEntry.setType(existing.getType());
-        logEntry.setTitle(existing.getTitle());
-        logEntry.setSummary(logSummary);
-//        logEntry.setPerformedBy(existing.getAssignedTo());
-        logEntry.setTimestamp(LocalDateTime.now().toString());
-        lead.getActivityLog().add(logEntry);
-
-        leadRepository.save(lead);
-        return existing;
     }
+    if (existing == null) throw new RuntimeException("Activity not found");
+
+    // Update only non-null fields
+    if (dto.getType() != null) existing.setType(dto.getType());
+    if (dto.getTitle() != null) existing.setTitle(dto.getTitle());
+    if (dto.getPurposeOfTheCall() != null) existing.setPurposeOfTheCall(dto.getPurposeOfTheCall());
+    if (dto.getOutComeOfTheCall() != null) existing.setOutComeOfTheCall(dto.getOutComeOfTheCall());
+    if (dto.getDueDate() != null) existing.setDueDate(dto.getDueDate());
+    if (dto.getTime() != null) existing.setTime(dto.getTime());
+    if (dto.getNextFollowUp() != null) existing.setNextFollowUp(dto.getNextFollowUp());
+    if (dto.getAssignedTo() != null) existing.setAssignedTo(dto.getAssignedTo());
+    if (dto.getStatus() != null) existing.setStatus(dto.getStatus());
+    if (dto.getMeetingVenue() != null) existing.setMeetingVenue(dto.getMeetingVenue());
+    if (dto.getMeetingLink() != null) existing.setMeetingLink(dto.getMeetingLink());
+    if (dto.getAttendees() != null) existing.setAttendees(dto.getAttendees());
+    if (dto.getOutcomeOfTheMeeting() != null) existing.setOutcomeOfTheMeeting(dto.getOutcomeOfTheMeeting());
+
+    // Handle attachment update based on activity type
+    MultipartFile attachFile = null;
+    String type = dto.getType() != null ? dto.getType().toLowerCase() : existing.getType().toLowerCase();
+    switch (type) {
+        case "call":
+            attachFile = callAttachment;
+            break;
+        case "to-do":
+        case "todo":
+            attachFile = todoAttachment;
+            break;
+        case "meeting":
+            attachFile = meetingAttachment;
+            break;
+        case "email":
+            attachFile = emailAttachment;
+            break;
+        default:
+            // No attachment or unknown type
+            break;
+    }
+
+    if (attachFile != null && !attachFile.isEmpty()) {
+        String bucketName = "lead";
+        String attachUrl = minioService.uploadFile(bucketName, attachFile, leadId);
+        existing.setAttach(attachUrl);
+    }
+
+    activities.set(idx, existing);
+
+    // Add Activity Log Entry
+    if (lead.getActivityLog() == null) {
+        lead.setActivityLog(new java.util.ArrayList<>());
+    }
+    String status = existing.getStatus();
+    String logSummary;
+    if ("pending".equalsIgnoreCase(status) || "done".equalsIgnoreCase(status) || "delete".equalsIgnoreCase(status)) {
+        logSummary = existing.getType() + " " + existing.getTitle() + " marked as " + status;
+    } else {
+        logSummary = "Activity '" + existing.getTitle() + "' updated by " + existing.getAssignedTo();
+    }
+
+    ModelLead.ActivityLogEntry logEntry = new ModelLead.ActivityLogEntry();
+    logEntry.setLogId("LOG" + snowflakeIdGenerator.nextId());
+    logEntry.setType(existing.getType());
+    logEntry.setTitle(existing.getTitle());
+    logEntry.setSummary(logSummary);
+    // logEntry.setPerformedBy(existing.getAssignedTo());
+    logEntry.setTimestamp(LocalDateTime.now().toString());
+    lead.getActivityLog().add(logEntry);
+
+    leadRepository.save(lead);
+    return existing;
+}
+
 
 
 public void deleteActivity(String leadId, String activityId) {
