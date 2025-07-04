@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestPart;
 
 import java.util.List;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/leads")
@@ -145,10 +146,14 @@ public class LeadController {
     @PostMapping(path = "/{leadId}/convert-with-docs", consumes = {"multipart/form-data"})
     public LeadConversionResponseDTO convertLeadWithDocs(
         @PathVariable String leadId,
-        @RequestPart("conversionData") ConvertLeadRequestDTO conversionData,
-        @RequestPart(value = "paymentDetailsFile", required = false) MultipartFile paymentDetailsFile,
-        @RequestPart(value = "bookingFormFile", required = false) MultipartFile bookingFormFile
-    ) {
+        @RequestParam("conversionData") String conversionDataJson,
+        @RequestParam(value = "paymentDetailsFile", required = false) MultipartFile paymentDetailsFile,
+        @RequestParam(value = "bookingFormFile", required = false) MultipartFile bookingFormFile
+    ) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ConvertLeadRequestDTO conversionData = objectMapper.readValue(
+            conversionDataJson, ConvertLeadRequestDTO.class
+        );
         return leadService.convertLeadWithDocs(leadId, conversionData, paymentDetailsFile, bookingFormFile, "Public User");
     }
 
@@ -274,9 +279,13 @@ public class LeadController {
     @PostMapping(path = "/{leadId}/activities/bulk-with-files", consumes = {"multipart/form-data"})
     public LeadResponseDTO addActivitiesBulkWithFiles(
         @PathVariable String leadId,
-        @RequestPart("activities") List<ActivityDTO> activities,
-        @RequestPart(value = "files", required = false) List<MultipartFile> files
-    ) {
+        @RequestParam("activities") String activitiesJson,
+        @RequestParam(value = "files", required = false) List<MultipartFile> files
+    ) throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<ActivityDTO> activities = objectMapper.readValue(
+            activitiesJson, new com.fasterxml.jackson.core.type.TypeReference<List<ActivityDTO>>() {}
+        );
         return LeadMapper.mapToResponseDTO(
             leadService.addActivitiesBulkWithFiles(leadId, activities, files, "Public User"),
             pipelineStageService, employeeService

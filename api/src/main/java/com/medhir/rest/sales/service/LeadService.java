@@ -320,8 +320,6 @@ public class LeadService {
         lead.setDiscount(conversionData.getDiscount());
         lead.setInitialQuote(conversionData.getInitialQuote());
         lead.setProjectTimeline(conversionData.getProjectTimeline());
-        lead.setPaymentDetailsFileName(conversionData.getPaymentDetailsFileName());
-        lead.setBookingFormFileName(conversionData.getBookingFormFileName());
         
         // Change stageId to CONVERTED
         lead.setStageId(convertedStageId);
@@ -871,6 +869,9 @@ public class LeadService {
             String bookingFileUrl = minioService.uploadDocumentsImg(bookingFormFile, leadId);
             lead.setBookingFormFileName(bookingFileUrl);
         }
+
+        // Save the lead after setting file fields
+        leadRepository.save(lead);
 
         // Existing conversion logic
         LeadModel convertedLead = convertLead(leadId, conversionData, user);
