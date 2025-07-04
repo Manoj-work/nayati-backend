@@ -198,41 +198,7 @@ public ModelLead createLead(ModelLead lead) {
         return leadRepository.save(existing);
     }
 
-    // -------------------- Lead Status Change & Logging --------------------
-//    public ModelLead updateLeadStatusByStageId(String leadId, String stageId) {
-//        // Fetch the lead by leadId or throw 404 if not found
-//        ModelLead lead = leadRepository.findByLeadId(leadId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lead not found"));
-//
-//        // Fetch the pipeline stage by stageId or throw 400 if not found
-//        PipelineStageModel newStage = pipelineStageRepository.findByStageId(stageId)
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stage not found: " + stageId));
-//
-//        // Store old stage info for logging
-//        String oldStageName = lead.getStageName();
-//        String oldStageId = lead.getStageId();
-//
-//        // Update lead's stage details
-//        lead.setStageId(newStage.getStageId());
-//        lead.setStageName(newStage.getStageName());
-//        // No pipelineGroupId to set
-//
-//        // Set lead status to the new stage name
-//        lead.setStageName(newStage.getStageName());
-//
-//        // Log the stage and status change in the activity log
-//        addActivityLogEntry(
-//                lead,
-//                "lead",
-//                oldStageName,                    // Old stage name
-//                newStage.getStageName(),         // New stage name
-//                "Stage changed from '" + oldStageName + "' to '" + newStage.getStageName() + "'",
-//                lead.getRole() != null ? lead.getRole().name() : "User"
-//        );
-//
-//        // Save and return the updated lead
-//        return leadRepository.save(lead);
-//    }
+
     public ModelLead updateLeadStatusByStageId(String leadId, String stageId) {
         // Fetch the lead by leadId or throw 404 if not found
         ModelLead lead = leadRepository.findByLeadId(leadId)
