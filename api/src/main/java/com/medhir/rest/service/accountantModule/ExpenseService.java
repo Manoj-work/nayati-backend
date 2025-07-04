@@ -120,7 +120,7 @@ public class ExpenseService {
     public Expense updateExpense(String expenseId,UpdateExpenseRequest request, MultipartFile receiptInvoiceAttachment, MultipartFile paymentProof, boolean isAccountant) {
         // Fetch by unique expenseId
         Expense expense = expenseRepository.findByExpenseId(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found"));
 
         // Update fields
         expenseMapper.updateExpenseFromRequest(request, expense);
@@ -154,7 +154,7 @@ public class ExpenseService {
 
     public ExpenseResponse getExpenseById(String expenseId) {
         Expense expense = expenseRepository.findByExpenseId(expenseId)
-                .orElseThrow(() -> new RuntimeException("Expense not found with ID: " + expenseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Expense not found with ID: " + expenseId));
 
         // Fetch related Employee and Vendor
         EmployeeModel employee = employeeRepository.findByEmployeeId(expense.getCreatedBy())
@@ -186,6 +186,5 @@ public class ExpenseService {
                 expense.getStatus().name()
         );
     }
-
 
 }

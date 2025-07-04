@@ -5,7 +5,7 @@ plugins {
 group = "com.medhir"
 version = "0.0.1"
 
-tasks.register<Exec>("runFaceRecognitionService") {
+tasks.register<Exec>("facerecog") {
     group = "application"
     description = "Run the Python-based face recognition service using Uvicorn"
     workingDir = file("face-recognition-service")
