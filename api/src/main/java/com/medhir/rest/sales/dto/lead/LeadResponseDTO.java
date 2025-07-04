@@ -29,7 +29,6 @@ public class LeadResponseDTO {
     private String stageId;
     private String stageName;
     private String stageColor;
-    private Integer rating;
     private String priority;
     private String salesRep;
     private String salesRepName;
@@ -37,9 +36,6 @@ public class LeadResponseDTO {
     private String designerName;
     private String submittedBy;
     private String submittedByName;
-    private String callDescription;
-    private List<String> callHistory;
-    private String nextCall;
     private String quotedAmount;
     private String finalQuotation;
     private String signupAmount;

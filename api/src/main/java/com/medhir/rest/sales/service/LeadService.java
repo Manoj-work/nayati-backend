@@ -74,7 +74,6 @@ public class LeadService {
         if (dto.getLeadSource() != null) lead.setLeadSource(dto.getLeadSource());
         if (dto.getNotes() != null) lead.setNotes(dto.getNotes());
         if (dto.getStageId() != null) lead.setStageId(dto.getStageId());
-        if (dto.getRating() != null) lead.setRating(dto.getRating());
         if (dto.getPriority() != null) lead.setPriority(dto.getPriority());
         if (dto.getSalesRep() != null) {
             if (!employeeService.getEmployeeById(dto.getSalesRep()).isPresent()) {
@@ -88,9 +87,6 @@ public class LeadService {
             }
             lead.setDesigner(dto.getDesigner());
         }
-        if (dto.getCallDescription() != null) lead.setCallDescription(dto.getCallDescription());
-        if (dto.getCallHistory() != null) lead.setCallHistory(dto.getCallHistory());
-        if (dto.getNextCall() != null) lead.setNextCall(dto.getNextCall());
         if (dto.getQuotedAmount() != null) lead.setQuotedAmount(dto.getQuotedAmount());
         if (dto.getFinalQuotation() != null) lead.setFinalQuotation(dto.getFinalQuotation());
         if (dto.getSignupAmount() != null) lead.setSignupAmount(dto.getSignupAmount());
@@ -118,7 +114,7 @@ public class LeadService {
                 String defaultStageName = stageNames.get(0); // "New"
                 var defaultStage = pipelineStageService.getStageByName(defaultStageName);
                 if (defaultStage.isPresent()) {
-                    lead.setStageId(defaultStage.get().getId());
+                    lead.setStageId(defaultStage.get().getStageId());
                 }
             }
         }
@@ -277,7 +273,7 @@ public class LeadService {
         if (convertedStage.isEmpty()) {
             throw new RuntimeException("❌ 'Converted' stage not found in pipeline");
         }
-        String convertedStageId = convertedStage.get().getId();
+        String convertedStageId = convertedStage.get().getStageId();
         
         // Validate lead can be converted
         if (convertedStageId.equals(lead.getStageId())) {
@@ -285,7 +281,7 @@ public class LeadService {
         }
         
         var lostStage = pipelineStageService.getStageByName("Lost");
-        if (lostStage.isPresent() && lostStage.get().getId().equals(lead.getStageId())) {
+        if (lostStage.isPresent() && lostStage.get().getStageId().equals(lead.getStageId())) {
             throw new RuntimeException("❌ Cannot convert a lost lead");
         }
         
@@ -648,17 +644,17 @@ public class LeadService {
         var lostStage = pipelineStageService.getStageByName("Lost");
         
         for (LeadModel lead : leads) {
-            if (newStage.isPresent() && newStage.get().getId().equals(lead.getStageId())) {
+            if (newStage.isPresent() && newStage.get().getStageId().equals(lead.getStageId())) {
                 stats.setNewLeads(stats.getNewLeads() + 1);
-            } else if (contactedStage.isPresent() && contactedStage.get().getId().equals(lead.getStageId())) {
+            } else if (contactedStage.isPresent() && contactedStage.get().getStageId().equals(lead.getStageId())) {
                 stats.setContactedLeads(stats.getContactedLeads() + 1);
-            } else if (qualifiedStage.isPresent() && qualifiedStage.get().getId().equals(lead.getStageId())) {
+            } else if (qualifiedStage.isPresent() && qualifiedStage.get().getStageId().equals(lead.getStageId())) {
                 stats.setQualifiedLeads(stats.getQualifiedLeads() + 1);
-            } else if (quotedStage.isPresent() && quotedStage.get().getId().equals(lead.getStageId())) {
+            } else if (quotedStage.isPresent() && quotedStage.get().getStageId().equals(lead.getStageId())) {
                 stats.setQuotedLeads(stats.getQuotedLeads() + 1);
-            } else if (convertedStage.isPresent() && convertedStage.get().getId().equals(lead.getStageId())) {
+            } else if (convertedStage.isPresent() && convertedStage.get().getStageId().equals(lead.getStageId())) {
                 stats.setConvertedLeads(stats.getConvertedLeads() + 1);
-            } else if (lostStage.isPresent() && lostStage.get().getId().equals(lead.getStageId())) {
+            } else if (lostStage.isPresent() && lostStage.get().getStageId().equals(lead.getStageId())) {
                 stats.setLostLeads(stats.getLostLeads() + 1);
             }
         }

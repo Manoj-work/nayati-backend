@@ -37,16 +37,9 @@ public class LeadModel {
     private String leadSource;
     private String notes;
     private String stageId;
-    private Integer rating;
     private String priority;
     private String salesRep;
     private String designer;
-    private String callDescription;
-    private List<String> callHistory = new ArrayList<>();
-
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    private String nextCall;
-
     private String quotedAmount;
     private String finalQuotation;
     private String signupAmount;

@@ -30,4 +30,7 @@ public interface PipelineStageRepository extends MongoRepository<PipelineStage, 
     
     // Find by custom Snowflake stageId
     Optional<PipelineStage> findByStageId(String stageId);
+    
+    // Add existence check by Snowflake stageId
+    boolean existsByStageId(String stageId);
 } 

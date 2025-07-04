@@ -74,13 +74,14 @@ public class PipelineStageService {
     }
 
     // 🎯 Delete pipeline stage
-    public void deleteStage(String id) {
-        PipelineStage stage = getStageOrThrow(id);
-        long leadCount = leadRepository.countByStageId(stage.getId());
+    public void deleteStage(String stageId) {
+        PipelineStage stage = pipelineStageRepository.findByStageId(stageId)
+            .orElseThrow(() -> new RuntimeException("Pipeline stage not found with stageId: " + stageId));
+        long leadCount = leadRepository.countByStageId(stage.getStageId());
         if (leadCount > 0) {
             throw new RuntimeException("Cannot delete stage '" + stage.getName() + "' because " + leadCount + " lead(s) are currently in this stage. Please move them to another stage first.");
         }
-        pipelineStageRepository.deleteById(id);
+        pipelineStageRepository.deleteById(stage.getId());
     }
 
     // 🎯 Reorder pipeline stages
@@ -112,7 +113,7 @@ public class PipelineStageService {
 
     // 🎯 Validate stage exists by ID (new method for stageId approach)
     public boolean stageExistsById(String stageId) {
-        return pipelineStageRepository.existsById(stageId);
+        return pipelineStageRepository.existsByStageId(stageId);
     }
 
     // 🎯 Get stage by name (for backward compatibility)

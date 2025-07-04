@@ -30,7 +30,6 @@ public class LeadRequestDTO {
     private String leadSource;
     private String notes;
     private String stageId; // Changed from status to stageId for better data integrity
-    private Integer rating;
     private String priority; // Added: Priority as string (Low, Medium, High)
     private String salesRep;
     private String designer;

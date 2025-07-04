@@ -33,7 +33,6 @@ public class LeadMapper {
                 response.setStageColor(stage.get().getColor());
             }
         }
-        response.setRating(lead.getRating());
         response.setPriority(lead.getPriority());
         // Map employee information with details
         if (lead.getSalesRep() != null) {
@@ -60,9 +59,6 @@ public class LeadMapper {
                 response.setSubmittedByName(submittedByDetails.getName());
             }
         }
-        response.setCallDescription(lead.getCallDescription());
-        response.setCallHistory(lead.getCallHistory());
-        response.setNextCall(lead.getNextCall());
         response.setQuotedAmount(lead.getQuotedAmount());
         response.setFinalQuotation(lead.getFinalQuotation());
         response.setSignupAmount(lead.getSignupAmount());
