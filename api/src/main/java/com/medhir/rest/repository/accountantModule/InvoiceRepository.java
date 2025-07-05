@@ -4,6 +4,7 @@ import com.medhir.rest.model.accountantModule.Invoice;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface InvoiceRepository extends MongoRepository<Invoice,String> {
@@ -11,5 +12,5 @@ public interface InvoiceRepository extends MongoRepository<Invoice,String> {
 
     Optional<Invoice> findByinvoiceNumber(String invoiceNumber);
 
-
+    List<Invoice> findAllByProjectId(String projectId);
 }

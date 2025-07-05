@@ -42,4 +42,10 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceResponse);
     }
 
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<List<InvoiceResponse>> getInvoicesByProjectId(@PathVariable String projectId){
+        List<InvoiceResponse> invoices  = invoiceService.getInvoicesByProjectId(projectId);
+        return ResponseEntity.ok(invoices);
+    }
+
 }

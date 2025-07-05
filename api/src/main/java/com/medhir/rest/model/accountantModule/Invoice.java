@@ -60,20 +60,6 @@ public class Invoice {
     public static enum Status {
         PENDING, PAID,PARTIALLYPAID
     }
-    public void updateStatus() {
-        if (amountReceived == null || totalAmount == null) {
-            this.status = Status.PENDING;
-            return;
-        }
 
-        BigDecimal remaining = getAmountRemaining();
-        if (remaining.compareTo(BigDecimal.ZERO) <= 0) {
-            this.status = Status.PAID;
-        } else if (amountReceived.compareTo(BigDecimal.ZERO) > 0) {
-            this.status = Status.PARTIALLYPAID;
-        } else {
-            this.status = Status.PENDING;
-        }
-    }
 
 }

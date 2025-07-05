@@ -161,5 +161,79 @@ public class InvoiceService {
 
         }).collect(Collectors.toList());
     }
+    public List<InvoiceResponse> getInvoicesByProjectId(String projectId) {
+        // Get only invoices for the given projectId
+        List<Invoice> invoices = invoiceRepository.findAllByProjectId(projectId);
+
+        if (invoices.isEmpty()) {
+            return List.of(); // Return empty list if none found
+        }
+
+        // Get unique customerIds from these invoices
+        Set<String> customerIds = invoices.stream()
+                .map(Invoice::getCustomerId)
+                .collect(Collectors.toSet());
+
+        // Fetch related Project once (should be unique)
+        Project project = projectRepository.findByProjectId(projectId)
+                .orElse(null);
+
+        // Fetch all related customers
+        List<Customer> customers = customerRepository.findAllByCustomerIdIn(customerIds);
+
+        Map<String, Customer> customerMap = customers.stream()
+                .collect(Collectors.toMap(Customer::getCustomerId, c -> c));
+
+        // Map each invoice to InvoiceResponse
+        return invoices.stream().map(invoice -> {
+
+            Customer customer = customerMap.get(invoice.getCustomerId());
+
+            InvoiceResponse.ProjectInfo projectInfo = (project != null)
+                    ? new InvoiceResponse.ProjectInfo(
+                    project.getProjectId(),
+                    project.getProjectName(),
+                    project.getSiteAddress()
+            )
+                    : null;
+
+            InvoiceResponse.CustomerInfo customerInfo = (customer != null)
+                    ? new InvoiceResponse.CustomerInfo(
+                    customer.getCustomerId(),
+                    customer.getCustomerName()
+            )
+                    : null;
+
+            List<InvoiceResponse.InvoiceItem> items = invoice.getItems().stream()
+                    .map(item -> new InvoiceResponse.InvoiceItem(
+                            item.getItemName(),
+                            item.getDescription(),
+                            item.getHsnOrSac(),
+                            item.getQuantity(),
+                            item.getUom(),
+                            BigDecimal.valueOf(item.getRate()),
+                            BigDecimal.valueOf(item.getGstPercentage()),
+                            BigDecimal.valueOf(item.getTotal())
+                    ))
+                    .collect(Collectors.toList());
+
+            return new InvoiceResponse(
+                    invoice.getId(),
+                    projectInfo,
+                    customerInfo,
+                    invoice.getInvoiceNumber(),
+                    invoice.getInvoiceDate(),
+                    invoice.getDueDate(),
+                    invoice.getSubtotal(),
+                    invoice.getTotalGst(),
+                    invoice.getTotalAmount(),
+                    invoice.getAmountReceived(),
+                    invoice.getAmountRemaining(),
+                    items,
+                    invoice.getStatus().name()
+            );
+
+        }).collect(Collectors.toList());
+    }
 
 }
