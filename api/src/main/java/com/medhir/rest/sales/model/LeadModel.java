@@ -59,8 +59,8 @@ public class LeadModel {
     private String initialQuote;
     private String projectTimeline;
 
-    private String assignedSalesRep;
-    private String assignedDesigner;
+//    private String assignedSalesRep;
+//    private String assignedDesigner;
     private String dateOfCreation;
 
     private List<Activity> activities = new ArrayList<>();
@@ -71,7 +71,7 @@ public class LeadModel {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Activity {
-        private String id;
+        private String activityId;
         private String type;
         private String summary;
         private String dueDate;
@@ -93,7 +93,7 @@ public class LeadModel {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Note {
-        private String id;
+        private String notesId;
         private String content;
         private String user;
         private String timestamp;

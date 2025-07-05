@@ -79,7 +79,7 @@ public class LeadMapper {
             response.setActivities(
                 lead.getActivities().stream()
                     .map(activity -> new ActivityDTO(
-                        activity.getId(),
+                        activity.getActivityId(),
                         activity.getType(),
                         activity.getSummary(),
                         activity.getDueDate(),
@@ -104,7 +104,7 @@ public class LeadMapper {
             response.setNotesList(
                 lead.getNotesList().stream()
                     .map(note -> new NoteDTO(
-                        note.getId(),
+                        note.getNotesId(),
                         note.getContent(),
                         note.getUser(),
                         note.getTimestamp()

@@ -101,8 +101,8 @@ public class LeadService {
         if (dto.getBookingFormFileName() != null) lead.setBookingFormFileName(dto.getBookingFormFileName());
         if (dto.getInitialQuote() != null) lead.setInitialQuote(dto.getInitialQuote());
         if (dto.getProjectTimeline() != null) lead.setProjectTimeline(dto.getProjectTimeline());
-        if (dto.getAssignedSalesRep() != null) lead.setAssignedSalesRep(dto.getAssignedSalesRep());
-        if (dto.getAssignedDesigner() != null) lead.setAssignedDesigner(dto.getAssignedDesigner());
+//        if (dto.getAssignedSalesRep() != null) lead.setAssignedSalesRep(dto.getAssignedSalesRep());
+//        if (dto.getAssignedDesigner() != null) lead.setAssignedDesigner(dto.getAssignedDesigner());
         if (dto.getDateOfCreation() != null) lead.setDateOfCreation(dto.getDateOfCreation());
     }
 
@@ -143,7 +143,7 @@ public class LeadService {
         return createLead(lead);
     }
 
-    // ✏️ Update existing lead
+    //  Update existing lead
     public LeadModel updateLead(String id, LeadModel updatedLead) {
         LeadModel existingLead = getLeadByLeadId(id); // Ensures lead exists
         updatedLead.setLeadId(existingLead.getLeadId()); // Retain original ID
@@ -163,10 +163,10 @@ public class LeadService {
         return leadRepository.save(existingLead);
     }
 
-    // ❌ Delete lead
+    //  Delete lead
     public void deleteLead(String id) {
         if (!leadRepository.existsById(id)) {
-            throw new RuntimeException("⚠️ Cannot delete. Lead not found with id: " + id);
+            throw new RuntimeException("Cannot delete. Lead not found with id: " + id);
         }
         leadRepository.deleteById(id);
     }
@@ -229,7 +229,7 @@ public class LeadService {
 
     public void logActivityCompletion(LeadModel lead, LeadModel.Activity activity, String user) {
         Map<String, Object> metadata = new HashMap<>();
-        metadata.put("activityId", activity.getId());
+        metadata.put("activityId", activity.getActivityId());
         metadata.put("activityType", activity.getType());
         metadata.put("activitySummary", activity.getSummary());
         
@@ -264,47 +264,47 @@ public class LeadService {
         // return leadRepository.findByManagerId(managerId);
     }
 
-    // 🎯 Lead Conversion Method
+    //  Lead Conversion Method
     public LeadModel convertLead(String leadId, ConvertLeadRequestDTO conversionData, String user) {
         LeadModel lead = getLeadByLeadId(leadId);
         
         // Get the "Converted" stage ID
         var convertedStage = pipelineStageService.getStageByName("Converted");
         if (convertedStage.isEmpty()) {
-            throw new RuntimeException("❌ 'Converted' stage not found in pipeline");
+            throw new RuntimeException(" 'Converted' stage not found in pipeline");
         }
         String convertedStageId = convertedStage.get().getStageId();
         
         // Validate lead can be converted
         if (convertedStageId.equals(lead.getStageId())) {
-            throw new RuntimeException("❌ Lead is already converted");
+            throw new RuntimeException(" Lead is already converted");
         }
         
         var lostStage = pipelineStageService.getStageByName("Lost");
         if (lostStage.isPresent() && lostStage.get().getStageId().equals(lead.getStageId())) {
-            throw new RuntimeException("❌ Cannot convert a lost lead");
+            throw new RuntimeException(" Cannot convert a lost lead");
         }
         
         // Validate required lead information
         if (lead.getName() == null || lead.getName().trim().isEmpty()) {
-            throw new RuntimeException("❌ Lead name is required for conversion");
+            throw new RuntimeException("Lead name is required for conversion");
         }
         
         if (lead.getContactNumber() == null || lead.getContactNumber().trim().isEmpty()) {
-            throw new RuntimeException("❌ Contact number is required for conversion");
+            throw new RuntimeException("Contact number is required for conversion");
         }
         
         if (lead.getEmail() == null || lead.getEmail().trim().isEmpty()) {
-            throw new RuntimeException("❌ Email is required for conversion");
+            throw new RuntimeException(" Email is required for conversion");
         }
         
         // Validate conversion data
         if (conversionData.getFinalQuotation() == null || conversionData.getFinalQuotation().trim().isEmpty()) {
-            throw new RuntimeException("❌ Final quotation is required for conversion");
+            throw new RuntimeException("Final quotation is required for conversion");
         }
         
         if (conversionData.getSignupAmount() == null || conversionData.getSignupAmount().trim().isEmpty()) {
-            throw new RuntimeException("❌ Sign-up amount is required for conversion");
+            throw new RuntimeException(" Sign-up amount is required for conversion");
         }
         
         // Update lead with conversion data
@@ -327,7 +327,7 @@ public class LeadService {
         
         String conversionNoteId = "NOTE-" + snowflakeIdGenerator.nextId();
         LeadModel.Note conversionNote = new LeadModel.Note();
-        conversionNote.setId(conversionNoteId);
+        conversionNote.setNotesId(conversionNoteId);
         conversionNote.setContent("🎉 LEAD CONVERTED: " + conversionData.getConversionNotes());
         conversionNote.setUser(user);
         conversionNote.setTimestamp(LocalDateTime.now().toString());
@@ -336,7 +336,7 @@ public class LeadService {
         return leadRepository.save(lead);
     }
 
-    // 🎯 Lead Assignment Update Method
+    // Lead Assignment Update Method
     public LeadModel updateLeadAssignment(String leadId, LeadAssignmentRequestDTO assignmentData, String manager) {
         LeadModel lead = getLeadByLeadId(leadId);
         // Validate salesRep
@@ -363,7 +363,7 @@ public class LeadService {
         }
         
         LeadModel.Activity activity = new LeadModel.Activity();
-        activity.setId("ACT-" + snowflakeIdGenerator.nextId());
+        activity.setActivityId("ACT-" + snowflakeIdGenerator.nextId());
         activity.setType(activityDTO.getType());
         activity.setSummary(activityDTO.getSummary());
         activity.setDueDate(activityDTO.getDueDate());
@@ -390,13 +390,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getActivities() == null) {
-            throw new RuntimeException("❌ No activities found for this lead");
+            throw new RuntimeException("No activities found for this lead");
         }
         
         LeadModel.Activity activityToUpdate = lead.getActivities().stream()
-                .filter(activity -> activity.getId().equals(activityId))
+                .filter(activity -> activity.getActivityId().equals(activityId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
+                .orElseThrow(() -> new RuntimeException("Activity not found with id: " + activityId));
         
         // Update activity fields
         if (activityDTO.getType() != null) {
@@ -450,15 +450,15 @@ public class LeadService {
     public LeadModel deleteActivity(String leadId, String activityId) {
         LeadModel lead = getLeadByLeadId(leadId);
         if (lead.getActivities() == null) {
-            throw new RuntimeException("❌ No activities found for this lead");
+            throw new RuntimeException("No activities found for this lead");
         }
         LeadModel.Activity deletedActivity = lead.getActivities().stream()
-            .filter(activity -> activity.getId().equals(activityId))
+            .filter(activity -> activity.getActivityId().equals(activityId))
             .findFirst()
             .orElse(null);
-        boolean removed = lead.getActivities().removeIf(activity -> activity.getId().equals(activityId));
+        boolean removed = lead.getActivities().removeIf(activity -> activity.getActivityId().equals(activityId));
         if (!removed) {
-            throw new RuntimeException("❌ Activity not found with id: " + activityId);
+            throw new RuntimeException("Activity not found with id: " + activityId);
         }
         // Add ActivityLog for deletion
         if (deletedActivity != null) {
@@ -486,7 +486,7 @@ public class LeadService {
         }
         
         LeadModel.Activity activity = lead.getActivities().stream()
-                .filter(act -> act.getId().equals(activityId))
+                .filter(act -> act.getActivityId().equals(activityId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
         
@@ -501,7 +501,7 @@ public class LeadService {
         }
         
         LeadModel.Activity activity = lead.getActivities().stream()
-                .filter(act -> act.getId().equals(activityId))
+                .filter(act -> act.getActivityId().equals(activityId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
         
@@ -524,7 +524,7 @@ public class LeadService {
         }
         
         LeadModel.Note note = new LeadModel.Note();
-        note.setId("NOTE-" + snowflakeIdGenerator.nextId());
+        note.setNotesId("NOTE-" + snowflakeIdGenerator.nextId());
         note.setContent(noteDTO.getContent());
         note.setUser(user);
         note.setTimestamp(LocalDateTime.now().toString());
@@ -538,13 +538,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getNotesList() == null) {
-            throw new RuntimeException("❌ No notes found for this lead");
+            throw new RuntimeException("No notes found for this lead");
         }
         
         LeadModel.Note noteToUpdate = lead.getNotesList().stream()
-                .filter(note -> note.getId().equals(noteId))
+                .filter(note -> note.getNotesId().equals(noteId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("❌ Note not found with id: " + noteId));
+                .orElseThrow(() -> new RuntimeException("Note not found with id: " + noteId));
         
         if (noteDTO.getContent() != null) {
             noteToUpdate.setContent(noteDTO.getContent());
@@ -560,7 +560,7 @@ public class LeadService {
             throw new RuntimeException("No notes found for this lead");
         }
         
-        boolean removed = lead.getNotesList().removeIf(note -> note.getId().equals(noteId));
+        boolean removed = lead.getNotesList().removeIf(note -> note.getNotesId().equals(noteId));
         
         if (!removed) {
             throw new RuntimeException("Note not found with id: " + noteId);
@@ -773,7 +773,7 @@ public class LeadService {
         if (convertedLead.getNotesList() != null) {
             for (LeadModel.Note note : convertedLead.getNotesList()) {
                 if (note.getContent().startsWith("🎉 LEAD CONVERTED:")) {
-                    return note.getId();
+                    return note.getNotesId();
                 }
             }
         }
@@ -787,7 +787,7 @@ public class LeadService {
         }
         for (ActivityDTO activityDTO : activities) {
             LeadModel.Activity activity = new LeadModel.Activity();
-            activity.setId("ACT-" + snowflakeIdGenerator.nextId());
+            activity.setActivityId("ACT-" + snowflakeIdGenerator.nextId());
             activity.setType(activityDTO.getType());
             activity.setSummary(activityDTO.getSummary());
             activity.setDueDate(activityDTO.getDueDate());
@@ -817,7 +817,7 @@ public class LeadService {
         for (int i = 0; i < activities.size(); i++) {
             ActivityDTO activityDTO = activities.get(i);
             LeadModel.Activity activity = new LeadModel.Activity();
-            activity.setId("ACT-" + snowflakeIdGenerator.nextId());
+            activity.setActivityId("ACT-" + snowflakeIdGenerator.nextId());
             activity.setType(activityDTO.getType());
             activity.setSummary(activityDTO.getSummary());
             activity.setDueDate(activityDTO.getDueDate());

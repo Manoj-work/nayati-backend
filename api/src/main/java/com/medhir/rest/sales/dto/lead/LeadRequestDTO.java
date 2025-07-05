@@ -60,7 +60,7 @@ public class LeadRequestDTO {
     private String initialQuote;
     private String projectTimeline;
 
-    private String assignedSalesRep;
-    private String assignedDesigner;
+//    private String assignedSalesRep;
+//    private String assignedDesigner;
     private String dateOfCreation; // Added: Date of creation (ISO date string)
 } 

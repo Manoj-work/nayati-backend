@@ -49,8 +49,8 @@ public class LeadResponseDTO {
     private String bookingFormFileName;
     private String initialQuote;
     private String projectTimeline;
-    private String assignedSalesRep;
-    private String assignedDesigner;
+//    private String assignedSalesRep;
+//    private String assignedDesigner;
     private String createdAt;
     private String updatedAt;
     private String dateOfCreation;
@@ -58,7 +58,7 @@ public class LeadResponseDTO {
     private List<NoteDTO> notesList;
     private List<ActivityLogDTO> activityLogs;
 
-//    private salesinfo salesinfo;
+//    private salesInfo salesinfo;
 //    public static class SalesInfo {
 //        private String slaesID;
 //        private String SalesName;

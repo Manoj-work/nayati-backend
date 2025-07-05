@@ -233,7 +233,7 @@ public class LeadController {
         String fileUrl = minioService.uploadDocumentsImg(file, leadId);
         if (lead.getActivities() != null) {
             for (LeadModel.Activity activity : lead.getActivities()) {
-                if (activityId.equals(activity.getId())) {
+                if (activityId.equals(activity.getActivityId())) {
                     activity.setAttachment(fileUrl);
                     break;
                 }
@@ -251,7 +251,7 @@ public class LeadController {
         }
         return lead.getActivities().stream()
             .map(activity -> new ActivityDTO(
-                activity.getId(),
+                activity.getActivityId(),
                 activity.getType(),
                 activity.getSummary(),
                 activity.getDueDate(),
