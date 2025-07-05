@@ -54,13 +54,13 @@ public class LeadRequestDTO {
     private String discount;
     private String reasonForLost;
     private String reasonForJunk;
-    private String submittedBy;
+    private String createdBy;
     private String paymentDetailsFileName;
     private String bookingFormFileName;
     private String initialQuote;
     private String projectTimeline;
 
-    private String assignedSalesRep;  // Optional field for assignment
-    private String assignedDesigner;  // Optional field for assignment
+    private String assignedSalesRep;
+    private String assignedDesigner;
     private String dateOfCreation; // Added: Date of creation (ISO date string)
 } 

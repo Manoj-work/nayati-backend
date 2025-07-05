@@ -8,7 +8,7 @@ import com.medhir.rest.sales.dto.activity.ActivityLogDTO;
 import com.medhir.rest.sales.service.PipelineStageService;
 import com.medhir.rest.service.EmployeeService;
 import java.util.stream.Collectors;
-
+import com.medhir.rest.sales.dto.pipeline.PipelineStageResponse;
 public class LeadMapper {
     public static LeadResponseDTO mapToResponseDTO(LeadModel lead, PipelineStageService pipelineStageService, EmployeeService employeeService) {
         LeadResponseDTO response = new LeadResponseDTO();
@@ -25,6 +25,7 @@ public class LeadMapper {
         response.setLeadSource(lead.getLeadSource());
         response.setNotes(lead.getNotes());
         response.setStageId(lead.getStageId());
+        response.setStageName(lead.getStageName());
         // Get stage information for better API responses
         if (lead.getStageId() != null) {
             var stage = pipelineStageService.getStageByIdOptional(lead.getStageId());
@@ -51,12 +52,12 @@ public class LeadMapper {
                 response.setDesignerName(designerDetails.getName());
             }
         }
-        if (lead.getSubmittedBy() != null) {
-            response.setSubmittedBy(lead.getSubmittedBy());
-            var submittedByOpt = employeeService.getEmployeeById(lead.getSubmittedBy());
+        if (lead.getCreatedBy() != null) {
+            response.setCreatedBy(lead.getCreatedBy());
+            var submittedByOpt = employeeService.getEmployeeById(lead.getCreatedBy());
             if (submittedByOpt.isPresent()) {
                 var submittedByDetails = submittedByOpt.get();
-                response.setSubmittedByName(submittedByDetails.getName());
+                response.setCreatedByName(submittedByDetails.getName());
             }
         }
         response.setQuotedAmount(lead.getQuotedAmount());

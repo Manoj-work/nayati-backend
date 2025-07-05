@@ -34,8 +34,8 @@ public class LeadResponseDTO {
     private String salesRepName;
     private String designer;
     private String designerName;
-    private String submittedBy;
-    private String submittedByName;
+    private String createdBy;
+    private String createdByName;
     private String quotedAmount;
     private String finalQuotation;
     private String signupAmount;
@@ -57,4 +57,11 @@ public class LeadResponseDTO {
     private List<ActivityDTO> activities;
     private List<NoteDTO> notesList;
     private List<ActivityLogDTO> activityLogs;
+
+//    private salesinfo salesinfo;
+//    public static class SalesInfo {
+//        private String slaesID;
+//        private String SalesName;
+//
+//    }
 } 

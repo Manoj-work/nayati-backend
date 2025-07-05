@@ -96,7 +96,7 @@ public class LeadService {
         if (dto.getDiscount() != null) lead.setDiscount(dto.getDiscount());
         if (dto.getReasonForLost() != null) lead.setReasonForLost(dto.getReasonForLost());
         if (dto.getReasonForJunk() != null) lead.setReasonForJunk(dto.getReasonForJunk());
-        if (dto.getSubmittedBy() != null) lead.setSubmittedBy(dto.getSubmittedBy());
+        if (dto.getCreatedBy() != null) lead.setCreatedBy(dto.getCreatedBy());
         if (dto.getPaymentDetailsFileName() != null) lead.setPaymentDetailsFileName(dto.getPaymentDetailsFileName());
         if (dto.getBookingFormFileName() != null) lead.setBookingFormFileName(dto.getBookingFormFileName());
         if (dto.getInitialQuote() != null) lead.setInitialQuote(dto.getInitialQuote());
@@ -187,7 +187,7 @@ public class LeadService {
         lead.setStageId(stageId);
         
         // Log stage change
-        logStageChange(lead, oldStageId, stageId, lead.getSubmittedBy() != null ? lead.getSubmittedBy() : "System");
+        logStageChange(lead, oldStageId, stageId, lead.getCreatedBy() != null ? lead.getCreatedBy() : "System");
         
         return leadRepository.save(lead);
     }
@@ -469,7 +469,7 @@ public class LeadService {
             log.setId("LOG-" + snowflakeIdGenerator.nextId());
             log.setAction("Activity Deleted");
             log.setDetails(deletedActivity.getType() + ": " + (deletedActivity.getSummary() != null ? deletedActivity.getSummary() : ""));
-            log.setUser(lead.getSubmittedBy() != null ? lead.getSubmittedBy() : "System");
+            log.setUser(lead.getCreatedBy() != null ? lead.getCreatedBy() : "System");
             log.setTimestamp(java.time.LocalDateTime.now().toString());
             log.setActivityType(deletedActivity.getType());
             log.setMetadata(new java.util.HashMap<>());
@@ -510,7 +510,7 @@ public class LeadService {
         
         // Only log when activity is completed
         if ("completed".equalsIgnoreCase(status) && !"completed".equalsIgnoreCase(oldStatus)) {
-            logActivityCompletion(lead, activity, lead.getSubmittedBy() != null ? lead.getSubmittedBy() : "System");
+            logActivityCompletion(lead, activity, lead.getCreatedBy() != null ? lead.getCreatedBy() : "System");
         }
         
         return leadRepository.save(lead);
@@ -557,13 +557,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getNotesList() == null) {
-            throw new RuntimeException("❌ No notes found for this lead");
+            throw new RuntimeException("No notes found for this lead");
         }
         
         boolean removed = lead.getNotesList().removeIf(note -> note.getId().equals(noteId));
         
         if (!removed) {
-            throw new RuntimeException("❌ Note not found with id: " + noteId);
+            throw new RuntimeException("Note not found with id: " + noteId);
         }
         
         return leadRepository.save(lead);

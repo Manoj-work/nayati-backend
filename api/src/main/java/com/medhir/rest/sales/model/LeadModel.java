@@ -17,7 +17,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "leads")
+@Document(collection = "leadsCheck")
 public class LeadModel {
     @Id
     @JsonIgnore
@@ -37,6 +37,7 @@ public class LeadModel {
     private String leadSource;
     private String notes;
     private String stageId;
+    private String stageName;
     private String priority;
     private String salesRep;
     private String designer;
@@ -52,7 +53,7 @@ public class LeadModel {
     private String discount;
     private String reasonForLost;
     private String reasonForJunk;
-    private String submittedBy;
+    private String createdBy;
     private String paymentDetailsFileName;
     private String bookingFormFileName;
     private String initialQuote;
