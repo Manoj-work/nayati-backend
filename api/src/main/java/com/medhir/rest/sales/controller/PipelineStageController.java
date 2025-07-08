@@ -1,15 +1,20 @@
 package com.medhir.rest.sales.controller;
 
 import com.medhir.rest.sales.service.PipelineStageService;
+import com.medhir.rest.sales.service.PipelineStageMigrationService;
 import com.medhir.rest.sales.dto.pipeline.CreatePipelineStageRequest;
 import com.medhir.rest.sales.dto.pipeline.UpdatePipelineStageRequest;
 import com.medhir.rest.sales.dto.pipeline.ReorderPipelineStageRequest;
 import com.medhir.rest.sales.dto.pipeline.PipelineStageResponse;
+import com.medhir.rest.sales.dto.pipeline.FormTypeDTO;
+import com.medhir.rest.sales.model.FormType;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/pipeline-stages")
@@ -18,6 +23,9 @@ public class PipelineStageController {
 
     @Autowired
     private PipelineStageService pipelineStageService;
+
+    @Autowired
+    private PipelineStageMigrationService migrationService;
 
     // 🎯 Get all active pipeline stages
     @GetMapping
@@ -78,5 +86,25 @@ public class PipelineStageController {
     @GetMapping("/exists/{stageName}")
     public boolean stageExists(@PathVariable String stageName) {
         return pipelineStageService.stageExists(stageName);
+    }
+
+    // 🎯 Get available form types
+    @GetMapping("/form-types")
+    public List<FormTypeDTO> getAvailableFormTypes() {
+        return Arrays.stream(FormType.values())
+                .map(FormTypeDTO::fromFormType)
+                .collect(Collectors.toList());
+    }
+
+    // 🎯 Migration endpoints
+    @PostMapping("/migrate")
+    public String migratePipelineStages() {
+        migrationService.migrateExistingPipelineStages();
+        return "Migration completed successfully";
+    }
+
+    @GetMapping("/migration-status")
+    public PipelineStageMigrationService.MigrationStatus getMigrationStatus() {
+        return migrationService.getMigrationStatus();
     }
 } 

@@ -1,6 +1,9 @@
 package com.medhir.rest.sales.service;
 
 import com.medhir.rest.sales.model.LeadModel;
+import com.medhir.rest.sales.model.Activity;
+import com.medhir.rest.sales.model.ActivityLog;
+import com.medhir.rest.sales.model.Note;
 import com.medhir.rest.sales.repository.LeadRepository;
 import com.medhir.rest.sales.dto.lead.ConvertLeadRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadAssignmentRequestDTO;
@@ -212,7 +215,7 @@ public class LeadService {
             newStageName = newStage.get().getName();
         }
         
-        LeadModel.ActivityLog log = new LeadModel.ActivityLog();
+        ActivityLog log = new ActivityLog();
         log.setId("LOG-" + snowflakeIdGenerator.nextId());
         log.setAction("Stage changed");
         log.setDetails(oldStageName + " → " + newStageName);
@@ -227,16 +230,17 @@ public class LeadService {
         lead.getActivityLogs().add(log);
     }
 
-    public void logActivityCompletion(LeadModel lead, LeadModel.Activity activity, String user) {
+    public void logActivityCompletion(LeadModel lead, Activity activity, String user) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("activityId", activity.getId());
         metadata.put("activityType", activity.getType());
-        metadata.put("activitySummary", activity.getSummary());
+        metadata.put("activityTitle", activity.getTitle());
+        metadata.put("activityNotes", activity.getNotes());
         
-        LeadModel.ActivityLog log = new LeadModel.ActivityLog();
+        ActivityLog log = new ActivityLog();
         log.setId("LOG-" + snowflakeIdGenerator.nextId());
         log.setAction("Activity completed");
-        log.setDetails(activity.getSummary());
+        log.setDetails(activity.getNotes());
         log.setUser(user);
         log.setTimestamp(LocalDateTime.now().toString());
         log.setActivityType("ACTIVITY_COMPLETION");
@@ -326,7 +330,7 @@ public class LeadService {
         }
         
         String conversionNoteId = "NOTE-" + snowflakeIdGenerator.nextId();
-        LeadModel.Note conversionNote = new LeadModel.Note();
+        Note conversionNote = new Note();
         conversionNote.setId(conversionNoteId);
         conversionNote.setContent("🎉 LEAD CONVERTED: " + conversionData.getConversionNotes());
         conversionNote.setUser(user);
@@ -362,10 +366,11 @@ public class LeadService {
             lead.setActivities(new ArrayList<>());
         }
         
-        LeadModel.Activity activity = new LeadModel.Activity();
+        Activity activity = new Activity();
         activity.setId("ACT-" + snowflakeIdGenerator.nextId());
         activity.setType(activityDTO.getType());
-        activity.setSummary(activityDTO.getSummary());
+        activity.setTitle(activityDTO.getTitle());
+        activity.setNotes(activityDTO.getNotes());
         activity.setDueDate(activityDTO.getDueDate());
         activity.setDueTime(activityDTO.getDueTime());
         activity.setUser(user);
@@ -381,7 +386,24 @@ public class LeadService {
         activity.setAttachment(activityDTO.getAttachment());
         
         lead.getActivities().add(activity);
-        // Removed: Only log when activity is completed, not when created
+        // Log activity creation
+        if (lead.getActivityLogs() == null) {
+            lead.setActivityLogs(new ArrayList<>());
+        }
+        ActivityLog log = new ActivityLog();
+        log.setId("LOG-" + snowflakeIdGenerator.nextId());
+        log.setAction("Activity created");
+        log.setDetails(activity.getTitle());
+        log.setUser(user);
+        log.setTimestamp(LocalDateTime.now().toString());
+        log.setActivityType(activity.getType());
+        Map<String, Object> metadata = new HashMap<>();
+        metadata.put("activityId", activity.getId());
+        metadata.put("activityTitle", activity.getTitle());
+        metadata.put("activityNotes", activity.getNotes());
+        metadata.put("activityType", activity.getType());
+        log.setMetadata(metadata);
+        lead.getActivityLogs().add(log);
         
         return leadRepository.save(lead);
     }
@@ -393,7 +415,7 @@ public class LeadService {
             throw new RuntimeException("❌ No activities found for this lead");
         }
         
-        LeadModel.Activity activityToUpdate = lead.getActivities().stream()
+        Activity activityToUpdate = lead.getActivities().stream()
                 .filter(activity -> activity.getId().equals(activityId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
@@ -402,8 +424,11 @@ public class LeadService {
         if (activityDTO.getType() != null) {
             activityToUpdate.setType(activityDTO.getType());
         }
-        if (activityDTO.getSummary() != null) {
-            activityToUpdate.setSummary(activityDTO.getSummary());
+        if (activityDTO.getTitle() != null) {
+            activityToUpdate.setTitle(activityDTO.getTitle());
+        }
+        if (activityDTO.getNotes() != null) {
+            activityToUpdate.setNotes(activityDTO.getNotes());
         }
         if (activityDTO.getDueDate() != null) {
             activityToUpdate.setDueDate(activityDTO.getDueDate());
@@ -452,7 +477,7 @@ public class LeadService {
         if (lead.getActivities() == null) {
             throw new RuntimeException("❌ No activities found for this lead");
         }
-        LeadModel.Activity deletedActivity = lead.getActivities().stream()
+        Activity deletedActivity = lead.getActivities().stream()
             .filter(activity -> activity.getId().equals(activityId))
             .findFirst()
             .orElse(null);
@@ -465,10 +490,10 @@ public class LeadService {
             if (lead.getActivityLogs() == null) {
                 lead.setActivityLogs(new java.util.ArrayList<>());
             }
-            LeadModel.ActivityLog log = new LeadModel.ActivityLog();
+            ActivityLog log = new ActivityLog();
             log.setId("LOG-" + snowflakeIdGenerator.nextId());
             log.setAction("Activity Deleted");
-            log.setDetails(deletedActivity.getType() + ": " + (deletedActivity.getSummary() != null ? deletedActivity.getSummary() : ""));
+            log.setDetails(deletedActivity.getType() + ": " + (deletedActivity.getNotes() != null ? deletedActivity.getNotes() : ""));
             log.setUser(lead.getSubmittedBy() != null ? lead.getSubmittedBy() : "System");
             log.setTimestamp(java.time.LocalDateTime.now().toString());
             log.setActivityType(deletedActivity.getType());
@@ -485,7 +510,7 @@ public class LeadService {
             throw new RuntimeException("❌ No activities found for this lead");
         }
         
-        LeadModel.Activity activity = lead.getActivities().stream()
+        Activity activity = lead.getActivities().stream()
                 .filter(act -> act.getId().equals(activityId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
@@ -500,16 +525,16 @@ public class LeadService {
             throw new RuntimeException("❌ No activities found for this lead");
         }
         
-        LeadModel.Activity activity = lead.getActivities().stream()
+        Activity activity = lead.getActivities().stream()
                 .filter(act -> act.getId().equals(activityId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
         
         String oldStatus = activity.getStatus();
         activity.setStatus(status);
-        
-        // Only log when activity is completed
-        if ("completed".equalsIgnoreCase(status) && !"completed".equalsIgnoreCase(oldStatus)) {
+        // Log when activity is completed or done
+        if (("completed".equalsIgnoreCase(status) || "done".equalsIgnoreCase(status)) &&
+            !("completed".equalsIgnoreCase(oldStatus) || "done".equalsIgnoreCase(oldStatus))) {
             logActivityCompletion(lead, activity, lead.getSubmittedBy() != null ? lead.getSubmittedBy() : "System");
         }
         
@@ -523,7 +548,7 @@ public class LeadService {
             lead.setNotesList(new ArrayList<>());
         }
         
-        LeadModel.Note note = new LeadModel.Note();
+        Note note = new Note();
         note.setId("NOTE-" + snowflakeIdGenerator.nextId());
         note.setContent(noteDTO.getContent());
         note.setUser(user);
@@ -541,7 +566,7 @@ public class LeadService {
             throw new RuntimeException("❌ No notes found for this lead");
         }
         
-        LeadModel.Note noteToUpdate = lead.getNotesList().stream()
+        Note noteToUpdate = lead.getNotesList().stream()
                 .filter(note -> note.getId().equals(noteId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("❌ Note not found with id: " + noteId));
@@ -569,7 +594,7 @@ public class LeadService {
         return leadRepository.save(lead);
     }
 
-    public List<LeadModel.ActivityLog> getActivityLogs(String leadId) {
+    public List<ActivityLog> getActivityLogs(String leadId) {
         LeadModel lead = getLeadByLeadId(leadId);
         return lead.getActivityLogs() != null ? lead.getActivityLogs() : new ArrayList<>();
     }
@@ -581,7 +606,7 @@ public class LeadService {
             lead.setActivityLogs(new ArrayList<>());
         }
         
-        LeadModel.ActivityLog log = new LeadModel.ActivityLog();
+        ActivityLog log = new ActivityLog();
         log.setId(activityLogDTO.getId() != null ? activityLogDTO.getId() : "LOG-" + snowflakeIdGenerator.nextId());
         log.setAction(activityLogDTO.getAction());
         log.setDetails(activityLogDTO.getDetails());
@@ -678,7 +703,7 @@ public class LeadService {
         
         for (LeadModel lead : leads) {
             if (lead.getActivities() != null) {
-                for (LeadModel.Activity activity : lead.getActivities()) {
+                for (Activity activity : lead.getActivities()) {
                     if ("completed".equalsIgnoreCase(activity.getStatus())) {
                         CompletedActivityResponse response = new CompletedActivityResponse();
                         response.setLeadId(lead.getLeadId());
@@ -696,15 +721,15 @@ public class LeadService {
     public static class CompletedActivityResponse {
         private String leadId;
         private String leadName;
-        private LeadModel.Activity activity;
+        private Activity activity;
 
         // Getters and setters
         public String getLeadId() { return leadId; }
         public void setLeadId(String leadId) { this.leadId = leadId; }
         public String getLeadName() { return leadName; }
         public void setLeadName(String leadName) { this.leadName = leadName; }
-        public LeadModel.Activity getActivity() { return activity; }
-        public void setActivity(LeadModel.Activity activity) { this.activity = activity; }
+        public Activity getActivity() { return activity; }
+        public void setActivity(Activity activity) { this.activity = activity; }
     }
 
     public static class ConversionStatsResponse {
@@ -771,7 +796,7 @@ public class LeadService {
 
     private String findConversionNoteId(LeadModel convertedLead) {
         if (convertedLead.getNotesList() != null) {
-            for (LeadModel.Note note : convertedLead.getNotesList()) {
+            for (Note note : convertedLead.getNotesList()) {
                 if (note.getContent().startsWith("🎉 LEAD CONVERTED:")) {
                     return note.getId();
                 }
@@ -786,10 +811,11 @@ public class LeadService {
             lead.setActivities(new ArrayList<>());
         }
         for (ActivityDTO activityDTO : activities) {
-            LeadModel.Activity activity = new LeadModel.Activity();
+            Activity activity = new Activity();
             activity.setId("ACT-" + snowflakeIdGenerator.nextId());
             activity.setType(activityDTO.getType());
-            activity.setSummary(activityDTO.getSummary());
+            activity.setTitle(activityDTO.getTitle());
+            activity.setNotes(activityDTO.getNotes());
             activity.setDueDate(activityDTO.getDueDate());
             activity.setDueTime(activityDTO.getDueTime());
             activity.setUser(user);
@@ -804,6 +830,24 @@ public class LeadService {
             activity.setNote(activityDTO.getNote());
             activity.setAttachment(activityDTO.getAttachment());
             lead.getActivities().add(activity);
+            // Log activity creation
+            if (lead.getActivityLogs() == null) {
+                lead.setActivityLogs(new ArrayList<>());
+            }
+            ActivityLog log = new ActivityLog();
+            log.setId("LOG-" + snowflakeIdGenerator.nextId());
+            log.setAction("Activity created");
+            log.setDetails(activity.getTitle());
+            log.setUser(user);
+            log.setTimestamp(LocalDateTime.now().toString());
+            log.setActivityType(activity.getType());
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("activityId", activity.getId());
+            metadata.put("activityTitle", activity.getTitle());
+            metadata.put("activityNotes", activity.getNotes());
+            metadata.put("activityType", activity.getType());
+            log.setMetadata(metadata);
+            lead.getActivityLogs().add(log);
         }
         createLead(lead); // Save updated lead
         return lead;
@@ -816,10 +860,11 @@ public class LeadService {
         }
         for (int i = 0; i < activities.size(); i++) {
             ActivityDTO activityDTO = activities.get(i);
-            LeadModel.Activity activity = new LeadModel.Activity();
+            Activity activity = new Activity();
             activity.setId("ACT-" + snowflakeIdGenerator.nextId());
             activity.setType(activityDTO.getType());
-            activity.setSummary(activityDTO.getSummary());
+            activity.setTitle(activityDTO.getTitle());
+            activity.setNotes(activityDTO.getNotes());
             activity.setDueDate(activityDTO.getDueDate());
             activity.setDueTime(activityDTO.getDueTime());
             activity.setUser(user);
@@ -840,6 +885,24 @@ public class LeadService {
                 activity.setAttachment(activityDTO.getAttachment());
             }
             lead.getActivities().add(activity);
+            // Log activity creation
+            if (lead.getActivityLogs() == null) {
+                lead.setActivityLogs(new ArrayList<>());
+            }
+            ActivityLog log = new ActivityLog();
+            log.setId("LOG-" + snowflakeIdGenerator.nextId());
+            log.setAction("Activity created");
+            log.setDetails(activity.getTitle());
+            log.setUser(user);
+            log.setTimestamp(LocalDateTime.now().toString());
+            log.setActivityType(activity.getType());
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("activityId", activity.getId());
+            metadata.put("activityTitle", activity.getTitle());
+            metadata.put("activityNotes", activity.getNotes());
+            metadata.put("activityType", activity.getType());
+            log.setMetadata(metadata);
+            lead.getActivityLogs().add(log);
         }
         createLead(lead); // Save updated lead
         return lead;

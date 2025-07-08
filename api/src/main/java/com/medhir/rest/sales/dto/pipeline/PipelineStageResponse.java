@@ -1,5 +1,6 @@
 package com.medhir.rest.sales.dto.pipeline;
 
+import com.medhir.rest.sales.model.FormType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,5 +19,7 @@ public class PipelineStageResponse {
     private String createdBy;
     private String createdAt;
     private String updatedAt;
+    private boolean isForm;
+    private FormType formType;
     private int leadCount; // Number of leads in this stage
 } 

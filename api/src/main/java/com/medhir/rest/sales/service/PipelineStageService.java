@@ -1,6 +1,7 @@
 package com.medhir.rest.sales.service;
 
 import com.medhir.rest.sales.model.PipelineStage;
+import com.medhir.rest.sales.model.FormType;
 import com.medhir.rest.sales.repository.PipelineStageRepository;
 import com.medhir.rest.sales.repository.LeadRepository;
 import com.medhir.rest.sales.dto.pipeline.CreatePipelineStageRequest;
@@ -54,6 +55,7 @@ public class PipelineStageService {
     // 🎯 Create new pipeline stage
     public PipelineStageResponse createStage(CreatePipelineStageRequest request, String createdBy) {
         validateStageNameUnique(request.getName());
+        validateFormTypeConfiguration(request.isForm(), request.getFormType());
         int nextOrderIndex = getNextOrderIndex();
         PipelineStage stage = new PipelineStage();
         assignCreateFields(stage, request, createdBy, nextOrderIndex);
@@ -67,7 +69,10 @@ public class PipelineStageService {
         PipelineStage stage = getStageOrThrow(id);
         if (request.getName() != null && !request.getName().equalsIgnoreCase(stage.getName())) {
             validateStageNameUnique(request.getName());
-            }
+        }
+        if (request.getIsForm() != null) {
+            validateFormTypeConfiguration(request.getIsForm(), request.getFormType());
+        }
         assignUpdateFields(stage, request);
         PipelineStage savedStage = pipelineStageRepository.save(stage);
         return mapToResponse(savedStage);
@@ -123,7 +128,7 @@ public class PipelineStageService {
 
     // 🎯 Get stage by ID (new method for stageId approach)
     public Optional<PipelineStage> getStageByIdOptional(String stageId) {
-        return pipelineStageRepository.findById(stageId);
+        return pipelineStageRepository.findByStageId(stageId);
     }
 
     // 🎯 Initialize default stages (for first-time setup)
@@ -148,6 +153,36 @@ public class PipelineStageService {
         }
     }
 
+    // 🎯 Check if migration is needed
+    public boolean isMigrationNeeded() {
+        List<PipelineStage> allStages = pipelineStageRepository.findAll();
+        return allStages.stream().anyMatch(stage -> stage.getFormType() == null);
+    }
+
+    // 🎯 Get migration status
+    public MigrationStatus getMigrationStatus() {
+        List<PipelineStage> allStages = pipelineStageRepository.findAll();
+        long migratedCount = allStages.stream()
+            .filter(stage -> stage.getFormType() != null || stage.isForm())
+            .count();
+        
+        return new MigrationStatus(allStages.size(), migratedCount);
+    }
+
+    public static class MigrationStatus {
+        private final long totalStages;
+        private final long migratedStages;
+
+        public MigrationStatus(long totalStages, long migratedStages) {
+            this.totalStages = totalStages;
+            this.migratedStages = migratedStages;
+        }
+
+        public long getTotalStages() { return totalStages; }
+        public long getMigratedStages() { return migratedStages; }
+        public boolean isComplete() { return totalStages == migratedStages; }
+    }
+
     // 🎯 Helper method to get next order index
     private int getNextOrderIndex() {
         Optional<PipelineStage> lastStage = pipelineStageRepository.findTopByOrderByOrderIndexDesc();
@@ -163,6 +198,8 @@ public class PipelineStageService {
         response.setOrderIndex(stage.getOrderIndex());
         response.setColor(stage.getColor());
         response.setActive(stage.isActive());
+        response.setForm(stage.isForm());
+        response.setFormType(stage.getFormType());
         response.setCreatedBy(stage.getCreatedBy());
         response.setCreatedAt(stage.getCreatedAt());
         response.setUpdatedAt(stage.getUpdatedAt());
@@ -192,6 +229,16 @@ public class PipelineStageService {
                 .orElseThrow(() -> new RuntimeException("Pipeline stage not found with id: " + id));
     }
 
+    // Helper: Validate form type configuration
+    private void validateFormTypeConfiguration(boolean isForm, FormType formType) {
+        if (isForm && formType == null) {
+            throw new RuntimeException("Form type is required when isForm is true");
+        }
+        if (!isForm && formType != null) {
+            throw new RuntimeException("Form type should not be provided when isForm is false");
+        }
+    }
+
     // Helper: Assign fields from CreatePipelineStageRequest to PipelineStage
     private void assignCreateFields(PipelineStage stage, CreatePipelineStageRequest request, String createdBy, int orderIndex) {
         stage.setName(request.getName());
@@ -199,6 +246,8 @@ public class PipelineStageService {
         stage.setOrderIndex(orderIndex);
         stage.setColor(request.getColor() != null ? request.getColor() : "#3B82F6");
         stage.setActive(true);
+        stage.setForm(request.isForm());
+        stage.setFormType(request.getFormType());
         stage.setCreatedBy(createdBy);
         stage.setCreatedAt(java.time.LocalDateTime.now().toString());
         stage.setUpdatedAt(java.time.LocalDateTime.now().toString());
@@ -217,6 +266,12 @@ public class PipelineStageService {
         }
         if (request.getIsActive() != null) {
             stage.setActive(request.getIsActive());
+        }
+        if (request.getIsForm() != null) {
+            stage.setForm(request.getIsForm());
+        }
+        if (request.getFormType() != null) {
+            stage.setFormType(request.getFormType());
         }
         stage.setUpdatedAt(java.time.LocalDateTime.now().toString());
     }

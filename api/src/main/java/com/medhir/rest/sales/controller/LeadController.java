@@ -4,7 +4,6 @@ import com.medhir.rest.sales.dto.activity.ActivityLogRequestDTO;
 import com.medhir.rest.sales.dto.lead.ConvertLeadRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadConversionResponseDTO;
 import com.medhir.rest.sales.dto.lead.LeadAssignmentRequestDTO;
-import com.medhir.rest.sales.dto.lead.UpdateLeadStageRequestDTO;
 
 import com.medhir.rest.sales.service.LeadService;
 import com.medhir.rest.sales.dto.activity.ActivityDTO;
@@ -17,6 +16,7 @@ import com.medhir.rest.sales.service.PipelineStageService;
 import com.medhir.rest.service.EmployeeService;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.sales.model.LeadModel;
+import com.medhir.rest.sales.model.Activity;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +112,10 @@ public class LeadController {
     @PatchMapping("/{leadId}/activities/{activityId}/status")
     public LeadResponseDTO updateActivityStatus(@PathVariable String leadId, @PathVariable String activityId, 
                                         @RequestBody String status) {
+        // Remove extra quotes if present
+        if (status != null && status.startsWith("\"") && status.endsWith("\"")) {
+            status = status.substring(1, status.length() - 1);
+        }
         return LeadMapper.mapToResponseDTO(leadService.updateActivityStatus(leadId, activityId, status), pipelineStageService, employeeService);
     }
 
@@ -132,9 +136,12 @@ public class LeadController {
     }
 
     // 🎯 Stage Management (changed from status to stageId)
-    @PatchMapping("/{leadId}/stage")
-    public LeadResponseDTO updateLeadStageId(@PathVariable String leadId, @Valid @RequestBody UpdateLeadStageRequestDTO request) {
-        return LeadMapper.mapToResponseDTO(leadService.updateLeadStageId(leadId, request.getStageId()), pipelineStageService, employeeService);
+    @PatchMapping("/{leadId}/stage/{stageId}")
+    public LeadResponseDTO updateLeadStageId(@PathVariable String leadId, @PathVariable String stageId) {
+        if (stageId == null || stageId.trim().isEmpty()) {
+            throw new RuntimeException("Stage ID is required");
+        }
+        return LeadMapper.mapToResponseDTO(leadService.updateLeadStageId(leadId, stageId.trim()), pipelineStageService, employeeService);
     }
 
     // 🎯 Lead Conversion
@@ -146,14 +153,51 @@ public class LeadController {
     @PostMapping(path = "/{leadId}/convert-with-docs", consumes = {"multipart/form-data"})
     public LeadConversionResponseDTO convertLeadWithDocs(
         @PathVariable String leadId,
-        @RequestParam("conversionData") String conversionDataJson,
+        @RequestParam(value = "conversionData", required = false) String conversionDataJson,
+        @RequestParam(value = "finalQuotation", required = false) String finalQuotation,
+        @RequestParam(value = "signupAmount", required = false) String signupAmount,
+        @RequestParam(value = "paymentDate", required = false) String paymentDate,
+        @RequestParam(value = "paymentMode", required = false) String paymentMode,
+        @RequestParam(value = "panNumber", required = false) String panNumber,
+        @RequestParam(value = "discount", required = false) String discount,
+        @RequestParam(value = "conversionNotes", required = false) String conversionNotes,
+        @RequestParam(value = "initialQuote", required = false) String initialQuote,
+        @RequestParam(value = "projectTimeline", required = false) String projectTimeline,
         @RequestParam(value = "paymentDetailsFile", required = false) MultipartFile paymentDetailsFile,
         @RequestParam(value = "bookingFormFile", required = false) MultipartFile bookingFormFile
     ) throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ConvertLeadRequestDTO conversionData = objectMapper.readValue(
-            conversionDataJson, ConvertLeadRequestDTO.class
-        );
+        ConvertLeadRequestDTO conversionData;
+        
+        if (conversionDataJson != null && !conversionDataJson.trim().isEmpty()) {
+            // Handle JSON string approach
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                conversionData = objectMapper.readValue(conversionDataJson, ConvertLeadRequestDTO.class);
+            } catch (Exception e) {
+                throw new RuntimeException("Invalid JSON format for conversionData: " + e.getMessage());
+            }
+        } else {
+            // Handle individual form fields approach
+            conversionData = new ConvertLeadRequestDTO();
+            conversionData.setFinalQuotation(finalQuotation);
+            conversionData.setSignupAmount(signupAmount);
+            conversionData.setPaymentDate(paymentDate);
+            conversionData.setPaymentMode(paymentMode);
+            conversionData.setPanNumber(panNumber);
+            conversionData.setDiscount(discount);
+            conversionData.setConversionNotes(conversionNotes);
+            conversionData.setInitialQuote(initialQuote);
+            conversionData.setProjectTimeline(projectTimeline);
+            
+            // Validate required fields
+            if (finalQuotation == null || finalQuotation.trim().isEmpty()) {
+                throw new RuntimeException("finalQuotation is required");
+            }
+            if (signupAmount == null || signupAmount.trim().isEmpty()) {
+                throw new RuntimeException("signupAmount is required");
+            }
+        }
+        
         return leadService.convertLeadWithDocs(leadId, conversionData, paymentDetailsFile, bookingFormFile, "Public User");
     }
 
@@ -232,7 +276,7 @@ public class LeadController {
         LeadModel lead = leadService.getLeadByLeadId(leadId);
         String fileUrl = minioService.uploadDocumentsImg(file, leadId);
         if (lead.getActivities() != null) {
-            for (LeadModel.Activity activity : lead.getActivities()) {
+            for (Activity activity : lead.getActivities()) {
                 if (activityId.equals(activity.getId())) {
                     activity.setAttachment(fileUrl);
                     break;
@@ -253,7 +297,8 @@ public class LeadController {
             .map(activity -> new ActivityDTO(
                 activity.getId(),
                 activity.getType(),
-                activity.getSummary(),
+                activity.getTitle(),
+                activity.getNotes(),
                 activity.getDueDate(),
                 activity.getDueTime(),
                 activity.getUser(),

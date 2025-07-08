@@ -17,8 +17,10 @@ public class ActivityDTO {
     private String id;
     @NotBlank(message = "Activity type is required")
     private String type;
-    @NotBlank(message = "Activity summary is required")
-    private String summary;
+    @NotBlank(message = "Activity title is required")
+    private String title;
+    @NotBlank(message = "Activity notes are required")
+    private String notes;
     @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2}$", message = "Due date must be in yyyy-MM-dd format")
     private String dueDate;
     @Pattern(regexp = "^([01]?[0-9]|2[0-3]):[0-5][0-9]$", message = "Due time must be in HH:mm format")

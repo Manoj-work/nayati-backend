@@ -26,6 +26,8 @@ public class PipelineStage {
     private int orderIndex;
     private String color;
     private boolean isActive;
+    private boolean isForm;
+    private FormType formType;
     private String createdBy;
     private String createdAt;
     private String updatedAt;
@@ -37,6 +39,22 @@ public class PipelineStage {
         this.orderIndex = orderIndex;
         this.color = color;
         this.isActive = true;
+        this.isForm = false;
+        this.formType = null;
+        this.createdBy = createdBy;
+        this.createdAt = java.time.LocalDateTime.now().toString();
+        this.updatedAt = java.time.LocalDateTime.now().toString();
+    }
+
+    // Constructor with form support
+    public PipelineStage(String name, String description, int orderIndex, String color, boolean isForm, FormType formType, String createdBy) {
+        this.name = name;
+        this.description = description;
+        this.orderIndex = orderIndex;
+        this.color = color;
+        this.isActive = true;
+        this.isForm = isForm;
+        this.formType = formType;
         this.createdBy = createdBy;
         this.createdAt = java.time.LocalDateTime.now().toString();
         this.updatedAt = java.time.LocalDateTime.now().toString();

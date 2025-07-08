@@ -80,7 +80,8 @@ public class LeadMapper {
                     .map(activity -> new ActivityDTO(
                         activity.getId(),
                         activity.getType(),
-                        activity.getSummary(),
+                        activity.getTitle(),
+                        activity.getNotes(),
                         activity.getDueDate(),
                         activity.getDueTime(),
                         activity.getUser(),
