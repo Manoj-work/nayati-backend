@@ -21,13 +21,13 @@ public class CompanyService {
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
-    public CompanyModel createCompany(CompanyModel company) {
+    public  CompanyModel createCompany(CompanyModel company) {
         // Check if email already exists
         if (companyRepository.findByEmail(company.getEmail()).isPresent()) {
             throw new DuplicateResourceException("Email already exists: " + company.getEmail());
         }
         // Check if phone number already exists
-        if (companyRepository.findByPhone(company.getPhone()).isPresent()) {
+         if (companyRepository.findByPhone(company.getPhone()).isPresent()) {
             throw new DuplicateResourceException("Phone number already exists: " + company.getPhone());
         }
 

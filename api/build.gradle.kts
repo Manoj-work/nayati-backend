@@ -45,6 +45,8 @@ dependencies {
     implementation(libs.springboot.starter.outh.client)
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
+    testAnnotationProcessor(libs.lombok) // for tests using Lombok
+
     // JWT Dependencies
     implementation(libs.jwt.api)
     implementation(libs.jwt.impl)
@@ -63,6 +65,7 @@ dependencies {
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
 }
 
 tasks.named<Test>("test") {
