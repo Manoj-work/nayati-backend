@@ -33,6 +33,7 @@ public class PaymentModel {
     private String paymentMethod;
     private String bankAccount;
     private String paymentTransactionId;
+    private BigDecimal adjustedAmountFromCredits;
 
     private String paymentDate;
     private BigDecimal totalAmount;

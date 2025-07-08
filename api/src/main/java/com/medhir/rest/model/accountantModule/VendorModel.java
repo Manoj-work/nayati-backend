@@ -136,6 +136,25 @@ public class VendorModel {
         private String creditDate;
         private String creditDescription;
     }
+
+    @Valid
+    private List<AdjustedPayments> adjustedPayments;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AdjustedPayments {
+        @NotBlank(message = "Adjusted amount is required")
+        private String adjustedAmount;
+        
+        @NotBlank(message = "Adjusted date is required")
+        private String adjustedDate;
+        
+        @NotBlank(message = "Adjusted payment ID is required")
+        private String adjustedPaymentId;
+    }
+
     private BigDecimal totalCredit;
 }
 

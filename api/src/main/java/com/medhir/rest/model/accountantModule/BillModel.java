@@ -102,7 +102,11 @@ public class BillModel {
     @DecimalMin(value = "0.0", inclusive = true, message = "Total paid cannot be negative")
     private BigDecimal totalPaid = BigDecimal.ZERO;
 
-    private String paymentId;
+    // Support for multiple payments
+    private List<BillPayment> billPayments;
+
+    // Keep single paymentId for backward compatibility (will be the latest payment ID)
+    // private String paymentId;
 
     // Other Info
     // private String paymentTerms;
@@ -157,6 +161,18 @@ public class BillModel {
         @NotNull(message = "Total amount is required")
         @DecimalMin(value = "0.0", inclusive = true, message = "Total amount cannot be negative")
         private BigDecimal totalAmount;
+    }
+
+    // Bill Payment Inner Class
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class BillPayment {
+        private String paymentId;
+        private BigDecimal paidAmount;
+        private String paymentDate;
+        private String notes;
     }
 
     public BigDecimal getDueAmount() {

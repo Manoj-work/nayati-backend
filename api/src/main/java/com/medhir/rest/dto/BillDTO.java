@@ -35,7 +35,7 @@ public class BillDTO {
     private BigDecimal tdsApplied;
     private BigDecimal finalAmount;
     private BigDecimal totalPaid;
-    private String paymentId;
+    private List<BillPaymentDTO> billPayments; // Multiple payments for this bill
     private List<String> attachmentUrls;
     private BigDecimal dueAmount;
 
@@ -54,5 +54,15 @@ public class BillDTO {
         private BigDecimal gstPercent;
         private BigDecimal gstAmount;
         private BigDecimal totalAmount;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BillPaymentDTO {
+        private String paymentId;
+        private BigDecimal paidAmount;
+        private String paymentDate;
     }
 } 
