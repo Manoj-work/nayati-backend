@@ -102,7 +102,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(
-                List.of("http://localhost:3000", "http://192.168.0.200:3000", "https://manage.medhir.in")); // Allow frontend
+                List.of("http://localhost:3000", "http://localhost:3001", "http://192.168.0.200:3000", "https://manage.medhir.in")); // Allow frontend
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // Allow cookies

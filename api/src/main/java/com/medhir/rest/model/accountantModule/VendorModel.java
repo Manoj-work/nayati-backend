@@ -1,6 +1,7 @@
 package com.medhir.rest.model.accountantModule;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Document(collection = "vendors")
@@ -18,6 +20,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VendorModel {
 
     @Id
@@ -118,10 +121,22 @@ public class VendorModel {
         @NotBlank(message = "UPI ID is required")
         @Email(message = "Invalid UPI ID format")
         private String upiId;
-
-
-
     }
+
+    @Valid
+    @NotEmpty(message = "At least one vendor credit is required")
+    private List<VendorCredit> vendorCredits;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class VendorCredit {
+        private String creditAmount;
+        private String creditDate;
+        private String creditDescription;
+    }
+    private BigDecimal totalCredit;
 }
 
 //    @Valid

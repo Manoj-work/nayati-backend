@@ -5,9 +5,11 @@ import com.medhir.rest.repository.accountantModule.VendorRepository;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
+import com.medhir.rest.dto.accountantModule.VendorCreditUpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -90,5 +92,44 @@ public class VendorService {
         return vendorRepository.findAll().stream()
                 .filter(v -> companyId.equals(v.getCompanyId()))
                 .toList();
+    }
+
+    public VendorModel updateVendorCredits(String vendorId, VendorCreditUpdateRequest request) {
+        VendorModel existingVendor = vendorRepository.findByVendorId(vendorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor with ID " + vendorId + " not found"));
+
+        // Convert DTO to model
+        List<VendorModel.VendorCredit> vendorCredits = null;
+        if (request.getVendorCredits() != null) {
+            vendorCredits = request.getVendorCredits().stream()
+                    .map(dto -> new VendorModel.VendorCredit(
+                            dto.getCreditAmount(),
+                            dto.getCreditDate(),
+                            dto.getCreditDescription()
+                    ))
+                    .toList();
+        }
+
+        // Update vendor credits
+        existingVendor.setVendorCredits(vendorCredits);
+
+        // Calculate total credit if vendor credits are not null
+        if (vendorCredits != null && !vendorCredits.isEmpty()) {
+            BigDecimal totalCredit = vendorCredits.stream()
+                    .map(credit -> {
+                        try {
+                            return new BigDecimal(credit.getCreditAmount());
+                        } catch (NumberFormatException e) {
+                            return BigDecimal.ZERO;
+                        }
+                    })
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            existingVendor.setTotalCredit(totalCredit);
+        } else {
+            // Set total credit to null if vendor credits is null or empty
+            existingVendor.setTotalCredit(null);
+        }
+
+        return vendorRepository.save(existingVendor);
     }
 }
