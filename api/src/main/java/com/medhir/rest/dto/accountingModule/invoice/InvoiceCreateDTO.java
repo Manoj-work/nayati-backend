@@ -64,4 +64,16 @@ public class InvoiceCreateDTO {
 
         private BigDecimal total; // line total provided by frontend
     }
+
+    private List<LinkedReceiptDTO> linkedReceipts;
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LinkedReceiptDTO {
+        private String receiptNumber;
+        private BigDecimal amountAllocated;
+    }
+
 }
