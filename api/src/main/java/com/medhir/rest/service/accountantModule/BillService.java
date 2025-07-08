@@ -14,6 +14,10 @@ import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
+import com.medhir.rest.dto.BillDTO;
+import com.medhir.rest.model.accountantModule.BillModel.BillLineItem;
+import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.accountantModule.VendorModel;
 
 @Service
 @RequiredArgsConstructor
@@ -61,32 +65,20 @@ public class BillService {
         }
         // Update only non-null fields
         if (updatedBill.getCompanyId() != null) existing.setCompanyId(updatedBill.getCompanyId());
-        if (updatedBill.getCompanyName() != null) existing.setCompanyName(updatedBill.getCompanyName());
         if (updatedBill.getVendorId() != null) existing.setVendorId(updatedBill.getVendorId());
-        if (updatedBill.getVendorName() != null) existing.setVendorName(updatedBill.getVendorName());
         if (updatedBill.getGstin() != null) existing.setGstin(updatedBill.getGstin());
-        if (updatedBill.getGstTreatment() != null) existing.setGstTreatment(updatedBill.getGstTreatment());
-        existing.setReverseCharge(updatedBill.isReverseCharge());
+        if (updatedBill.getVendorAddress() != null) existing.setVendorAddress(updatedBill.getVendorAddress());
+        if (updatedBill.getTdsPercentage() != null) existing.setTdsPercentage(updatedBill.getTdsPercentage());
+        if (updatedBill.getBillNumber() != null) existing.setBillNumber(updatedBill.getBillNumber());
         if (updatedBill.getBillReference() != null) existing.setBillReference(updatedBill.getBillReference());
         if (updatedBill.getBillDate() != null) existing.setBillDate(updatedBill.getBillDate());
         if (updatedBill.getDueDate() != null) existing.setDueDate(updatedBill.getDueDate());
-        if (updatedBill.getPlaceOfSupply() != null) existing.setPlaceOfSupply(updatedBill.getPlaceOfSupply());
-        if (updatedBill.getJournal() != null) existing.setJournal(updatedBill.getJournal());
-        if (updatedBill.getCurrency() != null) existing.setCurrency(updatedBill.getCurrency());
         if (updatedBill.getStatus() != null) existing.setStatus(updatedBill.getStatus());
         if (updatedBill.getBillLineItems() != null) existing.setBillLineItems(updatedBill.getBillLineItems());
         if (updatedBill.getTotalBeforeGST() != null) existing.setTotalBeforeGST(updatedBill.getTotalBeforeGST());
         if (updatedBill.getTotalGST() != null) existing.setTotalGST(updatedBill.getTotalGST());
+        if (updatedBill.getTdsApplied() != null) existing.setTdsApplied(updatedBill.getTdsApplied());
         if (updatedBill.getFinalAmount() != null) existing.setFinalAmount(updatedBill.getFinalAmount());
-        if (updatedBill.getPaymentTerms() != null) existing.setPaymentTerms(updatedBill.getPaymentTerms());
-        if (updatedBill.getRecipientBank() != null) existing.setRecipientBank(updatedBill.getRecipientBank());
-        if (updatedBill.getEwayBillNumber() != null) existing.setEwayBillNumber(updatedBill.getEwayBillNumber());
-        if (updatedBill.getTransporter() != null) existing.setTransporter(updatedBill.getTransporter());
-        if (updatedBill.getVehicleNumber() != null) existing.setVehicleNumber(updatedBill.getVehicleNumber());
-        if (updatedBill.getVendorReference() != null) existing.setVendorReference(updatedBill.getVendorReference());
-        if (updatedBill.getShippingAddress() != null) existing.setShippingAddress(updatedBill.getShippingAddress());
-        if (updatedBill.getBillingAddress() != null) existing.setBillingAddress(updatedBill.getBillingAddress());
-        if (updatedBill.getInternalNotes() != null) existing.setInternalNotes(updatedBill.getInternalNotes());
         // Handle attachment upload
         if (attachment != null && !attachment.isEmpty()) {
             String url = minioService.uploadBillAttachment(attachment, existing.getVendorId());
@@ -141,6 +133,68 @@ public class BillService {
             bill.setPaymentStatus(BillModel.PaymentStatus.UN_PAID);
         }
         return billRepository.save(bill);
+    }
+
+    private BillDTO mapToDTO(BillModel bill) {
+        CompanyModel company = companyService.getCompanyById(bill.getCompanyId()).orElse(null);
+        VendorModel vendor = vendorService.getVendorById(bill.getVendorId());
+        return BillDTO.builder()
+                .billId(bill.getBillId())
+                .vendorId(bill.getVendorId())
+                .vendorName(vendor != null ? vendor.getVendorName() : null)
+                .gstin(bill.getGstin())
+                .vendorAddress(bill.getVendorAddress())
+                .tdsPercentage(bill.getTdsPercentage())
+                .billNumber(bill.getBillNumber())
+                .billReference(bill.getBillReference())
+                .billDate(bill.getBillDate())
+                .dueDate(bill.getDueDate())
+                .companyId(bill.getCompanyId())
+                .companyName(company != null ? company.getName() : null)
+                .status(bill.getStatus() != null ? bill.getStatus().name() : null)
+                .paymentStatus(bill.getPaymentStatus() != null ? bill.getPaymentStatus().name() : null)
+                .billLineItems(bill.getBillLineItems() != null ? bill.getBillLineItems().stream().map(this::mapLineItemToDTO).toList() : null)
+                .totalBeforeGST(bill.getTotalBeforeGST())
+                .totalGST(bill.getTotalGST())
+                .tdsApplied(bill.getTdsApplied())
+                .finalAmount(bill.getFinalAmount())
+                .totalPaid(bill.getTotalPaid())
+                .paymentId(bill.getPaymentId())
+                .attachmentUrls(bill.getAttachmentUrls())
+                .dueAmount(bill.getDueAmount())
+                .build();
+    }
+
+    private BillDTO.BillLineItemDTO mapLineItemToDTO(BillLineItem item) {
+        return BillDTO.BillLineItemDTO.builder()
+                .productOrService(item.getProductOrService())
+                .description(item.getDescription())
+                .hsnOrSac(item.getHsnOrSac())
+                .quantity(item.getQuantity())
+                .uom(item.getUom())
+                .rate(item.getRate())
+                .amount(item.getAmount())
+                .gstPercent(item.getGstPercent())
+                .gstAmount(item.getGstAmount())
+                .totalAmount(item.getTotalAmount())
+                .build();
+    }
+
+    public BillDTO getBillDTOById(String billId) {
+        BillModel bill = getBillById(billId);
+        return mapToDTO(bill);
+    }
+
+    public List<BillDTO> getAllBillDTOs() {
+        return getAllBills().stream().map(this::mapToDTO).toList();
+    }
+
+    public List<BillDTO> getBillDTOsByCompanyId(String companyId) {
+        return getBillsByCompanyId(companyId).stream().map(this::mapToDTO).toList();
+    }
+
+    public List<BillDTO> getBillDTOsByVendorId(String vendorId) {
+        return getBillsByVendorId(vendorId).stream().map(this::mapToDTO).toList();
     }
 
 }

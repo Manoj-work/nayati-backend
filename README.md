@@ -37,16 +37,13 @@ cd nayati-main-backend
 #### b. Build and Run Java Services
 From the project root:
 
-```sh
-# On Linux/Mac
-./gradlew api:bootRun                # Start API service
-./gradlew attendance:bootRun         # Start Attendance service
-./gradlew minioService:bootRun       # Start Minio service
+##### On Linux/Mac/Windows
 
-# On Windows
-gradlew api:bootRun
-gradlew attendance:bootRun
-gradlew minioService:bootRun
+```sh
+  ./gradlew api:bootRun                # Start API service
+  ./gradlew attendance:bootRun         # Start Attendance service
+  ./gradlew minioService:bootRun       # Start Minio service
+  ./gradlew facerecog                  # start the python face-recognition-model
 ```
 
 > **Note:** All Gradle commands should be run from the project root using the Gradle Wrapper (`./gradlew` or `gradlew`).
@@ -100,7 +97,6 @@ docker run -p 8090:8090 face-recognition-service
 ## 4. MongoDB Setup
 - Make sure MongoDB is running locally or accessible remotely.
 - Default connection settings may need to be configured in the respective service's configuration files.
-
 ---
 
 

@@ -45,7 +45,6 @@ dependencies {
     implementation(libs.springboot.starter.outh.client)
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-
     testAnnotationProcessor(libs.lombok) // for tests using Lombok
 
     // JWT Dependencies
@@ -56,6 +55,10 @@ dependencies {
     // Lombok
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
+
+    //mapstruct for mapping
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
     // Development Tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")

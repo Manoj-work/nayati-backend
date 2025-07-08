@@ -1,0 +1,50 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.3'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+
+java {
+	sourceCompatibility = '21'
+	targetCompatibility = '21'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+
+repositories {
+	maven {
+		name = "internalReleasesOnline"
+		url = uri("https://repo.home.medhir.in/releases")
+	}
+	maven {
+		name = "internalReleasesOffline"
+		url = uri("http://10.0.3.90:9021/releases")
+		allowInsecureProtocol = true
+	}
+}
+
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+
+	implementation 'io.minio:minio:8.5.7' // MinIO Client Library
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

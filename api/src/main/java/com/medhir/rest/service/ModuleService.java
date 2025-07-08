@@ -85,6 +85,14 @@ public class ModuleService {
                 roles.add("PROJECTMANAGER");
                 employee.setRoles(roles);
             }
+            if (savedModule.getModuleName().toUpperCase().contains("SALE")) {
+                Set<String> roles = employee.getRoles();
+                if (roles == null) {
+                    roles = new HashSet<>();
+                }
+                roles.add("SALES");
+                employee.setRoles(roles);
+            }
             
             employeeRepository.save(employee);
         }
@@ -205,6 +213,9 @@ public class ModuleService {
                 }
                 if (moduleName.contains("PROJECT")) {
                     roles.add("PROJECTMANAGER");
+                }
+                if (moduleName.contains("SALE")) {
+                    roles.add("SALES");
                 }
                 employee.setRoles(roles);
                 employeeRepository.save(employee);
