@@ -54,7 +54,7 @@ public class DepartmentService {
         return departmentRepository.findAll();
     }
 
-    public List<DepartmentModel> getDepartmentsByCompanyId(String companyId) {            //
+    public List<DepartmentModel> getDepartmentsByCompanyId(String companyId) {
         return departmentRepository.findByCompanyId(companyId);
     }
 

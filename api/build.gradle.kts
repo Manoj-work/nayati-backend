@@ -19,16 +19,15 @@ java {
 }
 
 repositories {
-    mavenCentral()
-//    maven {
-//        name = "reposiliteRepositoryReleases"
-//        url = uri("https://repo.home.medhir.in/releases")
-//    }
-//    maven {
-//        name = "reposiliteRepositoryReleases"
-//        url = uri("http://10.0.3.90:9021/releases")
-//        isAllowInsecureProtocol = true
-//    }
+    maven {
+        name = "reposiliteRepositoryReleases"
+        url = uri("https://repo.home.medhir.in/releases")
+    }
+    maven {
+        name = "reposiliteRepositoryReleases"
+        url = uri("http://10.0.3.90:9021/releases")
+        isAllowInsecureProtocol = true
+    }
 
 }
 
@@ -46,14 +45,7 @@ dependencies {
     implementation(libs.springboot.starter.outh.client)
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
-// ✅ Spring Boot built-in test bundle
-//    testImplementation(libs.springboot.starter.test)
 
-// ✅ Explicit Mockito and JUnit in case Spring Boot’s test starter doesn't cover all
-//    testImplementation(libs.junit.api)
-//    testRuntimeOnly(libs.junit.engine)
-//    testImplementation(libs.mockito.core)
-//    testImplementation(libs.mockito.junit)
     testAnnotationProcessor(libs.lombok) // for tests using Lombok
 
     // JWT Dependencies

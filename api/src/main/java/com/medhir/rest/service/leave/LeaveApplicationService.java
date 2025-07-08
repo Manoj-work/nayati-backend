@@ -135,7 +135,7 @@ public class LeaveApplicationService {
         return leaveRepository.save(leave);
     }
 
-    void handleRegularLeaveApproval(LeaveModel leave) {
+   private void handleRegularLeaveApproval(LeaveModel leave) {
         // Calculate the number of days for this leave
         double leaveDays = calculateLeaveDays(leave);
         

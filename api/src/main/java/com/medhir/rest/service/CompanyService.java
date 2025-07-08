@@ -27,7 +27,7 @@ public class CompanyService {
             throw new DuplicateResourceException("Email already exists: " + company.getEmail());
         }
         // Check if phone number already exists
-        else if (companyRepository.findByPhone(company.getPhone()).isPresent()) {
+         if (companyRepository.findByPhone(company.getPhone()).isPresent()) {
             throw new DuplicateResourceException("Phone number already exists: " + company.getPhone());
         }
 
