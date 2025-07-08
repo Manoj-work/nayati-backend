@@ -2,6 +2,7 @@ package com.medhir.rest.controller.accountantModule;
 
 import com.medhir.rest.model.accountantModule.VendorModel;
 import com.medhir.rest.service.accountantModule.VendorService;
+import com.medhir.rest.dto.accountantModule.VendorCreditUpdateRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,6 +50,17 @@ public class VendorController {
         return ResponseEntity.ok(Map.of(
                 "message", "Vendor updated successfully!"
 //                "vendor", updated
+        ));
+    }
+
+    @PutMapping("/{vendorId}/credits")
+    public ResponseEntity<Map<String, Object>> updateVendorCredits(@PathVariable String vendorId,
+                                                                   @Valid @RequestBody VendorCreditUpdateRequest request) {
+        VendorModel updated = vendorService.updateVendorCredits(vendorId, request);
+        return ResponseEntity.ok(Map.of(
+                "message", "Vendor credits updated successfully!",
+                "vendorId", vendorId,
+                "totalCredit", updated.getTotalCredit()
         ));
     }
 }

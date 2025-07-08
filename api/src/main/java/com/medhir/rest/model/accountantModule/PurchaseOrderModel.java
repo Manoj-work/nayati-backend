@@ -15,24 +15,32 @@ import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 
-@Document(collection = "bills")
+@Document(collection = "purchase_orders")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class BillModel {
-
-        @Id
-        @JsonIgnore
-        private String id;
+public class PurchaseOrderModel {
+    @Id
+    @JsonIgnore
+    private String id;
 
     @Indexed(unique = true)
-    private String billId;
+    private String purchaseOrderId;
+
+    @NotBlank(message = "Purchase Order Number is required")
+    private String purchaseOrderNumber;
+
+    @Builder.Default
+    private String currency = "INR";
 
     // Company Info
     @NotBlank(message = "Company ID is required")
     private String companyId;
+
+    @NotBlank(message = "Company Address is required")
+    private String companyAddress;
 
     @NotBlank(message = "Vendor ID is required")
     private String vendorId;
@@ -46,74 +54,20 @@ public class BillModel {
 
     private Double tdsPercentage;
 
-    // private String gstTreatment;
-
-    // private boolean reverseCharge;
-
-    // Bill Details
-    @NotBlank(message = "Bill number is required")
-    private String billNumber;
-
-    @NotBlank(message = "Bill reference (invoice number) is required")
-    private String billReference;
-
-    @NotBlank(message = "Bill date is required")
+    @NotBlank(message = "Purchase Order Date is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String billDate;
+    private String purchaseOrderDate;
 
-    @NotBlank(message = "Due date is required")
+    @NotBlank(message = "Purchase Order Delivery Date is required")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private String dueDate;
-
-    // @NotBlank(message = "Place of supply is required")
-    // private String placeOfSupply;
-
-    // private String journal;
-
-    // private String currency;
+    private String purchaseOrderDeliveryDate;
 
     @Builder.Default
     private Status status = Status.DRAFT;
 
-    @Builder.Default
-    private PaymentStatus paymentStatus = PaymentStatus.UN_PAID;
-
     @Valid
-    @NotEmpty(message = "At least one bill line item is required")
-    private List<BillLineItem> billLineItems;
-
-    @NotNull(message = "Total before GST is required")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Total before GST cannot be negative")
-    private BigDecimal totalBeforeGST;
-
-    @NotNull(message = "Total GST is required")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Total GST cannot be negative")
-    private BigDecimal totalGST;
-
-    private BigDecimal tdsApplied;
-
-    @NotNull(message = "Final amount is required")
-    @DecimalMin(value = "0.0", inclusive = true, message = "Final amount cannot be negative")
-    private BigDecimal finalAmount;
-
-
-
-    @Builder.Default
-    @DecimalMin(value = "0.0", inclusive = true, message = "Total paid cannot be negative")
-    private BigDecimal totalPaid = BigDecimal.ZERO;
-
-    private String paymentId;
-
-    // Other Info
-    // private String paymentTerms;
-    // private String recipientBank;
-    // private String ewayBillNumber;
-    // private String transporter;
-    // private String vehicleNumber;
-    // private String vendorReference;
-    // private String shippingAddress;
-    // private String billingAddress;
-    // private String internalNotes;
+    @NotEmpty(message = "At least one purchase order line item is required")
+    private List<PurchaseOrderLineItem> purchaseOrderLineItems;
 
     private List<String> attachmentUrls;
 
@@ -122,10 +76,9 @@ public class BillModel {
     @NoArgsConstructor
     @AllArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class BillLineItem {
-
-        @NotBlank(message = "Product or service name is required")
-        private String productOrService;
+    public static class PurchaseOrderLineItem {
+        @NotBlank(message = "Item name is required")
+        private String itemName;
 
         private String description;
 
@@ -159,19 +112,27 @@ public class BillModel {
         private BigDecimal totalAmount;
     }
 
-    public BigDecimal getDueAmount() {
-        if (finalAmount == null) return null;
-        return finalAmount.subtract(totalPaid);
-    }
 
-    public static enum PaymentStatus {
-        PAID,
-        UN_PAID,
-        PARTIALLY_PAID
-    }
+
+    @NotNull(message = "Total before GST is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Total before GST cannot be negative")
+    private BigDecimal totalBeforeGST;
+
+    @NotNull(message = "Total GST is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Total GST cannot be negative")
+    private BigDecimal totalGST;
+
+    private BigDecimal tdsApplied;
+
+
+    @NotNull(message = "Final amount is required")
+    @DecimalMin(value = "0.0", inclusive = true, message = "Final amount cannot be negative")
+    private BigDecimal finalAmount;
+
 
     public static enum Status {
         DRAFT,
-        POSTED
+        APPROVED,
+        REJECTED
     }
 }
