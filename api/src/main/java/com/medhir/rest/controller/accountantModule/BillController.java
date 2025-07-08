@@ -71,4 +71,20 @@ public class BillController {
     public ResponseEntity<List<BillDTO>> getBillsByVendorId(@PathVariable String vendorId) {
         return ResponseEntity.ok(billService.getBillDTOsByVendorId(vendorId));
     }
+
+    @GetMapping("/{billId}/payment-history")
+    public ResponseEntity<List<BillDTO.BillPaymentDTO>> getBillPaymentHistory(@PathVariable String billId) {
+        return ResponseEntity.ok(billService.getBillPaymentHistory(billId));
+    }
+
+    @GetMapping("/status/{paymentStatus}")
+    public ResponseEntity<List<BillDTO>> getBillsByPaymentStatus(@PathVariable String paymentStatus) {
+        BillModel.PaymentStatus status;
+        try {
+            status = BillModel.PaymentStatus.valueOf(paymentStatus.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(billService.getBillsByPaymentStatus(status));
+    }
 }
