@@ -25,29 +25,30 @@ public class BillController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> createBill(
             @RequestPart("bill") String billJson,
-            @RequestPart(value = "attachment", required = false) MultipartFile attachment) throws JsonProcessingException {
+            @RequestPart(value = "attachment", required = false) MultipartFile attachment)
+            throws JsonProcessingException {
 
         ObjectMapper mapper = new ObjectMapper();
         BillModel bill = mapper.readValue(billJson, BillModel.class);
 
         BillModel saved = billService.createBill(bill, attachment);
         return ResponseEntity.ok(Map.of(
-                "message", "Bill created successfully"
-        ));
+                "message", "Bill created successfully"));
     }
 
     @PutMapping("/{billId}")
     public ResponseEntity<Map<String, Object>> updateBill(
             @PathVariable String billId,
             @RequestPart("bill") @Valid String billJson,
-            @RequestPart(value = "attachment", required = false) MultipartFile attachment) throws JsonProcessingException {
-       ObjectMapper mapper = new ObjectMapper();
-       BillModel bill = mapper.readValue(billJson, BillModel.class);
+            @RequestPart(value = "attachment", required = false) MultipartFile attachment)
+            throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        BillModel bill = mapper.readValue(billJson, BillModel.class);
 
         BillModel updated = billService.updateBill(billId, bill, attachment);
         return ResponseEntity.ok(Map.of(
                 "message", "Bill updated successfully"
-//                "bill", updated
+        // "bill", updated
         ));
     }
 
