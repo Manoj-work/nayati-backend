@@ -3,9 +3,11 @@ package com.medhir.rest.model.accountantModule;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -19,10 +21,12 @@ public class Invoice {
     @Id
     private String id;
 
+    @Indexed(unique = true)
+    private String invoiceNumber;
+
+    @Indexed
     private String projectId;      // Reference to the Project
     private String customerId;     // Reference to the Customer
-
-    private String invoiceNumber;
 
     private String invoiceDate;
     private String dueDate;
@@ -34,6 +38,17 @@ public class Invoice {
     private BigDecimal totalAmount;
     private BigDecimal amountReceived;
     private Status status = Status.PENDING;
+    @Builder.Default
+    private List<LinkedReceipt> linkedReceipts = new ArrayList<>();
+
+    @Data
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LinkedReceipt {
+        private String receiptNumber;
+        private BigDecimal amountAllocated;
+    }
 
     public BigDecimal getAmountRemaining() {
         // If amountReceived is null → treat it as ZERO
@@ -60,6 +75,5 @@ public class Invoice {
     public static enum Status {
         PENDING, PAID,PARTIALLYPAID
     }
-
 
 }

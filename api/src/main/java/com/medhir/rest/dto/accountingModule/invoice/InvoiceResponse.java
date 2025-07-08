@@ -63,4 +63,12 @@ public class InvoiceResponse {
         private BigDecimal gstPercentage;
         private BigDecimal total;
     }
+    private List<LinkedReceiptInfo> linkedReceipts;
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class LinkedReceiptInfo {
+        private String receiptNumber;
+        private BigDecimal amountAllocated;
+    }
 }
