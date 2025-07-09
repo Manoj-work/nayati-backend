@@ -1,4 +1,4 @@
-package com.medhir.rest.dto.accountingModule.expense;
+package com.medhir.rest.dto.accountantModule.expense;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

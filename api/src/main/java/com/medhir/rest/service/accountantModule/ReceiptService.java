@@ -1,7 +1,8 @@
 package com.medhir.rest.service.accountantModule;
 
-import com.medhir.rest.dto.accountingModule.receipt.ReceiptCreateDTO;
-import com.medhir.rest.dto.accountingModule.receipt.ReceiptResponse;
+import com.medhir.rest.dto.accountantModule.receipt.ReceiptCreateDTO;
+import com.medhir.rest.dto.accountantModule.receipt.ReceiptResponse;
+import com.medhir.rest.dto.accountantModule.receipt.UnallocatedReceiptsResponse;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.mapper.accountantModule.ReceiptMapper;
@@ -260,10 +261,10 @@ public class ReceiptService {
         }).collect(Collectors.toList());
     }
 
-    public List<ReceiptResponse> getUnallocatedReceipts(String projectId) {
+    public UnallocatedReceiptsResponse getUnallocatedReceipts(String projectId) {
         List<Receipt> receipts = receiptRepository.findAllByProjectId(projectId);
 
-        return receipts.stream()
+        List<ReceiptResponse> unallocatedReceipts = receipts.stream()
                 .filter(r -> r.getAmountReceived().subtract(
                         r.getAllocatedAmount() != null ? r.getAllocatedAmount() : BigDecimal.ZERO
                 ).compareTo(BigDecimal.ZERO) > 0)
@@ -271,16 +272,22 @@ public class ReceiptService {
                     BigDecimal allocated = r.getAllocatedAmount() != null ? r.getAllocatedAmount() : BigDecimal.ZERO;
                     return new ReceiptResponse(
                             r.getId(),
-                            null,  // or ProjectInfo if you want
-                            null,  // or CustomerInfo if you want
+                            null,  // ProjectInfo if you want
+                            null,  // CustomerInfo if you want
                             r.getReceiptNumber(),
                             r.getReceiptDate(),
                             r.getAmountReceived(),
                             allocated,
                             r.getAmountReceived().subtract(allocated),
-                            List.of() // skip linkedInvoices here
+                            List.of()  // linkedInvoices if needed
                     );
-                }).collect(Collectors.toList());
+                }).toList();
+
+        BigDecimal totalUnallocated = unallocatedReceipts.stream()
+                .map(ReceiptResponse::getUnallocatedAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new UnallocatedReceiptsResponse(unallocatedReceipts, totalUnallocated);
     }
 
 

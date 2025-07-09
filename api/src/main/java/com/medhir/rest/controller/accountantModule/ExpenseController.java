@@ -2,9 +2,9 @@ package com.medhir.rest.controller.accountantModule;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.medhir.rest.dto.accountingModule.expense.CreateExpenseRequest;
-import com.medhir.rest.dto.accountingModule.expense.ExpenseResponse;
-import com.medhir.rest.dto.accountingModule.expense.UpdateExpenseRequest;
+import com.medhir.rest.dto.accountantModule.expense.CreateExpenseRequest;
+import com.medhir.rest.dto.accountantModule.expense.ExpenseResponse;
+import com.medhir.rest.dto.accountantModule.expense.UpdateExpenseRequest;
 import com.medhir.rest.model.accountantModule.Expense;
 import com.medhir.rest.service.accountantModule.ExpenseService;
 import jakarta.validation.Valid;

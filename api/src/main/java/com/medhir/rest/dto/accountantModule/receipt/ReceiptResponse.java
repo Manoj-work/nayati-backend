@@ -1,4 +1,4 @@
-package com.medhir.rest.dto.accountingModule.receipt;
+package com.medhir.rest.dto.accountantModule.receipt;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;

@@ -1,4 +1,4 @@
-package com.medhir.rest.dto.accountingModule.receipt;
+package com.medhir.rest.dto.accountantModule.receipt;
 
 import lombok.*;
 import jakarta.validation.constraints.*;
