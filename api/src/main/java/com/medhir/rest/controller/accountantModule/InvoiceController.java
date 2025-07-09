@@ -1,7 +1,7 @@
 package com.medhir.rest.controller.accountantModule;
 
-import com.medhir.rest.dto.accountingModule.invoice.InvoiceCreateDTO;
-import com.medhir.rest.dto.accountingModule.invoice.InvoiceResponse;
+import com.medhir.rest.dto.accountantModule.invoice.InvoiceCreateDTO;
+import com.medhir.rest.dto.accountantModule.invoice.InvoiceResponse;
 import com.medhir.rest.model.accountantModule.Invoice;
 import com.medhir.rest.service.accountantModule.InvoiceService;
 import jakarta.validation.Valid;

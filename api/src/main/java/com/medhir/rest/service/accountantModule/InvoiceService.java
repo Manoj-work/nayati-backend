@@ -1,7 +1,7 @@
 package com.medhir.rest.service.accountantModule;
 
-import com.medhir.rest.dto.accountingModule.invoice.InvoiceCreateDTO;
-import com.medhir.rest.dto.accountingModule.invoice.InvoiceResponse;
+import com.medhir.rest.dto.accountantModule.invoice.InvoiceCreateDTO;
+import com.medhir.rest.dto.accountantModule.invoice.InvoiceResponse;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.mapper.accountantModule.InvoiceMapper;

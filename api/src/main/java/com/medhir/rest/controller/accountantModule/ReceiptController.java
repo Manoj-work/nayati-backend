@@ -1,7 +1,8 @@
 package com.medhir.rest.controller.accountantModule;
 
-import com.medhir.rest.dto.accountingModule.receipt.ReceiptCreateDTO;
-import com.medhir.rest.dto.accountingModule.receipt.ReceiptResponse;
+import com.medhir.rest.dto.accountantModule.receipt.ReceiptCreateDTO;
+import com.medhir.rest.dto.accountantModule.receipt.ReceiptResponse;
+import com.medhir.rest.dto.accountantModule.receipt.UnallocatedReceiptsResponse;
 import com.medhir.rest.model.accountantModule.Receipt;
 import com.medhir.rest.service.accountantModule.ReceiptService;
 import jakarta.validation.Valid;
@@ -46,7 +47,7 @@ public class ReceiptController {
         return ResponseEntity.ok(receiptService.getReceiptsByProjectId(projectId));
     }
     @GetMapping("/unallocated/project/{projectId}")
-    public ResponseEntity<List<ReceiptResponse>> getUnallocatedReceipts(@PathVariable String projectId){
+    public ResponseEntity<UnallocatedReceiptsResponse> getUnallocatedReceipts(@PathVariable String projectId) {
         return ResponseEntity.ok(receiptService.getUnallocatedReceipts(projectId));
     }
 

@@ -1,6 +1,6 @@
 package com.medhir.rest.mapper.accountantModule;
 
-import com.medhir.rest.dto.accountingModule.invoice.InvoiceCreateDTO;
+import com.medhir.rest.dto.accountantModule.invoice.InvoiceCreateDTO;
 import com.medhir.rest.model.accountantModule.Invoice;
 import org.mapstruct.*;
 
