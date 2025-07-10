@@ -2,6 +2,7 @@ package com.medhir.rest.controller.accountantModule;
 
 import com.medhir.rest.model.accountantModule.PaymentModel;
 import com.medhir.rest.service.accountantModule.PaymentService;
+import com.medhir.rest.service.accountantModule.VendorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
+import com.medhir.rest.dto.PaymentDTO;
 
 import java.util.List;
 
@@ -18,6 +20,9 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private VendorService vendorService;
 
     @GetMapping("/{paymentId}")
     public ResponseEntity<PaymentModel> getPaymentByPaymentId(@PathVariable String paymentId) {
@@ -34,14 +39,20 @@ public class PaymentController {
         PaymentModel saved = paymentService.createPayment(payment, paymentProof);
         return ResponseEntity.ok(java.util.Map.of(
             "message", "Payment created successfully",
-            "paymentId", saved.getPaymentId(),
-            "paymentProofUrl", saved.getPaymentProofUrl()
+            "paymentId", saved.getPaymentId()
+            // "paymentProofUrl", saved.getPaymentProofUrl()
         ));
     }
 
+    @GetMapping("/vendor-credit/{vendorId}")
+    public ResponseEntity<VendorService.VendorCreditInfo> getVendorCreditInfo(@PathVariable String vendorId) {
+        VendorService.VendorCreditInfo creditInfo = vendorService.getVendorCreditInfo(vendorId);
+        return ResponseEntity.ok(creditInfo);
+    }
+
     @GetMapping
-    public ResponseEntity<List<PaymentModel>> getAllPayments(){
-        List<PaymentModel> paymentList =  paymentService.getAllPayments();
+    public ResponseEntity<List<PaymentDTO>> getAllPayments(){
+        List<PaymentDTO> paymentList =  paymentService.getAllPaymentDTOs();
         return ResponseEntity.ok(paymentList);
     }
 } 

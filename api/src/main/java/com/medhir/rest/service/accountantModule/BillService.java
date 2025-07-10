@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Collections;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
@@ -65,32 +66,20 @@ public class BillService {
         }
         // Update only non-null fields
         if (updatedBill.getCompanyId() != null) existing.setCompanyId(updatedBill.getCompanyId());
-//        if (updatedBill.getCompanyName() != null) existing.setCompanyName(updatedBill.getCompanyName());
         if (updatedBill.getVendorId() != null) existing.setVendorId(updatedBill.getVendorId());
-//        if (updatedBill.getVendorName() != null) existing.setVendorName(updatedBill.getVendorName());
         if (updatedBill.getGstin() != null) existing.setGstin(updatedBill.getGstin());
-        if (updatedBill.getGstTreatment() != null) existing.setGstTreatment(updatedBill.getGstTreatment());
-        existing.setReverseCharge(updatedBill.isReverseCharge());
+        if (updatedBill.getVendorAddress() != null) existing.setVendorAddress(updatedBill.getVendorAddress());
+        if (updatedBill.getTdsPercentage() != null) existing.setTdsPercentage(updatedBill.getTdsPercentage());
+        if (updatedBill.getBillNumber() != null) existing.setBillNumber(updatedBill.getBillNumber());
         if (updatedBill.getBillReference() != null) existing.setBillReference(updatedBill.getBillReference());
         if (updatedBill.getBillDate() != null) existing.setBillDate(updatedBill.getBillDate());
         if (updatedBill.getDueDate() != null) existing.setDueDate(updatedBill.getDueDate());
-        if (updatedBill.getPlaceOfSupply() != null) existing.setPlaceOfSupply(updatedBill.getPlaceOfSupply());
-        if (updatedBill.getJournal() != null) existing.setJournal(updatedBill.getJournal());
-        if (updatedBill.getCurrency() != null) existing.setCurrency(updatedBill.getCurrency());
         if (updatedBill.getStatus() != null) existing.setStatus(updatedBill.getStatus());
         if (updatedBill.getBillLineItems() != null) existing.setBillLineItems(updatedBill.getBillLineItems());
         if (updatedBill.getTotalBeforeGST() != null) existing.setTotalBeforeGST(updatedBill.getTotalBeforeGST());
         if (updatedBill.getTotalGST() != null) existing.setTotalGST(updatedBill.getTotalGST());
+        if (updatedBill.getTdsApplied() != null) existing.setTdsApplied(updatedBill.getTdsApplied());
         if (updatedBill.getFinalAmount() != null) existing.setFinalAmount(updatedBill.getFinalAmount());
-        if (updatedBill.getPaymentTerms() != null) existing.setPaymentTerms(updatedBill.getPaymentTerms());
-        if (updatedBill.getRecipientBank() != null) existing.setRecipientBank(updatedBill.getRecipientBank());
-        if (updatedBill.getEwayBillNumber() != null) existing.setEwayBillNumber(updatedBill.getEwayBillNumber());
-        if (updatedBill.getTransporter() != null) existing.setTransporter(updatedBill.getTransporter());
-        if (updatedBill.getVehicleNumber() != null) existing.setVehicleNumber(updatedBill.getVehicleNumber());
-        if (updatedBill.getVendorReference() != null) existing.setVendorReference(updatedBill.getVendorReference());
-        if (updatedBill.getShippingAddress() != null) existing.setShippingAddress(updatedBill.getShippingAddress());
-        if (updatedBill.getBillingAddress() != null) existing.setBillingAddress(updatedBill.getBillingAddress());
-        if (updatedBill.getInternalNotes() != null) existing.setInternalNotes(updatedBill.getInternalNotes());
         // Handle attachment upload
         if (attachment != null && !attachment.isEmpty()) {
             String url = minioService.uploadBillAttachment(attachment, existing.getVendorId());
@@ -125,25 +114,53 @@ public class BillService {
 
     /**
      * Updates the payment details (totalPaid, paymentStatus, and paymentId) of a bill.
+     * Supports multiple payments and calculates proper payment status.
      * @param billId The bill's unique ID
-     * @param paidAmount The new paid amount to set
+     * @param paidAmount The new paid amount to add
      * @param paymentId The payment's unique ID to link
      */
     public BillModel updateBillPaymentDetails(String billId, BigDecimal paidAmount, String paymentId) {
         BillModel bill = billRepository.findByBillId(billId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bill not found with id : " + billId));
+        
         BigDecimal finalAmount = bill.getFinalAmount();
-        if (paidAmount == null) paidAmount = BigDecimal.ZERO;
         if (finalAmount == null) finalAmount = BigDecimal.ZERO;
-        bill.setTotalPaid(paidAmount);
-        bill.setPaymentId(paymentId);
-        if (paidAmount.compareTo(finalAmount) >= 0) {
+        if (paidAmount == null) paidAmount = BigDecimal.ZERO;
+        
+        // Get existing bill payments or create new list
+        List<BillModel.BillPayment> existingPayments = bill.getBillPayments();
+        if (existingPayments == null) {
+            existingPayments = new ArrayList<>();
+        }
+        
+        // Create new payment entry
+        BillModel.BillPayment newPayment = new BillModel.BillPayment();
+        newPayment.setPaymentId(paymentId);
+        newPayment.setPaidAmount(paidAmount);
+        newPayment.setPaymentDate(java.time.LocalDate.now().toString());
+        newPayment.setNotes("Payment processed");
+        
+        // Add new payment to list
+        existingPayments.add(newPayment);
+        bill.setBillPayments(existingPayments);
+        
+        // Calculate total paid from all payments
+        BigDecimal totalPaid = existingPayments.stream()
+                .map(payment -> payment.getPaidAmount() != null ? payment.getPaidAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        bill.setTotalPaid(totalPaid);
+        // bill.setPaymentId(paymentId); // Keep latest payment ID for backward compatibility
+        
+        // Calculate payment status based on total paid vs final amount
+        if (totalPaid.compareTo(finalAmount) >= 0) {
             bill.setPaymentStatus(BillModel.PaymentStatus.PAID);
-        } else if (paidAmount.compareTo(BigDecimal.ZERO) > 0) {
+        } else if (totalPaid.compareTo(BigDecimal.ZERO) > 0) {
             bill.setPaymentStatus(BillModel.PaymentStatus.PARTIALLY_PAID);
         } else {
             bill.setPaymentStatus(BillModel.PaymentStatus.UN_PAID);
         }
+        
         return billRepository.save(bill);
     }
 
@@ -155,49 +172,48 @@ public class BillService {
                 .vendorId(bill.getVendorId())
                 .vendorName(vendor != null ? vendor.getVendorName() : null)
                 .gstin(bill.getGstin())
-                .gstTreatment(bill.getGstTreatment())
-                .reverseCharge(bill.isReverseCharge())
+                .vendorAddress(bill.getVendorAddress())
+                .tdsPercentage(bill.getTdsPercentage())
+                .billNumber(bill.getBillNumber())
                 .billReference(bill.getBillReference())
                 .billDate(bill.getBillDate())
                 .dueDate(bill.getDueDate())
-                .placeOfSupply(bill.getPlaceOfSupply())
                 .companyId(bill.getCompanyId())
                 .companyName(company != null ? company.getName() : null)
-                .journal(bill.getJournal())
-                .currency(bill.getCurrency())
                 .status(bill.getStatus() != null ? bill.getStatus().name() : null)
                 .paymentStatus(bill.getPaymentStatus() != null ? bill.getPaymentStatus().name() : null)
                 .billLineItems(bill.getBillLineItems() != null ? bill.getBillLineItems().stream().map(this::mapLineItemToDTO).toList() : null)
                 .totalBeforeGST(bill.getTotalBeforeGST())
                 .totalGST(bill.getTotalGST())
+                .tdsApplied(bill.getTdsApplied())
                 .finalAmount(bill.getFinalAmount())
                 .totalPaid(bill.getTotalPaid())
-                .paymentId(bill.getPaymentId())
-                .paymentTerms(bill.getPaymentTerms())
-                .recipientBank(bill.getRecipientBank())
-                .ewayBillNumber(bill.getEwayBillNumber())
-                .transporter(bill.getTransporter())
-                .vehicleNumber(bill.getVehicleNumber())
-                .vendorReference(bill.getVendorReference())
-                .shippingAddress(bill.getShippingAddress())
-                .billingAddress(bill.getBillingAddress())
-                .internalNotes(bill.getInternalNotes())
+                .billPayments(bill.getBillPayments() != null ? bill.getBillPayments().stream().map(this::mapBillPaymentToDTO).toList() : null)
                 .attachmentUrls(bill.getAttachmentUrls())
                 .dueAmount(bill.getDueAmount())
+                .build();
+    }
+
+    private BillDTO.BillPaymentDTO mapBillPaymentToDTO(BillModel.BillPayment billPayment) {
+        return BillDTO.BillPaymentDTO.builder()
+                .paymentId(billPayment.getPaymentId())
+                .paidAmount(billPayment.getPaidAmount())
+                .paymentDate(billPayment.getPaymentDate())
                 .build();
     }
 
     private BillDTO.BillLineItemDTO mapLineItemToDTO(BillLineItem item) {
         return BillDTO.BillLineItemDTO.builder()
                 .productOrService(item.getProductOrService())
-                .hsnOrSac(item.getHsnOrSac())
                 .description(item.getDescription())
+                .hsnOrSac(item.getHsnOrSac())
                 .quantity(item.getQuantity())
                 .uom(item.getUom())
                 .rate(item.getRate())
-                .gstPercent(item.getGstPercent())
-                .discountPercent(item.getDiscountPercent())
                 .amount(item.getAmount())
+                .gstPercent(item.getGstPercent())
+                .gstAmount(item.getGstAmount())
+                .totalAmount(item.getTotalAmount())
                 .build();
     }
 
@@ -216,6 +232,33 @@ public class BillService {
 
     public List<BillDTO> getBillDTOsByVendorId(String vendorId) {
         return getBillsByVendorId(vendorId).stream().map(this::mapToDTO).toList();
+    }
+
+    /**
+     * Gets the payment history for a specific bill
+     * @param billId The bill's unique ID
+     * @return List of payment details for the bill
+     */
+    public List<BillDTO.BillPaymentDTO> getBillPaymentHistory(String billId) {
+        BillModel bill = getBillById(billId);
+        if (bill.getBillPayments() == null) {
+            return new ArrayList<>();
+        }
+        return bill.getBillPayments().stream()
+                .map(this::mapBillPaymentToDTO)
+                .toList();
+    }
+
+    /**
+     * Gets bills by payment status
+     * @param paymentStatus The payment status to filter by
+     * @return List of bills with the specified payment status
+     */
+    public List<BillDTO> getBillsByPaymentStatus(BillModel.PaymentStatus paymentStatus) {
+        return getAllBills().stream()
+                .filter(bill -> bill.getPaymentStatus() == paymentStatus)
+                .map(this::mapToDTO)
+                .toList();
     }
 
 }
