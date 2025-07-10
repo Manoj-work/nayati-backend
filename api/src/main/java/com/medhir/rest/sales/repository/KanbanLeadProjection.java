@@ -8,4 +8,5 @@ public interface KanbanLeadProjection {
     String getPriority();
     String getDateOfCreation();
     String getStageId();
+    String getBudget();
 } 
