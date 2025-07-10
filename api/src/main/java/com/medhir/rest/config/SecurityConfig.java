@@ -46,6 +46,8 @@ public class SecurityConfig {
                                 "/employee/id/*",
                                 "/employee/update-request",
                                 "/payslip/generate/**",
+                                "/leads/**",
+                                "/pipeline-stages/**",
                                 "/api/attendance/upload",
                                 "/employee/**"
                         ).permitAll()
@@ -102,7 +104,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(
                 List.of("http://localhost:3000", "http://localhost:3001", "http://192.168.0.200:3000", "https://manage.medhir.in")); // Allow frontend
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // Allow cookies
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
