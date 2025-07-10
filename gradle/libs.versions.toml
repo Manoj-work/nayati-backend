@@ -16,7 +16,6 @@ jwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version = "0.11.5" }
 lombok = { module = "org.projectlombok:lombok", version = "1.18.30" }
 
 
-
 [bundles]
 
 
