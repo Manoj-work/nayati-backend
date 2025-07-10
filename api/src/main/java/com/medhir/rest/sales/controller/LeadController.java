@@ -1,22 +1,19 @@
 package com.medhir.rest.sales.controller;
-import com.medhir.rest.sales.dto.lead.LeadRequestDTO;
+import com.medhir.rest.sales.dto.lead.*;
 import com.medhir.rest.sales.dto.activity.ActivityLogRequestDTO;
-import com.medhir.rest.sales.dto.lead.ConvertLeadRequestDTO;
-import com.medhir.rest.sales.dto.lead.LeadConversionResponseDTO;
-import com.medhir.rest.sales.dto.lead.LeadAssignmentRequestDTO;
 
 import com.medhir.rest.sales.service.LeadService;
 import com.medhir.rest.sales.dto.activity.ActivityDTO;
 import com.medhir.rest.sales.dto.activity.NoteDTO;
 import com.medhir.rest.sales.dto.activity.ActivityLogDTO;
 import org.springframework.web.multipart.MultipartFile;
-import com.medhir.rest.sales.dto.lead.LeadResponseDTO;
 import com.medhir.rest.sales.mapper.LeadMapper;
 import com.medhir.rest.sales.service.PipelineStageService;
 import com.medhir.rest.service.EmployeeService;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.sales.model.LeadModel;
 import com.medhir.rest.sales.model.Activity;
+import com.medhir.rest.sales.repository.KanbanLeadProjection;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +58,7 @@ public class LeadController {
     // 🔍 Manager/Admin Lead Operations (sees all leads)
     @GetMapping
     public List<LeadResponseDTO> getAllLeadsForManager(@RequestParam(value = "stageId", required = false) String stageId,
-                                                 @RequestParam(value = "employeeId", required = false) String employeeId) {
+                                                                       @RequestParam(value = "employeeId", required = false) String employeeId) {
         return leadService.getLeadsWithFilters(stageId, employeeId).stream()
             .map(lead -> LeadMapper.mapToResponseDTO(lead, pipelineStageService, employeeService))
             .toList();
@@ -335,5 +332,10 @@ public class LeadController {
             leadService.addActivitiesBulkWithFiles(leadId, activities, files, "Public User"),
             pipelineStageService, employeeService
         );
+    }
+
+    @GetMapping("/kanban-cards")
+    public List<LeadService.KanbanStageGroupDTO> getKanbanLeads() {
+        return leadService.getKanbanLeadsForBoard();
     }
 }

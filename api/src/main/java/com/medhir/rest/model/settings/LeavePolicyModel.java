@@ -35,6 +35,8 @@ public class LeavePolicyModel {
     private String updatedAt;
 
 
+
+
     @Data
     public static class LeaveAllocation {
         @NotBlank(message = "Leave type ID is required")

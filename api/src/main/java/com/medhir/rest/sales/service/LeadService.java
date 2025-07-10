@@ -5,6 +5,7 @@ import com.medhir.rest.sales.model.Activity;
 import com.medhir.rest.sales.model.ActivityLog;
 import com.medhir.rest.sales.model.Note;
 import com.medhir.rest.sales.repository.LeadRepository;
+import com.medhir.rest.sales.repository.KanbanLeadProjection;
 import com.medhir.rest.sales.dto.lead.ConvertLeadRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadAssignmentRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadRequestDTO;
@@ -17,6 +18,8 @@ import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.service.EmployeeService;
 import com.medhir.rest.sales.mapper.LeadMapper;
+import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.model.EmployeeModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -44,6 +47,9 @@ public class LeadService {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     // 🔍 Fetch all leads
     public List<LeadModel> getAllLeads() {
@@ -951,5 +957,68 @@ public class LeadService {
         response.setConversionTimestamp(java.time.LocalDateTime.now().toString());
         response.setConvertedBy(user);
         return response;
+    }
+
+    public static class KanbanLeadDTO {
+        private String leadId;
+        private String name;
+        private String salesRep;
+        private String designer;
+        private String priority;
+        private String dateOfCreation;
+        // getters and setters
+        public String getLeadId() { return leadId; }
+        public void setLeadId(String leadId) { this.leadId = leadId; }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getSalesRep() { return salesRep; }
+        public void setSalesRep(String salesRep) { this.salesRep = salesRep; }
+        public String getDesigner() { return designer; }
+        public void setDesigner(String designer) { this.designer = designer; }
+        public String getPriority() { return priority; }
+        public void setPriority(String priority) { this.priority = priority; }
+        public String getDateOfCreation() { return dateOfCreation; }
+        public void setDateOfCreation(String dateOfCreation) { this.dateOfCreation = dateOfCreation; }
+    }
+
+    public static class KanbanStageGroupDTO {
+        private String stageId;
+        private List<KanbanLeadDTO> leads;
+        public KanbanStageGroupDTO(String stageId, List<KanbanLeadDTO> leads) {
+            this.stageId = stageId;
+            this.leads = leads;
+        }
+        public String getStageId() { return stageId; }
+        public void setStageId(String stageId) { this.stageId = stageId; }
+        public List<KanbanLeadDTO> getLeads() { return leads; }
+        public void setLeads(List<KanbanLeadDTO> leads) { this.leads = leads; }
+    }
+
+    public List<KanbanStageGroupDTO> getKanbanLeadsForBoard() {
+        List<KanbanLeadProjection> projections = leadRepository.findAllBy(KanbanLeadProjection.class);
+        // Map to DTOs, but do not include stageId in the lead object
+        List<KanbanLeadDTO> dtos = projections.stream().map(p -> {
+            KanbanLeadDTO dto = new KanbanLeadDTO();
+            dto.setLeadId(p.getLeadId());
+            dto.setName(p.getName());
+            dto.setSalesRep(p.getSalesRep());
+            dto.setDesigner(p.getDesigner());
+            dto.setPriority(p.getPriority());
+            dto.setDateOfCreation(p.getDateOfCreation());
+            return dto;
+        }).collect(Collectors.toList());
+        // Group by stageId
+        return projections.stream()
+            .map(KanbanLeadProjection::getStageId)
+            .distinct()
+            .map(stageId -> new KanbanStageGroupDTO(stageId,
+                dtos.stream()
+                    .filter(dto -> projections.stream()
+                        .filter(p -> p.getLeadId().equals(dto.getLeadId()))
+                        .findFirst().map(KanbanLeadProjection::getStageId).orElse(null)
+                        .equals(stageId))
+                    .collect(Collectors.toList())
+            ))
+            .collect(Collectors.toList());
     }
 }

@@ -37,22 +37,14 @@ cd nayati-main-backend
 #### b. Build and Run Java Services
 From the project root:
 
-##### On Linux/Mac
+##### On Linux/Mac/Windows
 
 ```sh
   ./gradlew api:bootRun                # Start API service
   ./gradlew attendance:bootRun         # Start Attendance service
   ./gradlew minioService:bootRun       # Start Minio service
-  ./gradlew runFaceRecognitionService  # start the python face-recognition-model
+  ./gradlew facerecog                  # start the python face-recognition-model
 ```
-##### On Windows
-
-```sh
-  gradlew api:bootRun
-  gradlew attendance:bootRun
-  gradlew minioService:bootRun
-  gradlew runFaceRecognitionService
-  ```
 
 > **Note:** All Gradle commands should be run from the project root using the Gradle Wrapper (`./gradlew` or `gradlew`).
 

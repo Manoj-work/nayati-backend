@@ -38,7 +38,7 @@ public class IncomeService {
             }
 
             income.setGeneratedId(generatedId);
-//             income.setIncomeId("INC" + snowflakeIdGenerator.nextId());
+             income.setIncomeId("INC" + snowflakeIdGenerator.nextId());
 
             income.generateIncomeId();
             return incomeRepository.save(income);

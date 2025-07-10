@@ -35,8 +35,11 @@ public class LeadModel {
     private String leadSource;
     private String notes;
     private String stageId;
+    @Indexed
     private String priority;
+    @Indexed
     private String salesRep;
+    @Indexed
     private String designer;
     private String quotedAmount;
     private String finalQuotation;
@@ -58,6 +61,7 @@ public class LeadModel {
 
     private String assignedSalesRep;
     private String assignedDesigner;
+    @Indexed
     private String dateOfCreation;
 
     private List<Activity> activities = new ArrayList<>();

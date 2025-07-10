@@ -19,33 +19,23 @@ public class BillDTO {
     private String vendorId;
     private String vendorName;
     private String gstin;
-    private String gstTreatment;
-    private boolean reverseCharge;
+    private String vendorAddress;
+    private Double tdsPercentage;
+    private String billNumber;
     private String billReference;
     private String billDate;
     private String dueDate;
-    private String placeOfSupply;
     private String companyId;
     private String companyName;
-    private String journal;
-    private String currency;
     private String status;
     private String paymentStatus;
     private List<BillLineItemDTO> billLineItems;
     private BigDecimal totalBeforeGST;
     private BigDecimal totalGST;
+    private BigDecimal tdsApplied;
     private BigDecimal finalAmount;
     private BigDecimal totalPaid;
-    private String paymentId;
-    private String paymentTerms;
-    private String recipientBank;
-    private String ewayBillNumber;
-    private String transporter;
-    private String vehicleNumber;
-    private String vendorReference;
-    private String shippingAddress;
-    private String billingAddress;
-    private String internalNotes;
+    private List<BillPaymentDTO> billPayments; // Multiple payments for this bill
     private List<String> attachmentUrls;
     private BigDecimal dueAmount;
 
@@ -55,13 +45,24 @@ public class BillDTO {
     @Builder
     public static class BillLineItemDTO {
         private String productOrService;
-        private String hsnOrSac;
         private String description;
+        private String hsnOrSac;
         private int quantity;
         private String uom;
         private BigDecimal rate;
-        private BigDecimal gstPercent;
-        private BigDecimal discountPercent;
         private BigDecimal amount;
+        private BigDecimal gstPercent;
+        private BigDecimal gstAmount;
+        private BigDecimal totalAmount;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class BillPaymentDTO {
+        private String paymentId;
+        private BigDecimal paidAmount;
+        private String paymentDate;
     }
 } 

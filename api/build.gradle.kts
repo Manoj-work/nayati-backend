@@ -27,8 +27,8 @@ repositories {
         name = "reposiliteRepositoryReleases"
         url = uri("http://10.0.3.90:9021/releases")
         isAllowInsecureProtocol = true
-    }
 
+    }
 }
 
 dependencies {
@@ -45,6 +45,7 @@ dependencies {
     implementation(libs.springboot.starter.outh.client)
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 
+    testAnnotationProcessor(libs.lombok) // for tests using Lombok
 
     // JWT Dependencies
     implementation(libs.jwt.api)
@@ -55,16 +56,16 @@ dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
-    // MapStruct
-    implementation(libs.mapstruct)
-    annotationProcessor(libs.mapstruct.processor)
-
+    //mapstruct for mapping
+    implementation("org.mapstruct:mapstruct:1.5.5.Final")
+    annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
 
     // Development Tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Testing
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
 }
 
 tasks.named<Test>("test") {

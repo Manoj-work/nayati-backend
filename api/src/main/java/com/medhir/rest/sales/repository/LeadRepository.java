@@ -1,6 +1,7 @@
 package com.medhir.rest.sales.repository;
 
 import com.medhir.rest.sales.model.LeadModel;
+import com.medhir.rest.sales.repository.KanbanLeadProjection;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,4 +23,6 @@ public interface LeadRepository extends MongoRepository<LeadModel, String> {
 
     // Find by custom Snowflake leadId
     Optional<LeadModel> findByLeadId(String leadId);
+
+    List<KanbanLeadProjection> findAllBy(Class<KanbanLeadProjection> type);
 }
