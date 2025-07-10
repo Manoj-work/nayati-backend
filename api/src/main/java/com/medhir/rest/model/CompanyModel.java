@@ -50,4 +50,6 @@ public class CompanyModel {
 
     private String colorCode="#FFFFFF";
 
+//    private List<ModulePermission> assignedModules; // Which modules, features, sub-features are enabled for this company
+
 }

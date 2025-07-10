@@ -1,0 +1,52 @@
+{
+  "modules": [
+    {
+      "name": "Accountant",
+      "features": [
+        {
+          "name": "Customers",
+          "subFeatures": [
+            {
+              "name": "Invoices",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "name": "Receipts",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        },
+        {
+          "name": "Vendors",
+          "subFeatures": [
+            {
+              "name": "Bills",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "name": "PurchaseOrders",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "name": "Payments",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "name": "VendorList",
+              "actions": ["READ"]
+            }
+          ]
+        },
+        {
+          "name": "Employees",
+          "subFeatures": [
+            {
+              "name": "Reimbursements",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
