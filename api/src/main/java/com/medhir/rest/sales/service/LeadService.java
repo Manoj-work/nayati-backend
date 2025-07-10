@@ -966,6 +966,7 @@ public class LeadService {
         private String designer;
         private String priority;
         private String dateOfCreation;
+        private String budget;
         // getters and setters
         public String getLeadId() { return leadId; }
         public void setLeadId(String leadId) { this.leadId = leadId; }
@@ -979,6 +980,8 @@ public class LeadService {
         public void setPriority(String priority) { this.priority = priority; }
         public String getDateOfCreation() { return dateOfCreation; }
         public void setDateOfCreation(String dateOfCreation) { this.dateOfCreation = dateOfCreation; }
+        public String getBudget() { return budget; }
+        public void setBudget(String budget) { this.budget = budget; }
     }
 
     public static class KanbanStageGroupDTO {
@@ -1005,6 +1008,7 @@ public class LeadService {
             dto.setDesigner(p.getDesigner());
             dto.setPriority(p.getPriority());
             dto.setDateOfCreation(p.getDateOfCreation());
+            dto.setBudget(p.getBudget());
             return dto;
         }).collect(Collectors.toList());
         // Group by stageId
