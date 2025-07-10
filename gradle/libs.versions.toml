@@ -1,5 +1,6 @@
 [versions]
 springboot = "3.4.3"
+mapstruct = "1.5.5.Final"
 
 [libraries]
 springboot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web", version.ref = "springboot" }
@@ -14,6 +15,8 @@ jwt-api = { module = "io.jsonwebtoken:jjwt-api", version = "0.11.5" }
 jwt-impl = { module = "io.jsonwebtoken:jjwt-impl", version = "0.11.5" }
 jwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version = "0.11.5" }
 lombok = { module = "org.projectlombok:lombok", version = "1.18.30" }
+mapstruct = { module = "org.mapstruct:mapstruct", version.ref = "mapstruct" }
+mapstruct-processor = { module = "org.mapstruct:mapstruct-processor", version.ref = "mapstruct" }
 
 [bundles]
 
@@ -22,3 +25,4 @@ lombok = { module = "org.projectlombok:lombok", version = "1.18.30" }
 spring-boot = { id = "org.springframework.boot", version.ref = "springboot" }
 spring-dependency-management = { id = "io.spring.dependency-management", version = "1.1.4" }
 versions = { id = "com.github.ben-manes.versions", version = "0.52.0" }
+mapstruct = { id = "org.mapstruct.mapstruct", version.ref = "mapstruct" }

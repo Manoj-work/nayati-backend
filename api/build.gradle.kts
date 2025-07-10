@@ -55,6 +55,10 @@ dependencies {
     compileOnly(libs.lombok)
     annotationProcessor(libs.lombok)
 
+    // MapStruct
+    implementation(libs.mapstruct)
+    annotationProcessor(libs.mapstruct.processor)
+
 
     // Development Tools
     developmentOnly("org.springframework.boot:spring-boot-devtools")
