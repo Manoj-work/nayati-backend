@@ -1,9 +1,15 @@
 package com.medhir.rest.assetManagement.assetSetting.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Document(collection = "locations")
 public class Location {
     
@@ -19,23 +25,8 @@ public class Location {
     @Field("address")
     private String address;
     
-    public Location() {}
-    
     public Location(String name, String address) {
         this.name = name;
         this.address = address;
     }
-    
-    // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    
-    public String getLocationId() { return locationId; }
-    public void setLocationId(String locationId) { this.locationId = locationId; }
-    
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-    
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
 } 
