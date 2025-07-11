@@ -43,12 +43,12 @@ public class EmployeeModel {
     private String name = "";
 
     @NotBlank(message = "first name cannot be empty")
-    private String firstName;
+    private String firstName="";
 
-    private String middleName;
+    private String middleName="";
 
     @NotBlank(message = "last name cannot be empty")
-    private String lastName;
+    private String lastName="";
 
     public  String getName(){
         if(firstName == null || lastName == null){

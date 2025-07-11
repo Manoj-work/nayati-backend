@@ -21,8 +21,15 @@ public class EmployeeDTO {
     @NotBlank(message = "Company Id cannot be empty")
     private String companyId;
 
-    @NotBlank(message = "Employee name cannot be empty")
     private String name;
+
+    @NotBlank
+    private String firstName;
+
+    private String middleName;
+
+    @NotBlank
+    private String lastName;
 
     @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     @NotBlank(message = "Phone number cannot be empty")

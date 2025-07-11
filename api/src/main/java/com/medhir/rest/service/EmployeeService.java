@@ -43,10 +43,10 @@ import com.medhir.rest.mapper.EmployeeMapper;
 @Service
 public class EmployeeService {
 
-    @Value("${auth.service.url}")
-    String authServiceUrl;
-    @Value("${attendance.service.url}")
-    String attendanceServiceUrl;
+//    @Value("${auth.service.url}")
+//    String authServiceUrl;
+//    @Value("${attendance.service.url}")
+//    String attendanceServiceUrl;
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -198,9 +198,9 @@ public class EmployeeService {
                         savedEmployee.getEmailPersonal(),
                         savedEmployee.getPhone());
             }
-
-            // call Attendance Service to register user for face verification
-            registerUserInAttendanceService(savedEmployee);
+//
+//            // call Attendance Service to register user for face verification
+//            registerUserInAttendanceService(savedEmployee);
         } catch (Exception e) {
             // Log the error but don't fail the employee creation
             System.err.println("Failed to register employee in auth/attendance service: " + e.getMessage());
@@ -483,21 +483,21 @@ public class EmployeeService {
 
             StringBuilder fullName = new StringBuilder();
 
-            if (updatedEmployee.getFirstName() != null && !updatedEmployee.getFirstName().trim().isEmpty()) {
-                fullName.append(updatedEmployee.getFirstName().trim());
+            if (updatedEmployeeDTO.getFirstName() != null && !updatedEmployeeDTO.getFirstName().trim().isEmpty()) {
+                fullName.append(updatedEmployeeDTO.getFirstName().trim());
             }
 
-            if (updatedEmployee.getMiddleName() != null && !updatedEmployee.getMiddleName().trim().isEmpty()) {
+            if (updatedEmployeeDTO.getMiddleName() != null && !updatedEmployeeDTO.getMiddleName().trim().isEmpty()) {
                 if (fullName.length() > 0) fullName.append(" ");
-                fullName.append(updatedEmployee.getMiddleName().trim());
+                fullName.append(updatedEmployeeDTO.getMiddleName().trim());
             }
 
-            if (updatedEmployee.getLastName() != null && !updatedEmployee.getLastName().trim().isEmpty()) {
+            if (updatedEmployeeDTO.getLastName() != null && !updatedEmployeeDTO.getLastName().trim().isEmpty()) {
                 if (fullName.length() > 0) fullName.append(" ");
-                fullName.append(updatedEmployee.getLastName().trim());
+                fullName.append(updatedEmployeeDTO.getLastName().trim());
             }
 
-            updatedEmployee.setName(fullName.toString());
+            updatedEmployeeDTO.setName(fullName.toString());
 
 
             // Update basic details
@@ -521,9 +521,9 @@ public class EmployeeService {
             existingEmployee.setCurrentAddress(updatedEmployeeDTO.getCurrentAddress());
             existingEmployee.setSalaryDetails(EmployeeMapper.toModel(updatedEmployeeDTO.getSalaryDetails()));
             existingEmployee.setJoiningDate(updatedEmployeeDTO.getJoiningDate());
-            existingEmployee.setFirstName(updatedEmployee.getFirstName());
-            existingEmployee.setMiddleName(updatedEmployee.getMiddleName());
-            existingEmployee.setLastName(updatedEmployee.getLastName());
+            existingEmployee.setFirstName(updatedEmployeeDTO.getFirstName());
+            existingEmployee.setMiddleName(updatedEmployeeDTO.getMiddleName());
+            existingEmployee.setLastName(updatedEmployeeDTO.getLastName());
 
 //             existingEmployee.setDesignation(updatedEmployee.getDesignation());
 //             existingEmployee.setFathersName(updatedEmployee.getFathersName());
@@ -622,8 +622,8 @@ public class EmployeeService {
 
            // existingEmployee = setDefaultValues(existingEmployee);
 
-            // call Attendance Service to update user for face verification
-            updateEmployeeInAttendanceService(existingEmployee);
+//            // call Attendance Service to update user for face verification
+//            updateEmployeeInAttendanceService(existingEmployee);
 
             EmployeeModel savedEmployee = employeeRepository.save(existingEmployee);
 
@@ -763,65 +763,65 @@ public class EmployeeService {
    
 
 
-    private RestTemplate restTemplate = new RestTemplate();
+//    private RestTemplate restTemplate = new RestTemplate();
+//
+//    public void registerUserInAttendanceService(EmployeeModel employee) {
+//        try {
+//            // Create request parameters
+//            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+//            requestBody.add("employeeId", employee.getEmployeeId());
+//            requestBody.add("firstname", employee.getName());
+//            requestBody.add("imgUrl", employee.getEmployeeImgUrl()); // Always using imgUrl
+//            requestBody.add("joiningDate", employee.getJoiningDate().toString());
+//
+//            // Set headers for form-data
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.MULTIPART_FORM_DATA); // Ensures compatibility with @RequestParam
+//            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+//
+//            // Call the /register API
+//            restTemplate.postForEntity(attendanceServiceUrl + "/register", requestEntity, String.class);
+//            System.out.println("User registered in Attendance Service: " + employee.getName());
+//
+//        } catch (Exception e) {
+//            System.err.println("Failed to register user in Attendance Service: " + e.getMessage());
+//        }
+//    }
 
-    public void registerUserInAttendanceService(EmployeeModel employee) {
-        try {
-            // Create request parameters
-            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-            requestBody.add("employeeId", employee.getEmployeeId());
-            requestBody.add("firstname", employee.getName());
-            requestBody.add("imgUrl", employee.getEmployeeImgUrl()); // Always using imgUrl
-            requestBody.add("joiningDate", employee.getJoiningDate().toString());
-
-            // Set headers for form-data
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA); // Ensures compatibility with @RequestParam
-            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-
-            // Call the /register API
-            restTemplate.postForEntity(attendanceServiceUrl + "/register", requestEntity, String.class);
-            System.out.println("User registered in Attendance Service: " + employee.getName());
-
-        } catch (Exception e) {
-            System.err.println("Failed to register user in Attendance Service: " + e.getMessage());
-        }
-    }
-
-    public void updateEmployeeInAttendanceService(EmployeeModel employee) {
-        try {
-            // Create request parameters
-            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-            requestBody.add("employeeId", employee.getEmployeeId());
-
-            if (employee.getName() != null && !employee.getName().trim().isEmpty()) {
-                requestBody.add("name", employee.getName());
-            }
-
-            if (employee.getEmployeeImgUrl() != null && !employee.getEmployeeImgUrl().trim().isEmpty()) {
-                requestBody.add("imgUrl", employee.getEmployeeImgUrl());
-            }
-
-            if (employee.getJoiningDate() != null) {
-                requestBody.add("joiningDate", employee.getJoiningDate().toString());
-            }
-
-            // Set headers for form-data
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-
-            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-
-            // Make the PUT request
-            ResponseEntity<String> response = restTemplate.exchange(
-                    attendanceServiceUrl + "/update", HttpMethod.PUT, requestEntity, String.class);
-            System.out.println("User Updated in Attendance Service: " + employee.getName());
-
-        } catch (Exception e) {
-            System.err.println("Failed to Update user in Attendance Service: " + e.getMessage());
-
-        }
-    }
+//    public void updateEmployeeInAttendanceService(EmployeeModel employee) {
+//        try {
+//            // Create request parameters
+//            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+//            requestBody.add("employeeId", employee.getEmployeeId());
+//
+//            if (employee.getName() != null && !employee.getName().trim().isEmpty()) {
+//                requestBody.add("name", employee.getName());
+//            }
+//
+//            if (employee.getEmployeeImgUrl() != null && !employee.getEmployeeImgUrl().trim().isEmpty()) {
+//                requestBody.add("imgUrl", employee.getEmployeeImgUrl());
+//            }
+//
+//            if (employee.getJoiningDate() != null) {
+//                requestBody.add("joiningDate", employee.getJoiningDate().toString());
+//            }
+//
+//            // Set headers for form-data
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+//
+//            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+//
+//            // Make the PUT request
+//            ResponseEntity<String> response = restTemplate.exchange(
+//                    attendanceServiceUrl + "/update", HttpMethod.PUT, requestEntity, String.class);
+//            System.out.println("User Updated in Attendance Service: " + employee.getName());
+//
+//        } catch (Exception e) {
+//            System.err.println("Failed to Update user in Attendance Service: " + e.getMessage());
+//
+//        }
+//    }
 
     public String generateEmployeeId(String companyId) {
         CompanyModel company = companyService.getCompanyById(companyId)
