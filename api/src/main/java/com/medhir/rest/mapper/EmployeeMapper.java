@@ -10,6 +10,9 @@ public class EmployeeMapper {
         EmployeeModel model = new EmployeeModel();
         model.setCompanyId(dto.getCompanyId());
         model.setName(dto.getName());
+        model.setFirstName(dto.getFirstName());
+        model.setMiddleName(dto.getMiddleName());
+        model.setLastName(dto.getLastName());
         model.setPhone(dto.getPhone());
         model.setAlternatePhone(dto.getAlternatePhone());
         model.setRoles(dto.getRoles());
@@ -82,6 +85,9 @@ public class EmployeeMapper {
         EmployeeDTO dto = new EmployeeDTO();
         dto.setCompanyId(model.getCompanyId());
         dto.setName(model.getName());
+        dto.setFirstName(model.getFirstName());
+        dto.setMiddleName(model.getMiddleName());
+        dto.setLastName(model.getLastName());
         dto.setPhone(model.getPhone());
         dto.setAlternatePhone(model.getAlternatePhone());
         dto.setRoles(model.getRoles());
@@ -155,6 +161,9 @@ public class EmployeeMapper {
         // Copy all fields from EmployeeModel to EmployeeWithLeaveDetailsDTO
         dto.setCompanyId(model.getCompanyId());
         dto.setName(model.getName());
+        dto.setFirstName(model.getFirstName());
+        dto.setMiddleName(model.getMiddleName());
+        dto.setLastName(model.getLastName());
         dto.setPhone(model.getPhone());
         dto.setAlternatePhone(model.getAlternatePhone());
         dto.setRoles(model.getRoles());
