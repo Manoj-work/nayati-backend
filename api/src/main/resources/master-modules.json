@@ -1,46 +1,61 @@
 {
   "modules": [
     {
+      "id": "MOD_ACCOUNTANT",
       "name": "Accountant",
       "features": [
         {
+          "id": "FEATURE_CUSTOMERS",
           "name": "Customers",
           "subFeatures": [
             {
+              "id": "SUB_INVOICES",
               "name": "Invoices",
-              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+              "actions": [
+                "CREATE", "READ", "UPDATE", "DELETE"
+              ]
             },
             {
+              "id": "SUB_RECEIPTS",
               "name": "Receipts",
-              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+              "actions": [
+                "CREATE", "READ", "UPDATE", "DELETE"
+              ]
             }
           ]
         },
         {
+          "id": "FEATURE_VENDORS",
           "name": "Vendors",
           "subFeatures": [
             {
+              "id": "SUB_BILLS",
               "name": "Bills",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             },
             {
-              "name": "PurchaseOrders",
+              "id": "SUB_PURCHASE_ORDERS",
+              "name": "Purchase Orders",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             },
             {
+              "id": "SUB_PAYMENTS",
               "name": "Payments",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             },
             {
-              "name": "VendorList",
+              "id": "SUB_VENDOR_LIST",
+              "name": "Vendor List",
               "actions": ["READ"]
             }
           ]
         },
         {
+          "id": "FEATURE_EMPLOYEES",
           "name": "Employees",
           "subFeatures": [
             {
+              "id": "SUB_REIMBURSEMENTS",
               "name": "Reimbursements",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             }

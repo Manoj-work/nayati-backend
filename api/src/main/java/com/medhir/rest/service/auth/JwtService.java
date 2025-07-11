@@ -98,7 +98,9 @@ public class JwtService {
                 .claim("name", employee.getName())
                 .claim("employeeId", employeeAuth.getEmployeeId())
                 .claim("roles", roles)  // Add roles to the token
-                .setSubject(employeeAuth.getEmail())
+//                .setSubject(employeeAuth.getEmail())
+                .claim("roleIds", employee.getRoleIds())
+                .setSubject(employee.getEmployeeId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)

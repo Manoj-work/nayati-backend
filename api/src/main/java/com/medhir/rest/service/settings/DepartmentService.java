@@ -5,7 +5,6 @@ import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.repository.settings.DepartmentRepository;
-import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

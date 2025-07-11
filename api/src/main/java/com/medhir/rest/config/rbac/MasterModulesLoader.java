@@ -1,4 +1,4 @@
-package com.medhir.rest.config;
+package com.medhir.rest.config.rbac;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
@@ -9,7 +9,6 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
-
 
 @Component
 @RequiredArgsConstructor
@@ -32,3 +31,4 @@ public class MasterModulesLoader {
         }
     }
 }
+
