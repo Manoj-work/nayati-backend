@@ -39,8 +39,10 @@ public class DepartmentService {
         }
 
         // Verify leave policy exists
-        leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
-
+        //     leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+        if (department.getLeavePolicy() != null) {
+            leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+        }
 
         String newDepartmentId = "DEPT" + snowflakeIdGenerator.nextId();
         department.setDepartmentId(newDepartmentId);
@@ -86,6 +88,18 @@ public class DepartmentService {
             throw new DuplicateResourceException("Department with name " + department.getName() + " already exists in this company");
         }
 
+
+
+
+        // Only validate leave policy if it's provided
+        if (department.getLeavePolicy() != null) {
+            leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+        }
+
+        //  Update all fields
+        if (department.getName() != null) {
+            existingDepartment.setName(department.getName());
+        }
         // Verify leave policy exists
         leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
 
@@ -95,7 +109,8 @@ public class DepartmentService {
         existingDepartment.setLeavePolicy(department.getLeavePolicy());
         existingDepartment.setWeeklyHolidays(department.getWeeklyHolidays());
         existingDepartment.setUpdatedAt(LocalDateTime.now().toString());
-        
+        //as it is changed to make it work
+        existingDepartment.setLeavePolicy(department.getLeavePolicy());
         // Update companyId if provided
         if (department.getCompanyId() != null) {
             existingDepartment.setCompanyId(department.getCompanyId());

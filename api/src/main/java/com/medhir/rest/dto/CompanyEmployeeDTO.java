@@ -22,6 +22,9 @@ public class CompanyEmployeeDTO extends EmployeeModel {
         // Copy all fields from EmployeeModel
         this.setEmployeeId(employee.getEmployeeId());
         this.setName(employee.getName());
+        this.setFirstName(employee.getFirstName());
+        this.setMiddleName(employee.getMiddleName());
+        this.setLastName(employee.getLastName());
         this.setCompanyId(employee.getCompanyId());
         this.setDepartment(employee.getDepartment());
         this.setDesignation(employee.getDesignation());

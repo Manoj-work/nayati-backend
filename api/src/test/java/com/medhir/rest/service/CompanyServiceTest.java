@@ -62,9 +62,7 @@ public class CompanyServiceTest {
 
     }
 
-//
-//
-//
+
     @Test
     public void ThrowException_WhenEmailAlreadyExists_duringCompanyCreation() {
 
