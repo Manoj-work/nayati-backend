@@ -50,27 +50,6 @@ public class RolesService {
         employeeRepository.save(employee);
     }
 
-    // Helper method to create the head of company role
-    public Roles createHeadOfCompanyRole(String companyId, List<ModulePermission> permissions) {
-        String roleName = "HEAD_OF_COMPANY_" + companyId;
-        Roles role = new Roles();
-        role.setName(roleName);
-        role.setCompanyId(companyId);
-        role.setPermissions(permissions);
-        return rolesRepository.save(role);
-    }
-
-    // Helper method to update the head of company role's permissions
-    public void updateHeadOfCompanyRolePermissions(String companyId, List<ModulePermission> permissions) {
-        String roleName = "HEAD_OF_COMPANY_" + companyId;
-        Roles headRole = rolesRepository.findAll().stream()
-            .filter(r -> roleName.equals(r.getName()) && companyId.equals(r.getCompanyId()))
-            .findFirst()
-            .orElseThrow(() -> new ResourceNotFoundException("Head of company role not found for company: " + companyId));
-        headRole.setPermissions(permissions);
-        rolesRepository.save(headRole);
-    }
-
     private void validatePermissions(List<ModulePermission> permissions) {
         for (ModulePermission module : permissions) {
             var masterModule = masterModulesLoader.getConfig().getModules().stream()

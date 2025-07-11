@@ -10,16 +10,14 @@ import com.medhir.rest.model.rbac.FeaturePermission;
 import com.medhir.rest.model.rbac.ModulePermission;
 import com.medhir.rest.model.rbac.SubFeaturePermission;
 import com.medhir.rest.repository.CompanyRepository;
+import com.medhir.rest.service.rbac.RolesService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import com.medhir.rest.model.Roles;
-import com.medhir.rest.model.EmployeeModel;
 import com.medhir.rest.repository.EmployeeRepository;
-import com.medhir.rest.service.RolesService;
 
 
 @Service
@@ -55,18 +53,6 @@ public class CompanyService {
         company.setCompanyId("CID" + snowflakeIdGenerator.nextId());
 
         CompanyModel savedCompany = companyRepository.save(company);
-
-        // Create head of company role and assign to head
-        if (company.getHeadEmployeeId() != null && !company.getHeadEmployeeId().isEmpty()) {
-            // Create the role with current assigned modules (may be empty at creation)
-            Roles headRole = rolesService.createHeadOfCompanyRole(savedCompany.getCompanyId(), savedCompany.getAssignedModules() != null ? savedCompany.getAssignedModules() : List.of());
-            // Assign to head employee
-            EmployeeModel head = employeeRepository.findByEmployeeId(company.getHeadEmployeeId())
-                .orElseThrow(() -> new ResourceNotFoundException("Head employee not found: " + company.getHeadEmployeeId()));
-            if (head.getRoleIds() == null) head.setRoleIds(new java.util.ArrayList<>());
-            head.getRoleIds().add(headRole.getRoleId());
-            employeeRepository.save(head);
-        }
 
         return savedCompany;
     }
@@ -127,19 +113,19 @@ public class CompanyService {
         // Validate against master modules config
         for (AssignModulesRequest.ModuleRequest moduleDTO : request.getModules()) {
             var masterModule = masterModulesLoader.getConfig().getModules().stream()
-                    .filter(m -> m.getId().equals(moduleDTO.getModuleId()))
+                    .filter(m -> m.getModuleId().equals(moduleDTO.getModuleId()))
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Invalid module ID: " + moduleDTO.getModuleId()));
 
             for (AssignModulesRequest.FeatureRequest featureDTO : moduleDTO.getFeatures()) {
                 var masterFeature = masterModule.getFeatures().stream()
-                        .filter(f -> f.getId().equals(featureDTO.getFeatureId()))
+                        .filter(f -> f.getFeatureId().equals(featureDTO.getFeatureId()))
                         .findFirst()
                         .orElseThrow(() -> new IllegalArgumentException("Invalid feature ID: " + featureDTO.getFeatureId()));
 
                 for (AssignModulesRequest.SubFeatureRequest subFeatureDTO : featureDTO.getSubFeatures()) {
                     var masterSubFeature = masterFeature.getSubFeatures().stream()
-                            .filter(sf -> sf.getId().equals(subFeatureDTO.getSubFeatureId()))
+                            .filter(sf -> sf.getSubFeatureId().equals(subFeatureDTO.getSubFeatureId()))
                             .findFirst()
                             .orElseThrow(() -> new IllegalArgumentException("Invalid sub-feature ID: " + subFeatureDTO.getSubFeatureId()));
 
@@ -158,7 +144,6 @@ public class CompanyService {
         companyRepository.save(company);
 
         // Update head of company role permissions
-        rolesService.updateHeadOfCompanyRolePermissions(companyId, permissions);
     }
 
     public List<ModulePermission> getAssignedModules(String companyId) {

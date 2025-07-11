@@ -55,5 +55,4 @@ public class CompanyModel {
 
     private List<ModulePermission> assignedModules; // Which modules, features, sub-features are enabled for this company
 
-    private String headEmployeeId; // Employee ID of the head of the company
 }
