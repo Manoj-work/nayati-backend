@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -24,6 +25,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Document(collection = "employees")
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL) // Exclude null fields from JSON response
 public class EmployeeModel {
 
@@ -37,9 +39,37 @@ public class EmployeeModel {
 
     @NotBlank(message = "Company Id cannot be empty")
     private String companyId = "";
-
-    @NotBlank(message = "Employee name cannot be empty")
+  
     private String name = "";
+
+    @NotBlank(message = "first name cannot be empty")
+    private String firstName;
+
+    private String middleName;
+
+    @NotBlank(message = "last name cannot be empty")
+    private String lastName;
+
+    public  String getName(){
+        if(firstName == null || lastName == null){
+            return name;
+        }
+        StringBuilder fullName = new StringBuilder();
+
+        fullName.append(firstName);
+
+        if (middleName != null) {
+            if (fullName.length() > 0) fullName.append(" "); // Add space only if not first
+            fullName.append(middleName);
+        }
+
+        if (lastName != null) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(lastName);
+        }
+
+        return fullName.toString();
+    }
 
     @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     @Indexed(unique = true)

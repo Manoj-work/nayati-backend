@@ -105,7 +105,22 @@ public class EmployeeService {
             employee.setLeavePolicyId(department.getLeavePolicy());
         }
 
-        //employee = setDefaultValues(employee);
+        StringBuilder fullName = new StringBuilder();
+        if (employee.getFirstName() != null && !employee.getFirstName().trim().isEmpty()) {
+            fullName.append(employee.getFirstName().trim());
+        }
+
+        if (employee.getMiddleName() != null && !employee.getMiddleName().trim().isEmpty()) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(employee.getMiddleName().trim());
+        }
+
+        if (employee.getLastName() != null && !employee.getLastName().trim().isEmpty()) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(employee.getLastName().trim());
+        }
+
+        employee.setName(fullName.toString());
 
         // Generate image URLs only after validation passes
         if (profileImage != null) {
@@ -466,6 +481,25 @@ public class EmployeeService {
             // Store old reporting manager for comparison
             String oldReportingManager = existingEmployee.getReportingManager();
 
+            StringBuilder fullName = new StringBuilder();
+
+            if (updatedEmployee.getFirstName() != null && !updatedEmployee.getFirstName().trim().isEmpty()) {
+                fullName.append(updatedEmployee.getFirstName().trim());
+            }
+
+            if (updatedEmployee.getMiddleName() != null && !updatedEmployee.getMiddleName().trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(updatedEmployee.getMiddleName().trim());
+            }
+
+            if (updatedEmployee.getLastName() != null && !updatedEmployee.getLastName().trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(updatedEmployee.getLastName().trim());
+            }
+
+            updatedEmployee.setName(fullName.toString());
+
+
             // Update basic details
             existingEmployee.setName(updatedEmployeeDTO.getName());
             existingEmployee.setDesignation(updatedEmployeeDTO.getDesignation());
@@ -487,6 +521,30 @@ public class EmployeeService {
             existingEmployee.setCurrentAddress(updatedEmployeeDTO.getCurrentAddress());
             existingEmployee.setSalaryDetails(EmployeeMapper.toModel(updatedEmployeeDTO.getSalaryDetails()));
             existingEmployee.setJoiningDate(updatedEmployeeDTO.getJoiningDate());
+            existingEmployee.setFirstName(updatedEmployee.getFirstName());
+            existingEmployee.setMiddleName(updatedEmployee.getMiddleName());
+            existingEmployee.setLastName(updatedEmployee.getLastName());
+
+//             existingEmployee.setDesignation(updatedEmployee.getDesignation());
+//             existingEmployee.setFathersName(updatedEmployee.getFathersName());
+//             existingEmployee.setOvertimeEligibile(updatedEmployee.isOvertimeEligibile());
+//             existingEmployee.setPfEnrolled(updatedEmployee.isPfEnrolled());
+//             existingEmployee.setUanNumber(updatedEmployee.getUanNumber());
+//             existingEmployee.setEsicEnrolled(updatedEmployee.isEsicEnrolled());
+//             existingEmployee.setEsicNumber(updatedEmployee.getEsicNumber());
+//             existingEmployee.setWeeklyOffs(updatedEmployee.getWeeklyOffs());
+//             existingEmployee.setEmailPersonal(updatedEmployee.getEmailPersonal());
+//             existingEmployee.setEmailOfficial(updatedEmployee.getEmailOfficial());
+//             existingEmployee.setPhone(updatedEmployee.getPhone());
+//             existingEmployee.setAlternatePhone(updatedEmployee.getAlternatePhone());
+//             existingEmployee.setDepartment(updatedEmployee.getDepartment());
+//             existingEmployee.setGender(updatedEmployee.getGender());
+//             existingEmployee.setReportingManager(updatedEmployee.getReportingManager());
+//             existingEmployee.setPermanentAddress(updatedEmployee.getPermanentAddress());
+//             existingEmployee.setCurrentAddress(updatedEmployee.getCurrentAddress());
+//             existingEmployee.setSalaryDetails(updatedEmployee.getSalaryDetails());
+//             existingEmployee.setJoiningDate(updatedEmployee.getJoiningDate());
+// >>>>>>> main
 
             // Update leave policy based on department
             if (updatedEmployeeDTO.getDepartment() != null && !updatedEmployeeDTO.getDepartment().isEmpty()) {
@@ -563,6 +621,7 @@ public class EmployeeService {
             }
 
            // existingEmployee = setDefaultValues(existingEmployee);
+
             // call Attendance Service to update user for face verification
             updateEmployeeInAttendanceService(existingEmployee);
 
@@ -701,6 +760,7 @@ public class EmployeeService {
 //
 //        return employee;
 //    }
+   
 
 
     private RestTemplate restTemplate = new RestTemplate();
@@ -710,7 +770,7 @@ public class EmployeeService {
             // Create request parameters
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
             requestBody.add("employeeId", employee.getEmployeeId());
-            requestBody.add("name", employee.getName());
+            requestBody.add("firstname", employee.getName());
             requestBody.add("imgUrl", employee.getEmployeeImgUrl()); // Always using imgUrl
             requestBody.add("joiningDate", employee.getJoiningDate().toString());
 
@@ -771,8 +831,6 @@ public class EmployeeService {
 
         return generatedId.generateId(prefix, EmployeeModel.class, "employeeId");
     }
-
-
 
     public List<UserCompanyDTO> getEmployeeCompanies(String employeeId) {
         EmployeeModel employee = employeeRepository.findByEmployeeId(employeeId)
