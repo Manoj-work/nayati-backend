@@ -101,7 +101,25 @@ public class EmployeeService {
             employee.setLeavePolicyId(department.getLeavePolicy());
         }
 
-        employee = setDefaultValues(employee);
+        StringBuilder fullName = new StringBuilder();
+        if (employee.getFirstName() != null && !employee.getFirstName().trim().isEmpty()) {
+            fullName.append(employee.getFirstName().trim());
+        }
+
+        if (employee.getMiddleName() != null && !employee.getMiddleName().trim().isEmpty()) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(employee.getMiddleName().trim());
+        }
+
+        if (employee.getLastName() != null && !employee.getLastName().trim().isEmpty()) {
+            if (!fullName.isEmpty()) fullName.append(" ");
+            fullName.append(employee.getLastName().trim());
+        }
+
+        employee.setName(fullName.toString());
+
+
+                employee = setDefaultValues(employee);
 
         // Generate image URLs only after validation passes
         if (profileImage != null) {
@@ -466,8 +484,30 @@ public class EmployeeService {
             // Store old reporting manager for comparison
             String oldReportingManager = existingEmployee.getReportingManager();
 
+            StringBuilder fullName = new StringBuilder();
+
+            if (updatedEmployee.getFirstName() != null && !updatedEmployee.getFirstName().trim().isEmpty()) {
+                fullName.append(updatedEmployee.getFirstName().trim());
+            }
+
+            if (updatedEmployee.getMiddleName() != null && !updatedEmployee.getMiddleName().trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(updatedEmployee.getMiddleName().trim());
+            }
+
+            if (updatedEmployee.getLastName() != null && !updatedEmployee.getLastName().trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(updatedEmployee.getLastName().trim());
+            }
+
+            updatedEmployee.setName(fullName.toString());
+
+
             // Update basic details
-            existingEmployee.setName(updatedEmployee.getName());
+            existingEmployee.setFirstName(updatedEmployee.getFirstName());
+            existingEmployee.setMiddleName(updatedEmployee.getMiddleName());
+            existingEmployee.setLastName(updatedEmployee.getLastName());
+
             existingEmployee.setDesignation(updatedEmployee.getDesignation());
             existingEmployee.setFathersName(updatedEmployee.getFathersName());
             existingEmployee.setOvertimeEligibile(updatedEmployee.isOvertimeEligibile());
@@ -585,6 +625,7 @@ public class EmployeeService {
                         minioService.uploadDocumentsImg(passbookImage, existingEmployee.getEmployeeId()));
             }
 
+
             existingEmployee = setDefaultValues(existingEmployee);
             // call Attendance Service to update user for face verification
             updateEmployeeInAttendanceService(existingEmployee);
@@ -638,8 +679,12 @@ public class EmployeeService {
 
     // Set default values for missing fields
     private EmployeeModel setDefaultValues(EmployeeModel employee) {
-        if (employee.getName() == null)
-            employee.setName("");
+        if (employee.getFirstName() == null)
+            employee.setFirstName("");
+        if (employee.getMiddleName() == null)
+            employee.setMiddleName("");
+        if (employee.getLastName() == null)
+            employee.setLastName("");
         if (employee.getDesignation() == null)
             employee.setDesignation("");
         if (employee.getEmailPersonal() == null)
@@ -749,7 +794,7 @@ public class EmployeeService {
             // Create request parameters
             MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
             requestBody.add("employeeId", employee.getEmployeeId());
-            requestBody.add("name", employee.getName());
+            requestBody.add("firstname", employee.getName());
             requestBody.add("imgUrl", employee.getEmployeeImgUrl()); // Always using imgUrl
             requestBody.add("joiningDate", employee.getJoiningDate().toString());
 
@@ -817,7 +862,10 @@ public class EmployeeService {
         EmployeeModel employee = new EmployeeModel();
 
         // Set basic details from the request
-        employee.setName(request.getName());
+        employee.setFirstName(request.getName());
+        employee.setMiddleName(request.getName());
+        employee.setLastName(request.getName());
+
         employee.setEmailPersonal(request.getEmail());
         employee.setPhone(request.getPhone());
         employee.setCompanyId(request.getCompanyId());
