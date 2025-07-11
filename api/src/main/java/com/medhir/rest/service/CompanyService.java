@@ -152,20 +152,4 @@ public class CompanyService {
         return company.getAssignedModules();
     }
 
-    public void removeModuleFromCompany(String companyId, String moduleId) {
-        CompanyModel company = companyRepository.findByCompanyId(companyId)
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + companyId));
-
-        boolean removed = company.getAssignedModules().removeIf(m ->
-                m.getModuleId().equals(moduleId)
-        );
-
-        if (!removed) {
-            throw new ResourceNotFoundException("Module with ID: " + moduleId + " not found for this company");
-        }
-
-        companyRepository.save(company);
-    }
-
-
 }

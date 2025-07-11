@@ -3,6 +3,7 @@ package com.medhir.rest.service.rbac;
 import com.medhir.rest.config.rbac.MasterModulesLoader;
 import com.medhir.rest.dto.rbac.roles.CreateRoleRequest;
 import com.medhir.rest.dto.rbac.roles.UpdateRoleRequest;
+import com.medhir.rest.exception.BadRequestException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.mapper.rbac.roles.RolesMapper;
 import com.medhir.rest.model.EmployeeModel;
@@ -55,23 +56,23 @@ public class RolesService {
             var masterModule = masterModulesLoader.getConfig().getModules().stream()
                     .filter(m -> m.getModuleName().equals(module.getModuleName()))
                     .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid module: " + module.getModuleName()));
+                    .orElseThrow(() -> new BadRequestException("Invalid module: " + module.getModuleName()));
 
             for (var feature : module.getFeatures()) {
                 var masterFeature = masterModule.getFeatures().stream()
                         .filter(f -> f.getFeatureName().equals(feature.getFeatureName()))
                         .findFirst()
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid feature: " + feature.getFeatureName()));
+                        .orElseThrow(() -> new BadRequestException("Invalid feature: " + feature.getFeatureName()));
 
                 for (var sub : feature.getSubFeatures()) {
                     var masterSub = masterFeature.getSubFeatures().stream()
                             .filter(sf -> sf.getSubFeatureName().equals(sub.getSubFeatureName()))
                             .findFirst()
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid sub-feature: " + sub.getSubFeatureName()));
+                            .orElseThrow(() -> new BadRequestException("Invalid sub-feature: " + sub.getSubFeatureName()));
 
                     for (String action : sub.getActions()) {
                         if (!masterSub.getActions().contains(action)) {
-                            throw new IllegalArgumentException("Invalid action: " + action + " for sub-feature: " + sub.getSubFeatureName());
+                            throw new BadRequestException("Invalid action: " + action + " for sub-feature: " + sub.getSubFeatureName());
                         }
                     }
                 }

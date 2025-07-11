@@ -1,11 +1,13 @@
 package com.medhir.rest.dto.rbac;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import java.util.List;
 
 @Data
 public class AssignModulesRequest {
 
+    @NotNull
     private List<ModuleRequest> modules;
 
     @Data

@@ -9,4 +9,5 @@ import java.util.List;
 public class CreateRoleRequest {
     private String name;
     private List<ModulePermission> permissions;
+    private String companyId;
 }

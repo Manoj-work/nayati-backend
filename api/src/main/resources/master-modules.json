@@ -1,23 +1,23 @@
 {
   "modules": [
     {
-      "id": "MOD_ACCOUNTANT",
-      "name": "Accountant",
+      "moduleId": "MOD_ACCOUNTANT",
+      "moduleName": "Accountant",
       "features": [
         {
-          "id": "FEATURE_CUSTOMERS",
-          "name": "Customers",
+          "featureId": "FEATURE_CUSTOMERS",
+          "featureName": "Customers",
           "subFeatures": [
             {
-              "id": "SUB_INVOICES",
-              "name": "Invoices",
+              "subFeatureId": "SUB_INVOICES",
+              "subFeatureName": "Invoices",
               "actions": [
                 "CREATE", "READ", "UPDATE", "DELETE"
               ]
             },
             {
-              "id": "SUB_RECEIPTS",
-              "name": "Receipts",
+              "subFeatureId": "SUB_RECEIPTS",
+              "subFeatureName": "Receipts",
               "actions": [
                 "CREATE", "READ", "UPDATE", "DELETE"
               ]
@@ -25,38 +25,38 @@
           ]
         },
         {
-          "id": "FEATURE_VENDORS",
-          "name": "Vendors",
+          "featureId": "FEATURE_VENDORS",
+          "featureName": "Vendors",
           "subFeatures": [
             {
-              "id": "SUB_BILLS",
-              "name": "Bills",
+              "subFeatureId": "SUB_BILLS",
+              "subFeatureName": "Bills",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             },
             {
-              "id": "SUB_PURCHASE_ORDERS",
-              "name": "Purchase Orders",
+              "subFeatureId": "SUB_PURCHASE_ORDERS",
+              "subFeatureName": "Purchase Orders",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             },
             {
-              "id": "SUB_PAYMENTS",
-              "name": "Payments",
+              "subFeatureId": "SUB_PAYMENTS",
+              "subFeatureName": "Payments",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             },
             {
-              "id": "SUB_VENDOR_LIST",
-              "name": "Vendor List",
+              "subFeatureId": "SUB_VENDOR_LIST",
+              "subFeatureName": "Vendor List",
               "actions": ["READ"]
             }
           ]
         },
         {
-          "id": "FEATURE_EMPLOYEES",
-          "name": "Employees",
+          "featureId": "FEATURE_EMPLOYEES",
+          "featureName": "Employees",
           "subFeatures": [
             {
-              "id": "SUB_REIMBURSEMENTS",
-              "name": "Reimbursements",
+              "subFeatureId": "SUB_REIMBURSEMENTS",
+              "subFeatureName": "Reimbursements",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             }
           ]

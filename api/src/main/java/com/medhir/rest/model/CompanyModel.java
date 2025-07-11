@@ -12,6 +12,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -53,6 +54,6 @@ public class CompanyModel {
 
     private String colorCode="#FFFFFF";
 
-    private List<ModulePermission> assignedModules; // Which modules, features, sub-features are enabled for this company
+    private List<ModulePermission> assignedModules = new ArrayList<>(); // Which modules, features, sub-features are enabled for this company
 
 }

@@ -19,6 +19,7 @@ public class CompanyModuleController {
     @Autowired
     CompanyService companyService;
 
+    // used to assign and unassign the modules permission to the company
     @PutMapping("/{companyId}/modules")
     public ResponseEntity<Map<String, Object>> assignModulesToCompany(
             @PathVariable String companyId,
@@ -38,15 +39,6 @@ public class CompanyModuleController {
         return ResponseEntity.ok(modules);
     }
 
-    @DeleteMapping("/{companyId}/modules/{moduleName}")
-    public ResponseEntity<Map<String, Object>> removeModuleFromCompany(
-            @PathVariable String companyId,
-            @PathVariable String moduleId
-    ) {
-        companyService.removeModuleFromCompany(companyId, moduleId);
-        return ResponseEntity.ok(Map.of(
-                "message", "Module removed successfully!"
-        ));
-    }
+
 
 }
