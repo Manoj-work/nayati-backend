@@ -119,7 +119,7 @@ public class EmployeeService {
         employee.setName(fullName.toString());
 
 
-        //        employee = setDefaultValues(employee);
+                employee = setDefaultValues(employee);
 
         // Generate image URLs only after validation passes
         if (profileImage != null) {

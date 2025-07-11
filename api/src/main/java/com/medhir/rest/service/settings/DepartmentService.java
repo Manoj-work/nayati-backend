@@ -88,9 +88,6 @@ public class DepartmentService {
             throw new DuplicateResourceException("Department with name " + department.getName() + " already exists in this company");
         }
 
-
-
-
         // Only validate leave policy if it's provided
         if (department.getLeavePolicy() != null) {
             leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
@@ -100,8 +97,6 @@ public class DepartmentService {
         if (department.getName() != null) {
             existingDepartment.setName(department.getName());
         }
-        // Verify leave policy exists
-        leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
 
         existingDepartment.setName(department.getName());
         existingDepartment.setDescription(department.getDescription());
@@ -109,8 +104,9 @@ public class DepartmentService {
         existingDepartment.setLeavePolicy(department.getLeavePolicy());
         existingDepartment.setWeeklyHolidays(department.getWeeklyHolidays());
         existingDepartment.setUpdatedAt(LocalDateTime.now().toString());
-        //as it is changed to make it work
-        existingDepartment.setLeavePolicy(department.getLeavePolicy());
+        if(department.getLeavePolicy() != null){
+            existingDepartment.setLeavePolicy(department.getLeavePolicy());
+        }
         // Update companyId if provided
         if (department.getCompanyId() != null) {
             existingDepartment.setCompanyId(department.getCompanyId());
