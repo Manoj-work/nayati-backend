@@ -272,16 +272,7 @@ public class EmployeeService {
             dto.setDesignationName(
                     designationNameMap.getOrDefault(employee.getDesignation(), employee.getDesignation())
             );
-            // Debug checks
-            System.out.println("Department IDs: " + departmentIds);
-            System.out.println("Designation IDs: " + designationIds);
-            System.out.println("LeavePolicy IDs: " + leavePolicyIds);
-            System.out.println("LeaveType IDs: " + leaveTypeIds);
 
-            System.out.println("Department map keys: " + departmentNameMap.keySet());
-            System.out.println("Designation map keys: " + designationNameMap.keySet());
-            System.out.println("LeavePolicy map keys: " + leavePolicyMap.keySet());
-            System.out.println("LeaveTypeName map keys: " + leaveTypeNameMap.keySet());
             // Leave policy & leave types
             if (employee.getLeavePolicyId() != null && !employee.getLeavePolicyId().isEmpty()) {
                 LeavePolicyModel leavePolicy = leavePolicyMap.get(employee.getLeavePolicyId());
