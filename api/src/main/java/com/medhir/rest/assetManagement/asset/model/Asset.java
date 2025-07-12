@@ -30,7 +30,7 @@ public class Asset {
     private String assignedTo;
     private String purchaseDate;
     private Double purchaseCost;
-    private Long vendorId;
+    private String vendorId;
     private String invoiceNumber;
     private String warrantyExpiry;
     private String invoiceScanUrl;
