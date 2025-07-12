@@ -72,7 +72,10 @@ public class EmployeeService {
                                                       MultipartFile drivingLicenseImage,
                                                       MultipartFile voterIdImage,
                                                       MultipartFile passbookImage) {
+
         EmployeeModel employee = EmployeeMapper.toEmployeeModel(employeeDTO);
+
+        employee.setEmployeeId(generateEmployeeId(employee.getCompanyId()));
 
         if (employeeRepository.findByEmployeeId(employee.getEmployeeId()).isPresent()) {
             throw new DuplicateResourceException("Employee ID already exists: " + employee.getEmployeeId());
@@ -145,7 +148,6 @@ public class EmployeeService {
                     .setPassbookImgUrl(minioService.uploadDocumentsImg(passbookImage, employee.getEmployeeId()));
         }
 
-        employee.setEmployeeId(generateEmployeeId(employee.getCompanyId()));
         EmployeeModel savedEmployee = employeeRepository.save(employee);
 
         // Update reporting manager's assignTo list if a reporting manager is set
@@ -681,158 +683,6 @@ public class EmployeeService {
             return response;
         }).orElseThrow(() -> new ResourceNotFoundException("Employee with ID " + employeeId + " not found"));
     }
-
-//    // Set default values for missing fields
-//    private EmployeeModel setDefaultValues(EmployeeModel employee) {
-//        if (employee.getName() == null)
-//            employee.setName("");
-//        if (employee.getDesignation() == null)
-//            employee.setDesignation("");
-//        if (employee.getEmailPersonal() == null)
-//            employee.setEmailPersonal("");
-//        if (employee.getPhone() == null)
-//            employee.setPhone("");
-//        if (employee.getAlternatePhone() == null)
-//            employee.setAlternatePhone("");
-//        if (employee.getDepartment() == null)
-//            employee.setDepartment("");
-//        if (employee.getGender() == null)
-//            employee.setGender("");
-//        if (employee.getReportingManager() == null)
-//            employee.setReportingManager("");
-//        if (employee.getPermanentAddress() == null)
-//            employee.setPermanentAddress("");
-//        if (employee.getCurrentAddress() == null)
-//            employee.setCurrentAddress("");
-//
-//        // Initialize assignTo list if null
-//        if (employee.getAssignTo() == null) {
-//            employee.setAssignTo(new ArrayList<>());
-//        }
-//
-//        // Update assignTo lists for all managers
-//        updateAllManagersAssignTo();
-//
-//        // ID Proofs
-//        if (employee.getIdProofs() == null) {
-//            employee.setIdProofs(new EmployeeModel.IdProofs());
-//        } else {
-//            if (employee.getIdProofs().getAadharNo() == null)
-//                employee.getIdProofs().setAadharNo("");
-//            if (employee.getIdProofs().getPanNo() == null)
-//                employee.getIdProofs().setPanNo("");
-//            if (employee.getIdProofs().getPassport() == null)
-//                employee.getIdProofs().setPassport("");
-//            if (employee.getIdProofs().getDrivingLicense() == null)
-//                employee.getIdProofs().setDrivingLicense("");
-//            if (employee.getIdProofs().getVoterId() == null)
-//                employee.getIdProofs().setVoterId("");
-//        }
-//
-//        // Bank Details
-//        if (employee.getBankDetails() == null) {
-//            employee.setBankDetails(new EmployeeModel.BankDetails());
-//        } else {
-//            if (employee.getBankDetails().getAccountNumber() == null)
-//                employee.getBankDetails().setAccountNumber("");
-//            if (employee.getBankDetails().getAccountHolderName() == null)
-//                employee.getBankDetails().setAccountHolderName("");
-//            if (employee.getBankDetails().getIfscCode() == null)
-//                employee.getBankDetails().setIfscCode("");
-//            if (employee.getBankDetails().getBankName() == null)
-//                employee.getBankDetails().setBankName("");
-//            if (employee.getBankDetails().getBranchName() == null)
-//                employee.getBankDetails().setBranchName("");
-//            if (employee.getBankDetails().getUpiId() == null)
-//                employee.getBankDetails().setUpiId("");
-//            if (employee.getBankDetails().getUpiPhoneNumber() == null)
-//                employee.getBankDetails().setUpiPhoneNumber("");
-//        }
-//
-//        // Salary Details
-//        if (employee.getSalaryDetails() == null) {
-//            employee.setSalaryDetails(new EmployeeModel.SalaryDetails());
-//        } else {
-//            if (employee.getSalaryDetails().getAnnualCtc() == null)
-//                employee.getSalaryDetails().setAnnualCtc(0.0);
-//            if (employee.getSalaryDetails().getMonthlyCtc() == null)
-//                employee.getSalaryDetails().setMonthlyCtc(0.0);
-//            if (employee.getSalaryDetails().getBasicSalary() == null)
-//                employee.getSalaryDetails().setBasicSalary(0.0);
-//            if (employee.getSalaryDetails().getHra() == null)
-//                employee.getSalaryDetails().setHra(0.0);
-//            if (employee.getSalaryDetails().getAllowances() == null)
-//                employee.getSalaryDetails().setAllowances(0.0);
-//            if (employee.getSalaryDetails().getEmployerPfContribution() == null)
-//                employee.getSalaryDetails().setEmployerPfContribution(0.0);
-//            if (employee.getSalaryDetails().getEmployeePfContribution() == null)
-//                employee.getSalaryDetails().setEmployeePfContribution(0.0);
-//        }
-//
-//        return employee;
-//    }
-   
-
-
-//    private RestTemplate restTemplate = new RestTemplate();
-//
-//    public void registerUserInAttendanceService(EmployeeModel employee) {
-//        try {
-//            // Create request parameters
-//            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-//            requestBody.add("employeeId", employee.getEmployeeId());
-//            requestBody.add("firstname", employee.getName());
-//            requestBody.add("imgUrl", employee.getEmployeeImgUrl()); // Always using imgUrl
-//            requestBody.add("joiningDate", employee.getJoiningDate().toString());
-//
-//            // Set headers for form-data
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.MULTIPART_FORM_DATA); // Ensures compatibility with @RequestParam
-//            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-//
-//            // Call the /register API
-//            restTemplate.postForEntity(attendanceServiceUrl + "/register", requestEntity, String.class);
-//            System.out.println("User registered in Attendance Service: " + employee.getName());
-//
-//        } catch (Exception e) {
-//            System.err.println("Failed to register user in Attendance Service: " + e.getMessage());
-//        }
-//    }
-
-//    public void updateEmployeeInAttendanceService(EmployeeModel employee) {
-//        try {
-//            // Create request parameters
-//            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
-//            requestBody.add("employeeId", employee.getEmployeeId());
-//
-//            if (employee.getName() != null && !employee.getName().trim().isEmpty()) {
-//                requestBody.add("name", employee.getName());
-//            }
-//
-//            if (employee.getEmployeeImgUrl() != null && !employee.getEmployeeImgUrl().trim().isEmpty()) {
-//                requestBody.add("imgUrl", employee.getEmployeeImgUrl());
-//            }
-//
-//            if (employee.getJoiningDate() != null) {
-//                requestBody.add("joiningDate", employee.getJoiningDate().toString());
-//            }
-//
-//            // Set headers for form-data
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-//
-//            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
-//
-//            // Make the PUT request
-//            ResponseEntity<String> response = restTemplate.exchange(
-//                    attendanceServiceUrl + "/update", HttpMethod.PUT, requestEntity, String.class);
-//            System.out.println("User Updated in Attendance Service: " + employee.getName());
-//
-//        } catch (Exception e) {
-//            System.err.println("Failed to Update user in Attendance Service: " + e.getMessage());
-//
-//        }
-//    }
 
     public String generateEmployeeId(String companyId) {
         CompanyModel company = companyService.getCompanyById(companyId)
