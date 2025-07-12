@@ -50,24 +50,24 @@ public class EmployeeModel {
     @NotBlank(message = "last name cannot be empty")
     private String lastName="";
 
-    public  String getName(){
-        if(firstName == null || lastName == null){
+    public String getName() {
+        boolean hasFirst = firstName != null && !firstName.trim().isEmpty();
+        boolean hasLast = lastName != null && !lastName.trim().isEmpty();
+
+        if (!hasFirst && !hasLast) {
             return name;
         }
+
         StringBuilder fullName = new StringBuilder();
-
-        fullName.append(firstName);
-
-        if (middleName != null) {
-            if (fullName.length() > 0) fullName.append(" "); // Add space only if not first
-            fullName.append(middleName);
-        }
-
-        if (lastName != null) {
+        if (hasFirst) fullName.append(firstName.trim());
+        if (middleName != null && !middleName.trim().isEmpty()) {
             if (fullName.length() > 0) fullName.append(" ");
-            fullName.append(lastName);
+            fullName.append(middleName.trim());
         }
-
+        if (hasLast) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(lastName.trim());
+        }
         return fullName.toString();
     }
 
