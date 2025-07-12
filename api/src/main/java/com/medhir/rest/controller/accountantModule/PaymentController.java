@@ -2,6 +2,7 @@ package com.medhir.rest.controller.accountantModule;
 
 import com.medhir.rest.model.accountantModule.PaymentModel;
 import com.medhir.rest.service.accountantModule.PaymentService;
+import com.medhir.rest.service.accountantModule.VendorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +20,9 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private VendorService vendorService;
 
     @GetMapping("/{paymentId}")
     public ResponseEntity<PaymentModel> getPaymentByPaymentId(@PathVariable String paymentId) {
@@ -38,6 +42,12 @@ public class PaymentController {
             "paymentId", saved.getPaymentId()
             // "paymentProofUrl", saved.getPaymentProofUrl()
         ));
+    }
+
+    @GetMapping("/vendor-credit/{vendorId}")
+    public ResponseEntity<VendorService.VendorCreditInfo> getVendorCreditInfo(@PathVariable String vendorId) {
+        VendorService.VendorCreditInfo creditInfo = vendorService.getVendorCreditInfo(vendorId);
+        return ResponseEntity.ok(creditInfo);
     }
 
     @GetMapping

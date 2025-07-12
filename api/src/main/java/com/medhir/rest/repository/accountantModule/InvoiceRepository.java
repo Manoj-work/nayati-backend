@@ -10,7 +10,8 @@ import java.util.Optional;
 public interface InvoiceRepository extends MongoRepository<Invoice,String> {
     boolean existsByInvoiceNumber(String invoiceNumber);
 
-    Optional<Invoice> findByinvoiceNumber(String invoiceNumber);
+    Optional<Invoice> findByInvoiceNumber(String invoiceNumber);
 
     List<Invoice> findAllByProjectId(String projectId);
+
 }

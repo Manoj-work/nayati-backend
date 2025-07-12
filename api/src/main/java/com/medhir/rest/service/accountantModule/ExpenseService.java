@@ -1,8 +1,8 @@
 package com.medhir.rest.service.accountantModule;
 
-import com.medhir.rest.dto.accountingModule.expense.CreateExpenseRequest;
-import com.medhir.rest.dto.accountingModule.expense.ExpenseResponse;
-import com.medhir.rest.dto.accountingModule.expense.UpdateExpenseRequest;
+import com.medhir.rest.dto.accountantModule.expense.CreateExpenseRequest;
+import com.medhir.rest.dto.accountantModule.expense.ExpenseResponse;
+import com.medhir.rest.dto.accountantModule.expense.UpdateExpenseRequest;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.mapper.accountantModule.ExpenseMapper;
 import com.medhir.rest.model.EmployeeModel;

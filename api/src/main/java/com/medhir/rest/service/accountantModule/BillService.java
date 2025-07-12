@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Collections;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import com.medhir.rest.service.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
@@ -113,25 +114,53 @@ public class BillService {
 
     /**
      * Updates the payment details (totalPaid, paymentStatus, and paymentId) of a bill.
+     * Supports multiple payments and calculates proper payment status.
      * @param billId The bill's unique ID
-     * @param paidAmount The new paid amount to set
+     * @param paidAmount The new paid amount to add
      * @param paymentId The payment's unique ID to link
      */
     public BillModel updateBillPaymentDetails(String billId, BigDecimal paidAmount, String paymentId) {
         BillModel bill = billRepository.findByBillId(billId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bill not found with id : " + billId));
+        
         BigDecimal finalAmount = bill.getFinalAmount();
-        if (paidAmount == null) paidAmount = BigDecimal.ZERO;
         if (finalAmount == null) finalAmount = BigDecimal.ZERO;
-        bill.setTotalPaid(paidAmount);
-        bill.setPaymentId(paymentId);
-        if (paidAmount.compareTo(finalAmount) >= 0) {
+        if (paidAmount == null) paidAmount = BigDecimal.ZERO;
+        
+        // Get existing bill payments or create new list
+        List<BillModel.BillPayment> existingPayments = bill.getBillPayments();
+        if (existingPayments == null) {
+            existingPayments = new ArrayList<>();
+        }
+        
+        // Create new payment entry
+        BillModel.BillPayment newPayment = new BillModel.BillPayment();
+        newPayment.setPaymentId(paymentId);
+        newPayment.setPaidAmount(paidAmount);
+        newPayment.setPaymentDate(java.time.LocalDate.now().toString());
+        newPayment.setNotes("Payment processed");
+        
+        // Add new payment to list
+        existingPayments.add(newPayment);
+        bill.setBillPayments(existingPayments);
+        
+        // Calculate total paid from all payments
+        BigDecimal totalPaid = existingPayments.stream()
+                .map(payment -> payment.getPaidAmount() != null ? payment.getPaidAmount() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        bill.setTotalPaid(totalPaid);
+        // bill.setPaymentId(paymentId); // Keep latest payment ID for backward compatibility
+        
+        // Calculate payment status based on total paid vs final amount
+        if (totalPaid.compareTo(finalAmount) >= 0) {
             bill.setPaymentStatus(BillModel.PaymentStatus.PAID);
-        } else if (paidAmount.compareTo(BigDecimal.ZERO) > 0) {
+        } else if (totalPaid.compareTo(BigDecimal.ZERO) > 0) {
             bill.setPaymentStatus(BillModel.PaymentStatus.PARTIALLY_PAID);
         } else {
             bill.setPaymentStatus(BillModel.PaymentStatus.UN_PAID);
         }
+        
         return billRepository.save(bill);
     }
 
@@ -159,9 +188,17 @@ public class BillService {
                 .tdsApplied(bill.getTdsApplied())
                 .finalAmount(bill.getFinalAmount())
                 .totalPaid(bill.getTotalPaid())
-                .paymentId(bill.getPaymentId())
+                .billPayments(bill.getBillPayments() != null ? bill.getBillPayments().stream().map(this::mapBillPaymentToDTO).toList() : null)
                 .attachmentUrls(bill.getAttachmentUrls())
                 .dueAmount(bill.getDueAmount())
+                .build();
+    }
+
+    private BillDTO.BillPaymentDTO mapBillPaymentToDTO(BillModel.BillPayment billPayment) {
+        return BillDTO.BillPaymentDTO.builder()
+                .paymentId(billPayment.getPaymentId())
+                .paidAmount(billPayment.getPaidAmount())
+                .paymentDate(billPayment.getPaymentDate())
                 .build();
     }
 
@@ -195,6 +232,33 @@ public class BillService {
 
     public List<BillDTO> getBillDTOsByVendorId(String vendorId) {
         return getBillsByVendorId(vendorId).stream().map(this::mapToDTO).toList();
+    }
+
+    /**
+     * Gets the payment history for a specific bill
+     * @param billId The bill's unique ID
+     * @return List of payment details for the bill
+     */
+    public List<BillDTO.BillPaymentDTO> getBillPaymentHistory(String billId) {
+        BillModel bill = getBillById(billId);
+        if (bill.getBillPayments() == null) {
+            return new ArrayList<>();
+        }
+        return bill.getBillPayments().stream()
+                .map(this::mapBillPaymentToDTO)
+                .toList();
+    }
+
+    /**
+     * Gets bills by payment status
+     * @param paymentStatus The payment status to filter by
+     * @return List of bills with the specified payment status
+     */
+    public List<BillDTO> getBillsByPaymentStatus(BillModel.PaymentStatus paymentStatus) {
+        return getAllBills().stream()
+                .filter(bill -> bill.getPaymentStatus() == paymentStatus)
+                .map(this::mapToDTO)
+                .toList();
     }
 
 }

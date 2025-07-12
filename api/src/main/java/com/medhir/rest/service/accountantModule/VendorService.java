@@ -12,6 +12,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.regex.Pattern;
+import lombok.Data;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 @Service
 public class VendorService {
@@ -131,5 +135,30 @@ public class VendorService {
         }
 
         return vendorRepository.save(existingVendor);
+    }
+
+    public VendorModel updateVendorCreditsFromPayment(VendorModel vendor) {
+        return vendorRepository.save(vendor);
+    }
+
+    public VendorCreditInfo getVendorCreditInfo(String vendorId) {
+        VendorModel vendor = getVendorById(vendorId);
+        return VendorCreditInfo.builder()
+                .vendorId(vendor.getVendorId())
+                .vendorName(vendor.getVendorName())
+                .totalCredit(vendor.getTotalCredit())
+                .availableCredit(vendor.getTotalCredit() != null ? vendor.getTotalCredit() : BigDecimal.ZERO)
+                .build();
+    }
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class VendorCreditInfo {
+        private String vendorId;
+        private String vendorName;
+        private BigDecimal totalCredit;
+        private BigDecimal availableCredit;
     }
 }

@@ -30,6 +30,9 @@ public class MinioService {
     @Value("${minio.billsBucketName}")
     private String billsBucketName;
 
+    @Value("${minio.assetBucketName}")
+    private String assetBucketName;
+
     RestTemplate restTemplate = new RestTemplate();
 
     public String generateUUID() {
@@ -73,5 +76,9 @@ public class MinioService {
 
     public String uploadPaymentProof(MultipartFile file, String paymentId) {
         return uploadFile(billsBucketName, file, paymentId);
+    }
+
+    public String uploadAssetInvoice(MultipartFile file, Long vendorId) {
+        return uploadFile(assetBucketName, file, vendorId.toString());
     }
 }

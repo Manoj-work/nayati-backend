@@ -25,6 +25,7 @@ public class PaymentDTO {
     private String paymentTransactionId;
     private String paymentDate;
     private BigDecimal totalAmount;
+    private BigDecimal adjustedAmountFromCredits; // Amount adjusted from vendor credits
     private boolean tdsApplied;
     private String notes;
     private String paymentProofUrl;
