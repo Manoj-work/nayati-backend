@@ -102,22 +102,18 @@ public class EmployeeService {
             employee.setLeavePolicyId(department.getLeavePolicy());
         }
 
-        StringBuilder fullName = new StringBuilder();
+        List<String> nameParts = new ArrayList<>();
         if (employee.getFirstName() != null && !employee.getFirstName().trim().isEmpty()) {
-            fullName.append(employee.getFirstName().trim());
+            nameParts.add(employee.getFirstName().trim());
         }
-
         if (employee.getMiddleName() != null && !employee.getMiddleName().trim().isEmpty()) {
-            if (!fullName.isEmpty()) fullName.append(" ");
-            fullName.append(employee.getMiddleName().trim());
+            nameParts.add(employee.getMiddleName().trim());
         }
-
         if (employee.getLastName() != null && !employee.getLastName().trim().isEmpty()) {
-            if (!fullName.isEmpty()) fullName.append(" ");
-            fullName.append(employee.getLastName().trim());
+            nameParts.add(employee.getLastName().trim());
         }
 
-        employee.setName(fullName.toString());
+        employee.setName(String.join(" ", nameParts));
 
         // Generate image URLs only after validation passes
         if (profileImage != null) {
@@ -537,27 +533,6 @@ public class EmployeeService {
             existingEmployee.setFirstName(updatedEmployeeDTO.getFirstName());
             existingEmployee.setMiddleName(updatedEmployeeDTO.getMiddleName());
             existingEmployee.setLastName(updatedEmployeeDTO.getLastName());
-
-//             existingEmployee.setDesignation(updatedEmployee.getDesignation());
-//             existingEmployee.setFathersName(updatedEmployee.getFathersName());
-//             existingEmployee.setOvertimeEligibile(updatedEmployee.isOvertimeEligibile());
-//             existingEmployee.setPfEnrolled(updatedEmployee.isPfEnrolled());
-//             existingEmployee.setUanNumber(updatedEmployee.getUanNumber());
-//             existingEmployee.setEsicEnrolled(updatedEmployee.isEsicEnrolled());
-//             existingEmployee.setEsicNumber(updatedEmployee.getEsicNumber());
-//             existingEmployee.setWeeklyOffs(updatedEmployee.getWeeklyOffs());
-//             existingEmployee.setEmailPersonal(updatedEmployee.getEmailPersonal());
-//             existingEmployee.setEmailOfficial(updatedEmployee.getEmailOfficial());
-//             existingEmployee.setPhone(updatedEmployee.getPhone());
-//             existingEmployee.setAlternatePhone(updatedEmployee.getAlternatePhone());
-//             existingEmployee.setDepartment(updatedEmployee.getDepartment());
-//             existingEmployee.setGender(updatedEmployee.getGender());
-//             existingEmployee.setReportingManager(updatedEmployee.getReportingManager());
-//             existingEmployee.setPermanentAddress(updatedEmployee.getPermanentAddress());
-//             existingEmployee.setCurrentAddress(updatedEmployee.getCurrentAddress());
-//             existingEmployee.setSalaryDetails(updatedEmployee.getSalaryDetails());
-//             existingEmployee.setJoiningDate(updatedEmployee.getJoiningDate());
-// >>>>>>> main
 
             // Update leave policy based on department
             if (updatedEmployeeDTO.getDepartment() != null && !updatedEmployeeDTO.getDepartment().isEmpty()) {
