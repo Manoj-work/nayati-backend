@@ -45,7 +45,7 @@ public class EmployeeModel {
     @NotBlank(message = "first name cannot be empty")
     private String firstName="";
 
-    private String middleName="";
+    private String middleName;
 
     @NotBlank(message = "last name cannot be empty")
     private String lastName="";
