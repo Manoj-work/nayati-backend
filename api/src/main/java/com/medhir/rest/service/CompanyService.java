@@ -5,11 +5,16 @@ import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.CompanyModel;
 import com.medhir.rest.repository.CompanyRepository;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
+import com.medhir.rest.dto.EmployeeDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class CompanyService {
@@ -17,9 +22,12 @@ public class CompanyService {
     @Autowired
     private CompanyRepository companyRepository;
 
-
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
+
+    @Autowired
+    @Lazy
+    private EmployeeService employeeService;
 
     public  CompanyModel createCompany(CompanyModel company) {
         // Check if email already exists
@@ -33,8 +41,34 @@ public class CompanyService {
 
         company.setCompanyId("CID" + snowflakeIdGenerator.nextId());
 
-
         return companyRepository.save(company);
+    }
+
+    @Transactional
+    public CompanyModel createCompanyWithHead(CompanyModel company) {
+        // 1. Create company first
+        CompanyModel savedCompany = createCompany(company);
+        
+        // 2. If company head exists, create employee
+        if (savedCompany.getCompanyHead() != null && savedCompany.getCompanyHead().getName() != null) {
+            EmployeeDTO employeeDTO = new EmployeeDTO();
+            employeeDTO.setCompanyId(savedCompany.getCompanyId());
+            employeeDTO.setFirstName(savedCompany.getCompanyHead().getName());
+            employeeDTO.setEmailPersonal(savedCompany.getCompanyHead().getEmail());
+            employeeDTO.setPhone(savedCompany.getCompanyHead().getPhone());
+            employeeDTO.setRoles(Set.of("EMPLOYEE")); // Default role
+            employeeDTO.setJoiningDate(LocalDate.now());
+            
+            // Use existing employee service (no images needed for company head)
+            try {
+                employeeService.createEmployee(employeeDTO, null, null, null, null, null, null, null);
+            } catch (Exception e) {
+                // Log error but don't fail company creation
+                System.err.println("Failed to create company head as employee: " + e.getMessage());
+            }
+        }
+        
+        return savedCompany;
     }
 
     public List<CompanyModel> getAllCompanies() {

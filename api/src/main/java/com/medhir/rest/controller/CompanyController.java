@@ -19,12 +19,9 @@ public class CompanyController {
     private CompanyService companyService;
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createCompany(@Valid @RequestBody CompanyModel company) {
-        CompanyModel savedCompany = companyService.createCompany(company);
-        return ResponseEntity.ok(Map.of(
-                "message", "Company created successfully!"
-//                "company", savedCompany
-        ));
+    public ResponseEntity<CompanyModel> createCompany(@Valid @RequestBody CompanyModel company) {
+        CompanyModel savedCompany = companyService.createCompanyWithHead(company);
+        return ResponseEntity.ok(savedCompany);
     }
 
     @GetMapping
