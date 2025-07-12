@@ -79,6 +79,18 @@ public class MinioService {
     }
 
     public String uploadAssetInvoice(MultipartFile file, Long vendorId) {
-        return uploadFile(assetBucketName, file, vendorId.toString());
+        System.out.println("inside the asset  upload");
+        String Url = uploadFile(assetBucketName, file, vendorId.toString());
+
+        // 🔥 FIX: Convert direct MinIO URL to MinIO service URL for proper access
+        // Original: http://192.168.0.200:9000/assets/vendorId/filename
+        // Convert to: http://192.168.0.200:8085/minio/preview/assets/vendorId/filename
+//        if (url != null && url.contains("192.168.0.200:9000")) {
+//            String filePath = url.substring(url.indexOf("/assets/"));
+//            return "http://192.168.0.200:8085/minio/preview" + filePath;
+//        }
+//
+        return Url;
     }
+
 }

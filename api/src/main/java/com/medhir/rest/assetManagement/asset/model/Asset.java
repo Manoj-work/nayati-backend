@@ -1,5 +1,6 @@
 package com.medhir.rest.assetManagement.asset.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Document(collection = "assets")
 public class Asset {
+    @JsonIgnore
     @Id
     private String id;
     private String assetId;

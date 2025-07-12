@@ -99,23 +99,43 @@ public class AssetService {
         return assetRepository.save(existingAsset);
     }
 
-    public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
-        // TODO: Validate category, location, etc.
-        
-        // Generate asset ID based on category
-        if (asset.getCategoryId() != null) {
-            String generatedAssetId = assetIdGeneratorService.generateAssetId(asset.getCategoryId());
-            asset.setAssetId(generatedAssetId);
-        }
-        
-        if (invoiceScan != null && !invoiceScan.isEmpty()) {
-            String url = minioService.uploadAssetInvoice(invoiceScan, asset.getVendorId());
-            asset.setInvoiceScanUrl(url);
-        } else {
-            asset.setInvoiceScanUrl(null);
-        }
-        return assetRepository.save(asset);
+//    public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
+//        // TODO: Validate category, location, etc.
+//
+//        // Generate asset ID based on category
+//        if (asset.getCategoryId() != null) {
+//            String generatedAssetId = assetIdGeneratorService.generateAssetId(asset.getCategoryId());
+//            asset.setAssetId(generatedAssetId);
+//        }
+//
+//        if (invoiceScan != null && !invoiceScan.isEmpty()) {
+//            String url = minioService.uploadAssetInvoice(invoiceScan, asset.getVendorId());
+//            asset.setInvoiceScanUrl(url);
+//        } else {
+//            asset.setInvoiceScanUrl(null);
+//        }
+//        return assetRepository.save(asset);
+//    }
+public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
+    // Validate and generate asset ID based on category
+    if (asset.getCategoryId() != null) {
+        String generatedAssetId = assetIdGeneratorService.generateAssetId(asset.getCategoryId());
+        asset.setAssetId(generatedAssetId);
     }
+
+    // Handle invoice scan upload
+    if (invoiceScan != null && !invoiceScan.isEmpty()) {
+        String url = minioService.uploadAssetInvoice(invoiceScan, asset.getVendorId());  // Upload and get URL
+        System.out.println("url " + url);
+        asset.setInvoiceScanUrl(url);
+    } else {
+        asset.setInvoiceScanUrl(null);
+        // Optional: make it null if no file uploaded
+    }
+
+    return assetRepository.save(asset);
+}
+
 
     public Asset patchAsset(String id, Asset updatedAsset, MultipartFile invoiceScan) {
         Asset existingAsset = getAssetById(id);
