@@ -1,6 +1,7 @@
 package com.medhir.rest.service;
 
 import com.medhir.rest.dto.*;
+import com.medhir.rest.exception.BadRequestException;
 import com.medhir.rest.service.auth.EmployeeAuthService;
 import com.medhir.rest.model.EmployeeModel;
 import com.medhir.rest.exception.DuplicateResourceException;
@@ -93,14 +94,35 @@ public class EmployeeService {
         // Set role as EMPLOYEE
         employee.setRoles(Set.of("EMPLOYEE"));
 
-        // Set leave policy based on department
-        if (employee.getDepartment() != null && !employee.getDepartment().isEmpty()) {
-            DepartmentModel department = departmentService.getDepartmentById(employee.getDepartment());
-            LeavePolicyModel leavePolicy = leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
-
-            // Set the leave policy ID
-            employee.setLeavePolicyId(department.getLeavePolicy());
+        if ((employee.getDepartment() == null || employee.getDepartment().isEmpty()) &&
+                (employee.getDesignation() != null && !employee.getDesignation().isEmpty())) {
+            throw new BadRequestException("Department must be provided when a designation is specified.");
         }
+
+        if (employee.getDepartment() != null && !employee.getDepartment().isEmpty()) {
+
+            DepartmentModel department = departmentService.getDepartmentById(employee.getDepartment());
+
+            if (department != null) {
+
+                if (department.getLeavePolicy() != null && !department.getLeavePolicy().isEmpty()) {
+                    employee.setLeavePolicyId(department.getLeavePolicy());
+                }
+
+                if (employee.getDesignation() != null && !employee.getDesignation().isEmpty()) {
+                    DesignationModel designation = designationService.getDesignationById(employee.getDesignation());
+
+                    if (designation == null) {
+                        throw new BadRequestException("Designation not found: " + employee.getDesignation());
+                    }
+
+                    if (!designation.getDepartment().equals(department.getDepartmentId())) {
+                        throw new BadRequestException("The given designation does not belong to the selected department.");
+                    }
+                }
+            }
+        }
+
 
         List<String> nameParts = new ArrayList<>();
         if (employee.getFirstName() != null && !employee.getFirstName().trim().isEmpty()) {
