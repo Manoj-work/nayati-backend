@@ -26,8 +26,8 @@ public class InvoiceController {
         Invoice createdInvoice = invoiceService.createInvoice(request);
 
         return ResponseEntity.ok(Map.of(
-                "message", "Invoice created successfully!"
-//                "invoice", createdInvoice
+                "message", "Invoice created successfully!",
+                "invoice", createdInvoice
         ));
     }
 

@@ -10,7 +10,7 @@ public interface InvoiceMapper {
     // Maps Create DTO → Entity
     Invoice toInvoice(InvoiceCreateDTO request);
 
-//     Optional: If you add UpdateInvoiceRequest later
+////     Optional: If you add UpdateInvoiceRequest later
 //    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 //    void updateInvoiceFromRequest(UpdateInvoiceRequest request, @MappingTarget Invoice invoice);
 

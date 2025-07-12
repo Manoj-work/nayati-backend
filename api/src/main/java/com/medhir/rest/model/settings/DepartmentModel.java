@@ -23,9 +23,9 @@ public class DepartmentModel {
 
     private String description;
 
-    private String departmentHead;
 
-//    @NotBlank(message = "Leave policy name is required")
+
+
     private String leavePolicy;
 
     private String weeklyHolidays;
