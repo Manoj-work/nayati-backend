@@ -1,10 +1,13 @@
 package com.medhir.rest.sales.model;
 
+import com.medhir.rest.model.IncomeModel;
+import com.medhir.rest.utils.GeneratedId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,11 +20,16 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "leads")
 public class LeadModel {
+    @Transient
+    private GeneratedId generatedId;
     @Id
     @JsonIgnore
     private String id;
     @Indexed(unique = true)
     private String leadId;
+    private String customerId;
+    private String projectName;
+    private String projectId;
     private String name;
     private String contactNumber;
     private String email;
@@ -66,4 +74,14 @@ public class LeadModel {
     private List<Activity> activities = new ArrayList<>();
     private List<Note> notesList = new ArrayList<>();
     private List<ActivityLog> activityLogs = new ArrayList<>();
+
+    public void setGeneratedId(GeneratedId generatedId) {
+        this.generatedId = generatedId;
+    }
+
+    public void generateProjectName() {
+        if (this.projectName == null && this.generatedId != null) {
+            this.projectName = generatedId.generateId("PROJ-", LeadModel.class, "projectName");
+        }
+    }
 }

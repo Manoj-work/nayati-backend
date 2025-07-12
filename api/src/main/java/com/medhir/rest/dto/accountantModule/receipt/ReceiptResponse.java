@@ -28,6 +28,8 @@ public class ReceiptResponse {
 
     private BigDecimal unallocatedAmount;
 
+    private String paymentMethod;
+
     private List<LinkedInvoice> linkedInvoices;
 
     @Data

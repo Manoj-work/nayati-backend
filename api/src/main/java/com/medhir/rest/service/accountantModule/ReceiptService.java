@@ -10,11 +10,14 @@ import com.medhir.rest.model.accountantModule.Invoice;
 import com.medhir.rest.model.accountantModule.Receipt;
 import com.medhir.rest.repository.accountantModule.InvoiceRepository;
 import com.medhir.rest.repository.accountantModule.ReceiptRepository;
+import com.medhir.rest.sales.model.LeadModel;
+import com.medhir.rest.sales.repository.LeadRepository;
 import com.medhir.rest.testModuleforsales.Customer;
 import com.medhir.rest.testModuleforsales.CustomerRepository;
 import com.medhir.rest.testModuleforsales.Project;
 import com.medhir.rest.testModuleforsales.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +38,9 @@ public class ReceiptService {
     private final ReceiptMapper receiptMapper;
     private final CustomerRepository customerRepository;
 
+    @Autowired
+    private LeadRepository leadRepository;
+
     @Transactional
     public Receipt createReceipt(ReceiptCreateDTO dto) {
 
@@ -42,8 +48,9 @@ public class ReceiptService {
             throw new DuplicateResourceException("Receipt number already exists: " + dto.getReceiptNumber());
         }
 
-        Project project = projectRepository.findByProjectId(dto.getProjectId())
-                .orElseThrow(() -> new ResourceNotFoundException("Project not found with ID: " + dto.getProjectId()));
+        LeadModel project = leadRepository.findByLeadId(dto.getProjectId())
+                .orElseThrow(() -> new ResourceNotFoundException("Project not found with  ID: " + dto.getProjectId()));
+
 
         Receipt receipt = receiptMapper.toReceipt(dto);
 
@@ -148,6 +155,7 @@ public class ReceiptService {
                 receipt.getAmountReceived(),
                 receipt.getAllocatedAmount(),
                 receipt.getAmountReceived().subtract(receipt.getAllocatedAmount()),
+                receipt.getPaymentMethod(),
                 linkedInvoices
         );
     }
@@ -202,6 +210,7 @@ public class ReceiptService {
                     receipt.getAmountReceived(),
                     receipt.getAllocatedAmount(),
                     receipt.getAmountReceived().subtract(receipt.getAllocatedAmount()),
+                    receipt.getPaymentMethod(),
                     linkedInvoices
             );
 
@@ -255,6 +264,7 @@ public class ReceiptService {
                     receipt.getAmountReceived(),
                     receipt.getAllocatedAmount(),
                     receipt.getAmountReceived().subtract(receipt.getAllocatedAmount()),
+                    receipt.getPaymentMethod(),
                     linkedInvoices
             );
 
@@ -279,6 +289,7 @@ public class ReceiptService {
                             r.getAmountReceived(),
                             allocated,
                             r.getAmountReceived().subtract(allocated),
+                            r.getPaymentMethod(),
                             List.of()  // linkedInvoices if needed
                     );
                 }).toList();

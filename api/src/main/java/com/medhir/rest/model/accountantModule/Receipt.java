@@ -25,7 +25,7 @@ public class Receipt {
     private String receiptNumber;  // Unique number
 
     @Indexed
-    private String projectId;      // Link to Project
+    private String projectId;      // Link to lead
     private String customerId;     // Link to Customer
 
 

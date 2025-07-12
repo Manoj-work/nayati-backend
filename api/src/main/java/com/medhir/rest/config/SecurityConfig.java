@@ -51,6 +51,7 @@ public class SecurityConfig {
                                 "/api/attendance/upload",
                                 "/employee/**",
                                 "/receipts/**"
+
                         ).permitAll()
 
                         // Only HR Admin can access /hradmin/**

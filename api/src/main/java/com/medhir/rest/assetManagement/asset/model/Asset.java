@@ -1,5 +1,8 @@
 package com.medhir.rest.assetManagement.asset.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -9,7 +12,10 @@ import java.util.Map;
  * Represents an Asset in the Asset Management system.
  * Includes core identification, financial, assignment, and custom fields.
  */
+@Data
 @Document(collection = "assets")
+
+
 public class Asset {
     @Id
     private String id;
