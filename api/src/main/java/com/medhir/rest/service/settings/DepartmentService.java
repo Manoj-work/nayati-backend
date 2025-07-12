@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DepartmentService {
@@ -118,5 +120,9 @@ public class DepartmentService {
     public void deleteDepartment(String id) {
         DepartmentModel department = getDepartmentById(id);
         departmentRepository.deleteById(department.getId());
+    }
+
+    public List<DepartmentModel> getDepartmentsByIds(Set<String> ids) {
+        return departmentRepository.findByDepartmentIdIn(ids);
     }
 }

@@ -10,7 +10,9 @@ import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class LeaveTypeService {
@@ -106,5 +108,9 @@ public class LeaveTypeService {
 
     public boolean existsByName(String name) {
         return leaveTypeRepository.existsByLeaveTypeName(name);
+    }
+
+    public List<LeaveTypeModel> getLeaveTypesByIds(Set<String> ids) {
+        return leaveTypeRepository.findByLeaveTypeIdIn(ids);
     }
 }

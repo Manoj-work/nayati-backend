@@ -13,7 +13,9 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -126,5 +128,9 @@ public class DesignationService {
                             ));
                 })
                 .collect(Collectors.toList());
+    }
+
+    public List<DesignationModel> getDesignationsByIds(Set<String> ids) {
+        return designationRepository.findByDesignationIdIn(ids);
     }
 }

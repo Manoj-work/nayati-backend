@@ -29,13 +29,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import com.medhir.rest.dto.EmployeeDTO;
 import com.medhir.rest.mapper.EmployeeMapper;
@@ -212,54 +206,71 @@ public class EmployeeService {
     // Get All Employees
     public List<EmployeeWithLeaveDetailsDTO> getAllEmployees() {
         List<EmployeeModel> employees = employeeRepository.findAll();
+
+        Set<String> departmentIds = employees.stream()
+                .map(EmployeeModel::getDepartment)
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.toSet());
+
+        Set<String> designationIds = employees.stream()
+                .map(EmployeeModel::getDesignation)
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.toSet());
+
+        Set<String> leavePolicyIds = employees.stream()
+                .map(EmployeeModel::getLeavePolicyId)
+                .filter(s -> s != null && !s.isEmpty())
+                .collect(Collectors.toSet());
+
+        Map<String, String> departmentNameMap = departmentService.getDepartmentsByIds(departmentIds).stream()
+                .collect(Collectors.toMap(DepartmentModel::getId, DepartmentModel::getName));
+
+        Map<String, String> designationNameMap = designationService.getDesignationsByIds(designationIds).stream()
+                .collect(Collectors.toMap(DesignationModel::getId, DesignationModel::getName));
+
+        Map<String, LeavePolicyModel> leavePolicyMap = leavePolicyService.getLeavePoliciesByIds(leavePolicyIds).stream()
+                .collect(Collectors.toMap(LeavePolicyModel::getId, lp -> lp));
+
+        Set<String> leaveTypeIds = leavePolicyMap.values().stream()
+                .flatMap(lp -> lp.getLeaveAllocations().stream())
+                .map(LeavePolicyModel.LeaveAllocation::getLeaveTypeId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        Map<String, String> leaveTypeNameMap = leaveTypeService.getLeaveTypesByIds(leaveTypeIds).stream()
+                .collect(Collectors.toMap(LeaveTypeModel::getLeaveTypeId, LeaveTypeModel::getLeaveTypeName));
+
         return employees.stream().map(employee -> {
-            EmployeeWithLeaveDetailsDTO dto = EmployeeMapper.toEmployeeWithLeaveDetailsDTO(employee);
+            EmployeeWithLeaveDetailsDTO dto = new EmployeeWithLeaveDetailsDTO(employee);
 
-            // Get department name
-            try {
-                if (employee.getDepartment() != null && !employee.getDepartment().isEmpty()) {
-                    dto.setDepartmentName(departmentService.getDepartmentById(employee.getDepartment()).getName());
-                }
-            } catch (Exception e) {
-                dto.setDepartmentName(employee.getDepartment());
-            }
+            // Department name
+            dto.setDepartmentName(
+                    departmentNameMap.getOrDefault(employee.getDepartment(), employee.getDepartment())
+            );
 
-            // Get designation name
-            try {
-                Optional<DesignationModel> designation = Optional
-                        .ofNullable(designationService.getDesignationById(employee.getDesignation()));
-                designation.ifPresent(d -> dto.setDesignationName(d.getName()));
-                if (designation.isEmpty()) {
-                    dto.setDesignationName(employee.getDesignation());
-                }
-            } catch (Exception e) {
-                dto.setDesignationName(employee.getDesignation());
-            }
+            // Designation name
+            dto.setDesignationName(
+                    designationNameMap.getOrDefault(employee.getDesignation(), employee.getDesignation())
+            );
 
-            // Get leave policy name if available
-            if (employee.getLeavePolicyId() != null) {
-                try {
-                    LeavePolicyModel leavePolicy = leavePolicyService.getLeavePolicyById(employee.getLeavePolicyId());
+            // Leave policy & leave types
+            if (employee.getLeavePolicyId() != null && !employee.getLeavePolicyId().isEmpty()) {
+                LeavePolicyModel leavePolicy = leavePolicyMap.get(employee.getLeavePolicyId());
+                if (leavePolicy != null) {
                     dto.setLeavePolicyName(leavePolicy.getName());
 
-                    // Get all leave type names and IDs from the policy
                     List<String> leaveTypeNames = new ArrayList<>();
-                    List<String> leaveTypeIds = new ArrayList<>();
-
-                    leavePolicy.getLeaveAllocations().forEach(allocation -> {
-                        try {
-                            LeaveTypeModel leaveType = leaveTypeService.getLeaveTypeById(allocation.getLeaveTypeId());
-                            leaveTypeNames.add(leaveType.getLeaveTypeName());
-                            leaveTypeIds.add(leaveType.getLeaveTypeId());
-                        } catch (Exception e) {
-                            // Skip if leave type not found
+                    List<String> leaveTypeIdList = new ArrayList<>();
+                    for (LeavePolicyModel.LeaveAllocation allocation : leavePolicy.getLeaveAllocations()) {
+                        String leaveTypeId = allocation.getLeaveTypeId();
+                        String leaveTypeName = leaveTypeNameMap.get(leaveTypeId);
+                        if (leaveTypeName != null) {
+                            leaveTypeNames.add(leaveTypeName);
+                            leaveTypeIdList.add(leaveTypeId);
                         }
-                    });
-
+                    }
                     dto.setLeaveTypeNames(leaveTypeNames);
-                    dto.setLeaveTypeIds(leaveTypeIds);
-                } catch (Exception e) {
-                    // If leave policy not found, leave names and IDs as null
+                    dto.setLeaveTypeIds(leaveTypeIdList);
                 }
             }
 
