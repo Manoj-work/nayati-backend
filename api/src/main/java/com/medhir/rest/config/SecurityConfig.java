@@ -49,7 +49,8 @@ public class SecurityConfig {
                                 "/leads/**",
                                 "/pipeline-stages/**",
                                 "/api/attendance/upload",
-                                "/employee/**"
+                                "/employee/**",
+                                "/receipts/**"
                         ).permitAll()
 
                         // Only HR Admin can access /hradmin/**

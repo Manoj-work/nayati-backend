@@ -22,7 +22,6 @@ public class LeadModel {
     private String id;
     @Indexed(unique = true)
     private String leadId;
-
     private String name;
     private String contactNumber;
     private String email;
