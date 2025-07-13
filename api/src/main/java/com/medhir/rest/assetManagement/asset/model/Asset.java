@@ -15,7 +15,6 @@ import java.util.Map;
 @Data
 @Document(collection = "assets")
 
-
 public class Asset {
     @Id
     private String id;
