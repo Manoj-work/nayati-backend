@@ -1,5 +1,6 @@
 package com.medhir.rest.sales.service;
 
+import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.sales.model.LeadModel;
 import com.medhir.rest.sales.model.Activity;
 import com.medhir.rest.sales.model.ActivityLog;
@@ -32,6 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.medhir.rest.sales.dto.lead.LeadProjectCustomerResponseDTO;
 
 @Service
 public class LeadService {
@@ -1052,5 +1054,17 @@ public class LeadService {
                     .collect(Collectors.toList())
             ))
             .collect(Collectors.toList());
+    }
+
+    public LeadProjectCustomerResponseDTO getProjectCustomerInfo(String leadId) {
+        LeadModel lead = leadRepository.findByLeadId(leadId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lead not found with ID: " + leadId));
+
+        return new LeadProjectCustomerResponseDTO(
+                lead.getLeadId(),
+                lead.getProjectName(),
+                lead.getCustomerId(),
+                lead.getName()
+        );
     }
 }

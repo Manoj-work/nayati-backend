@@ -25,4 +25,7 @@ public interface LeadRepository extends MongoRepository<LeadModel, String> {
     Optional<LeadModel> findByLeadId(String leadId);
 
     List<KanbanLeadProjection> findAllBy(Class<KanbanLeadProjection> type);
+
+    Optional<LeadModel> findByProjectName(String projectName);
+
 }

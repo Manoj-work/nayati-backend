@@ -27,7 +27,7 @@ public class Receipt {
     @Indexed
     private String projectId;      // Link to lead
     private String customerId;     // Link to Customer
-
+    private String customerName;
 
     private String receiptDate;    // ISO String or LocalDate
 

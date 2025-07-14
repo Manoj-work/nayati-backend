@@ -48,6 +48,7 @@ public class ReceiptService {
             throw new DuplicateResourceException("Receipt number already exists: " + dto.getReceiptNumber());
         }
 
+
         LeadModel project = leadRepository.findByLeadId(dto.getProjectId())
                 .orElseThrow(() -> new ResourceNotFoundException("Project not found with  ID: " + dto.getProjectId()));
 
@@ -156,6 +157,7 @@ public class ReceiptService {
                 receipt.getAllocatedAmount(),
                 receipt.getAmountReceived().subtract(receipt.getAllocatedAmount()),
                 receipt.getPaymentMethod(),
+                receipt.getPaymentTransactionId(),
                 linkedInvoices
         );
     }
@@ -211,6 +213,7 @@ public class ReceiptService {
                     receipt.getAllocatedAmount(),
                     receipt.getAmountReceived().subtract(receipt.getAllocatedAmount()),
                     receipt.getPaymentMethod(),
+                    receipt.getPaymentTransactionId(),
                     linkedInvoices
             );
 
@@ -265,6 +268,7 @@ public class ReceiptService {
                     receipt.getAllocatedAmount(),
                     receipt.getAmountReceived().subtract(receipt.getAllocatedAmount()),
                     receipt.getPaymentMethod(),
+                    receipt.getPaymentTransactionId(),
                     linkedInvoices
             );
 
@@ -290,6 +294,7 @@ public class ReceiptService {
                             allocated,
                             r.getAmountReceived().subtract(allocated),
                             r.getPaymentMethod(),
+                            r.getPaymentTransactionId(),
                             List.of()  // linkedInvoices if needed
                     );
                 }).toList();

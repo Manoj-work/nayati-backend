@@ -30,6 +30,8 @@ public class ReceiptResponse {
 
     private String paymentMethod;
 
+    private String paymentTransactionId;
+
     private List<LinkedInvoice> linkedInvoices;
 
     @Data
