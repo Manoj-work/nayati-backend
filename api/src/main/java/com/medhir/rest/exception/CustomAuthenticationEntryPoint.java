@@ -30,7 +30,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             HttpStatus.UNAUTHORIZED.value(),
             "Unauthorized",
             "Authentication is required to access this resource",
-            null
+            null,
+            request.getRequestURI()
         );
 
         objectMapper.writeValue(response.getOutputStream(), errorResponse);

@@ -1,6 +1,7 @@
 package com.medhir.rest.dto.rbac.roles;
 
 import com.medhir.rest.model.rbac.ModulePermission;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
@@ -9,5 +10,5 @@ import java.util.List;
 public class UpdateRoleRequest {
     private String name;
     private List<ModulePermission> permissions;
-    private String companyId;
+    @NotNull private String companyId;
 }

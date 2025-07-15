@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/superadmin/companies")
+@RequestMapping("/superadmin/companies")
 @RequiredArgsConstructor
 public class CompanyModuleController {
     @Autowired
@@ -38,7 +38,5 @@ public class CompanyModuleController {
         List<ModulePermission> modules = companyService.getAssignedModules(companyId);
         return ResponseEntity.ok(modules);
     }
-
-
 
 }
