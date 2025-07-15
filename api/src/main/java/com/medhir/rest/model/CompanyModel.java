@@ -54,8 +54,54 @@ public class CompanyModel {
     @Getter
     @Setter
     public static class CompanyHead {
-        private String name;
+        @jakarta.validation.constraints.NotBlank(message = "First name is required")
+        private String firstName;
+        private String middleName;
+        @jakarta.validation.constraints.NotBlank(message = "Last name is required")
+        private String lastName;
         private String email;
         private String phone;
+        private String name; // Full name, persisted and exposed
+
+        public String getName() {
+            if (name != null && !name.trim().isEmpty()) return name;
+            StringBuilder fullName = new StringBuilder();
+            if (firstName != null && !firstName.trim().isEmpty()) fullName.append(firstName.trim());
+            if (middleName != null && !middleName.trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(middleName.trim());
+            }
+            if (lastName != null && !lastName.trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(lastName.trim());
+            }
+            return fullName.toString();
+        }
+
+        public void setFirstName(String firstName) {
+            this.firstName = firstName;
+            setFullNameFromParts();
+        }
+        public void setMiddleName(String middleName) {
+            this.middleName = middleName;
+            setFullNameFromParts();
+        }
+        public void setLastName(String lastName) {
+            this.lastName = lastName;
+            setFullNameFromParts();
+        }
+        private void setFullNameFromParts() {
+            StringBuilder fullName = new StringBuilder();
+            if (firstName != null && !firstName.trim().isEmpty()) fullName.append(firstName.trim());
+            if (middleName != null && !middleName.trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(middleName.trim());
+            }
+            if (lastName != null && !lastName.trim().isEmpty()) {
+                if (fullName.length() > 0) fullName.append(" ");
+                fullName.append(lastName.trim());
+            }
+            this.name = fullName.toString();
+        }
     }
 }

@@ -50,10 +50,12 @@ public class CompanyService {
         CompanyModel savedCompany = createCompany(company);
         
         // 2. If company head exists, create employee
-        if (savedCompany.getCompanyHead() != null && savedCompany.getCompanyHead().getName() != null) {
+        if (savedCompany.getCompanyHead() != null && savedCompany.getCompanyHead().getFirstName() != null) {
             EmployeeDTO employeeDTO = new EmployeeDTO();
             employeeDTO.setCompanyId(savedCompany.getCompanyId());
-            employeeDTO.setFirstName(savedCompany.getCompanyHead().getName());
+            employeeDTO.setFirstName(savedCompany.getCompanyHead().getFirstName());
+            employeeDTO.setMiddleName(savedCompany.getCompanyHead().getMiddleName());
+            employeeDTO.setLastName(savedCompany.getCompanyHead().getLastName());
             employeeDTO.setEmailPersonal(savedCompany.getCompanyHead().getEmail());
             employeeDTO.setPhone(savedCompany.getCompanyHead().getPhone());
             employeeDTO.setRoles(Set.of("EMPLOYEE")); // Default role
@@ -101,6 +103,8 @@ public class CompanyService {
         companyToUpdate.setGst(company.getGst());
         companyToUpdate.setRegAdd(company.getRegAdd());
         companyToUpdate.setPrefixForEmpID(company.getPrefixForEmpID());
+        companyToUpdate.setColorCode(company.getColorCode());
+        companyToUpdate.setCompanyHead(company.getCompanyHead());
 
         return companyRepository.save(companyToUpdate);
     }

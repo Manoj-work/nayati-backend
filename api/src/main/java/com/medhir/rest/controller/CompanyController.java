@@ -36,12 +36,9 @@ public class CompanyController {
     }
 
     @PutMapping("/{companyId}")
-    public ResponseEntity<Map<String, Object>> updateCompany(@PathVariable String companyId, @Valid @RequestBody CompanyModel company) {
+    public ResponseEntity<CompanyModel> updateCompany(@PathVariable String companyId, @Valid @RequestBody CompanyModel company) {
         CompanyModel updatedCompany =  companyService.updateCompany(companyId, company);
-        return ResponseEntity.ok(Map.of(
-                "message", "Company updated successfully!"
-//                "Company ",updatedCompany
-        ));
+        return ResponseEntity.ok(updatedCompany);
     }
 
     @DeleteMapping("/{companyId}")
