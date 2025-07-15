@@ -162,6 +162,65 @@ public class ReceiptService {
         );
     }
 
+//    public List<ReceiptResponse> getAllReceipts() {
+//
+//        List<Receipt> receipts = receiptRepository.findAll();
+//
+//        Set<String> projectIds = receipts.stream()
+//                .map(Receipt::getProjectId)
+//                .collect(Collectors.toSet());
+//
+//        Set<String> customerIds = receipts.stream()
+//                .map(Receipt::getCustomerId)
+//                .collect(Collectors.toSet());
+//
+//        List<Project> projects = projectRepository.findAllByProjectIdIn(projectIds);
+//        List<Customer> customers = customerRepository.findAllByCustomerIdIn(customerIds);
+//
+//        Map<String, Project> projectMap = projects.stream()
+//                .collect(Collectors.toMap(Project::getProjectId, p -> p));
+//
+//        Map<String, Customer> customerMap = customers.stream()
+//                .collect(Collectors.toMap(Customer::getCustomerId, c -> c));
+//
+//        return receipts.stream().map(receipt -> {
+//
+//            Project project = projectMap.get(receipt.getProjectId());
+//            Customer customer = customerMap.get(receipt.getCustomerId());
+//
+//            ReceiptResponse.ProjectInfo projectInfo = (project != null)
+//                    ? new ReceiptResponse.ProjectInfo(project.getProjectId(), project.getProjectName(), project.getSiteAddress())
+//                    : null;
+//
+//            ReceiptResponse.CustomerInfo customerInfo = (customer != null)
+//                    ? new ReceiptResponse.CustomerInfo(customer.getCustomerId(), customer.getCustomerName())
+//                    : null;
+//
+//            List<ReceiptResponse.LinkedInvoice> linkedInvoices = receipt.getLinkedInvoices().stream()
+//                    .map(linked -> new ReceiptResponse.LinkedInvoice(
+//                            linked.getInvoiceNumber(),
+//                            linked.getAmountAllocated()
+//                    ))
+//                    .collect(Collectors.toList());
+//
+//            return new ReceiptResponse(
+//                    receipt.getId(),
+//                    projectInfo,
+//                    customerInfo,
+//                    receipt.getReceiptNumber(),
+//                    receipt.getReceiptDate(),
+//                    receipt.getAmountReceived(),
+//                    receipt.getAllocatedAmount(),
+//                    receipt.getAmountReceived().subtract(receipt.getAllocatedAmount()),
+//                    receipt.getPaymentMethod(),
+//                    receipt.getPaymentTransactionId(),
+//                    linkedInvoices
+//            );
+//
+//        }).collect(Collectors.toList());
+//    }
+
+
     public List<ReceiptResponse> getAllReceipts() {
 
         List<Receipt> receipts = receiptRepository.findAll();
@@ -174,26 +233,37 @@ public class ReceiptService {
                 .map(Receipt::getCustomerId)
                 .collect(Collectors.toSet());
 
-        List<Project> projects = projectRepository.findAllByProjectIdIn(projectIds);
+        // Fetch from LeadRepository instead of ProjectRepository
+        List<LeadModel> projects = leadRepository.findAllByLeadIdIn(projectIds);
+
         List<Customer> customers = customerRepository.findAllByCustomerIdIn(customerIds);
 
-        Map<String, Project> projectMap = projects.stream()
-                .collect(Collectors.toMap(Project::getProjectId, p -> p));
+        // Map projectId to LeadModel
+        Map<String, LeadModel> projectMap = projects.stream()
+                .collect(Collectors.toMap(LeadModel::getLeadId, p -> p));
 
         Map<String, Customer> customerMap = customers.stream()
                 .collect(Collectors.toMap(Customer::getCustomerId, c -> c));
 
         return receipts.stream().map(receipt -> {
 
-            Project project = projectMap.get(receipt.getProjectId());
+            LeadModel project = projectMap.get(receipt.getProjectId());
             Customer customer = customerMap.get(receipt.getCustomerId());
 
             ReceiptResponse.ProjectInfo projectInfo = (project != null)
-                    ? new ReceiptResponse.ProjectInfo(project.getProjectId(), project.getProjectName(), project.getSiteAddress())
+                    ? new ReceiptResponse.ProjectInfo(
+                    project.getLeadId(),
+                    project.getProjectName()  ,
+                    null//assuming this exists in LeadModel
+//                    project.getSiteAddress()   //  or use null if siteAddress is not in LeadModel
+            )
                     : null;
 
             ReceiptResponse.CustomerInfo customerInfo = (customer != null)
-                    ? new ReceiptResponse.CustomerInfo(customer.getCustomerId(), customer.getCustomerName())
+                    ? new ReceiptResponse.CustomerInfo(
+                    customer.getCustomerId(),
+                    customer.getCustomerName()
+            )
                     : null;
 
             List<ReceiptResponse.LinkedInvoice> linkedInvoices = receipt.getLinkedInvoices().stream()
@@ -219,6 +289,8 @@ public class ReceiptService {
 
         }).collect(Collectors.toList());
     }
+
+
 
     public List<ReceiptResponse> getReceiptsByProjectId(String projectId) {
 

@@ -17,6 +17,9 @@ public class ReceiptCreateDTO {
     @NotBlank
     private String customerId;
 
+    private String customerName;
+    private String projectName;
+
     @NotBlank
     private String receiptNumber;
 

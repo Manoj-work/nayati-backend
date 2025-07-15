@@ -1067,4 +1067,20 @@ public class LeadService {
                 lead.getName()
         );
     }
+
+    public List<LeadProjectCustomerResponseDTO> getAllProjectCustomerInfo() {
+        List<LeadModel> leads = leadRepository.findAll();
+
+        return leads.stream()
+                .filter(lead -> lead.getCustomerId() != null) // skip bad data
+                .map(lead -> new LeadProjectCustomerResponseDTO(
+                        lead.getLeadId(),
+                        lead.getProjectName(),
+                        lead.getCustomerId(),
+                        lead.getName()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 }

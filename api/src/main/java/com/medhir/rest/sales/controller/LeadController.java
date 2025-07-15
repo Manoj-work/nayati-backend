@@ -367,4 +367,10 @@ public class LeadController {
                 )
         );
     }
+
+    @GetMapping("/project-customer/all")
+    public ResponseEntity<List<LeadProjectCustomerResponseDTO>> getAllProjectCustomerInfo() {
+        return ResponseEntity.ok(leadService.getAllProjectCustomerInfo());
+    }
+
 }

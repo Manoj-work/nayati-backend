@@ -28,6 +28,7 @@ public class Receipt {
     private String projectId;      // Link to lead
     private String customerId;     // Link to Customer
     private String customerName;
+    private String projectName;
 
     private String receiptDate;    // ISO String or LocalDate
 
