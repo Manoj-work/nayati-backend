@@ -11,6 +11,7 @@ import com.medhir.rest.model.ModuleModel;
 import com.medhir.rest.repository.EmployeeRepository;
 import com.medhir.rest.repository.ModuleRepository;
 import com.medhir.rest.model.settings.DepartmentModel;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.service.settings.DepartmentService;
 import com.medhir.rest.model.settings.DesignationModel;
 import com.medhir.rest.service.settings.DesignationService;
@@ -20,14 +21,8 @@ import com.medhir.rest.model.settings.LeavePolicyModel;
 import com.medhir.rest.service.settings.LeavePolicyService;
 import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.MinioService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
@@ -222,6 +217,64 @@ public class EmployeeService {
 
         return response;
     }
+
+    public EmployeeModel createCompanyHeadEmployee(
+            String companyId,
+            String firstName,
+            String middleName,
+            String lastName,
+            String email,
+            String phone
+    ) {
+        EmployeeModel employee = new EmployeeModel();
+        employee.setCompanyId(companyId);
+        employee.setFirstName(firstName);
+        employee.setMiddleName(middleName);
+        employee.setLastName(lastName);
+        employee.setEmailPersonal(email);
+        employee.setPhone(phone);
+
+        employee.setEmployeeId(generateAdminsId(companyId));
+
+        if (employeeRepository.findByEmployeeId(employee.getEmployeeId()).isPresent()) {
+            throw new DuplicateResourceException("Employee ID already exists: " + employee.getEmployeeId());
+        }
+
+        if (employeeRepository.findByEmailPersonal(email).isPresent()) {
+            throw new DuplicateResourceException("Email already exists: " + email);
+        }
+
+        if (employeeRepository.findByPhone(phone).isPresent()) {
+            throw new DuplicateResourceException("Phone number already exists: " + phone);
+        }
+
+        // Full name
+        List<String> nameParts = new ArrayList<>();
+        if (firstName != null && !firstName.trim().isEmpty()) {
+            nameParts.add(firstName.trim());
+        }
+        if (middleName != null && !middleName.trim().isEmpty()) {
+            nameParts.add(middleName.trim());
+        }
+        if (lastName != null && !lastName.trim().isEmpty()) {
+            nameParts.add(lastName.trim());
+        }
+        employee.setName(String.join(" ", nameParts));
+
+        // Mark role as COMPANY_HEAD or ADMIN or your standard role
+        employee.setRoles(Set.of("COMPANY_HEAD","EMPLOYEE"));
+
+        // Save
+        EmployeeModel saved = employeeRepository.save(employee);
+
+        // Optionally register login too
+        if (phone != null && email != null) {
+            employeeAuthService.registerEmployee(saved.getEmployeeId(), email, phone);
+        }
+
+        return saved;
+    }
+
 
     // Get All Employees
     public List<EmployeeWithLeaveDetailsDTO> getAllEmployees() {
@@ -687,7 +740,15 @@ public class EmployeeService {
 
         String prefix = company.getPrefixForEmpID();
 
-        return generatedId.generateId(prefix, EmployeeModel.class, "employeeId");
+        return generatedId.generateEmployeeId(prefix, EmployeeModel.class, "employeeId");
+    }
+    public String generateAdminsId(String companyId) {
+        CompanyModel company = companyService.getCompanyById(companyId)
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + companyId));
+
+        String prefix = company.getPrefixForEmpID();
+
+        return generatedId.generateAdminId(prefix, EmployeeModel.class, "employeeId");
     }
 
     public List<UserCompanyDTO> getEmployeeCompanies(String employeeId) {

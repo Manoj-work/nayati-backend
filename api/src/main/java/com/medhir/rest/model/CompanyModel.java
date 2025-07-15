@@ -50,4 +50,6 @@ public class CompanyModel {
 
     private String colorCode="#FFFFFF";
 
+    private String companyHeadId;
+
 }
