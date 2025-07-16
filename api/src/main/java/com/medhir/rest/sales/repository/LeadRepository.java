@@ -24,6 +24,7 @@ public interface LeadRepository extends MongoRepository<LeadModel, String> {
 
     // Find by custom Snowflake leadId
     Optional<LeadModel> findByLeadId(String leadId);
+    Optional<LeadModel> findByProjectId(String leadId);
 
     List<KanbanLeadProjection> findAllBy(Class<KanbanLeadProjection> type);
 

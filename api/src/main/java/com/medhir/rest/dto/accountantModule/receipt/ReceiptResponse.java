@@ -40,7 +40,7 @@ public class ReceiptResponse {
     public static class ProjectInfo {
         private String projectId;
         private String projectName;
-        private String siteAddress;
+        private String address;
     }
 
     @Data
