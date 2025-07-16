@@ -71,13 +71,17 @@ public class LeadService {
     // �� Get single lead by leadId (Snowflake ID)
     public LeadModel getLeadByLeadId(String leadId) {
         return leadRepository.findByLeadId(leadId)
-                .orElseThrow(() -> new RuntimeException("Lead not found with leadId: " + leadId));
+
+                .orElseThrow(() -> new RuntimeException(" Lead not found with leadId: " + leadId));
+
     }
 
     // Helper: Validate stageId exists
     private void validateStageId(String stageId) {
         if (!pipelineStageService.stageExistsById(stageId)) {
-            throw new RuntimeException("Invalid stageId: " + stageId + ". Please use a valid pipeline stage ID.");
+
+            throw new RuntimeException(" Invalid stageId: " + stageId + ". Please use a valid pipeline stage ID.");
+
         }
     }
 
@@ -202,10 +206,10 @@ public class LeadService {
         return leadRepository.save(existingLead);
     }
 
-    // ❌ Delete lead
+    //  Delete lead
     public void deleteLead(String id) {
         if (!leadRepository.existsById(id)) {
-            throw new RuntimeException("⚠️ Cannot delete. Lead not found with id: " + id);
+            throw new RuntimeException(" Cannot delete. Lead not found with id: " + id);
         }
         leadRepository.deleteById(id);
     }
@@ -311,36 +315,46 @@ public class LeadService {
         // Get the "Converted" stage ID
         var convertedStage = pipelineStageService.getStageByName("Converted");
         if (convertedStage.isEmpty()) {
-            throw new RuntimeException("'Converted' stage not found in pipeline");
+
+            throw new RuntimeException(" 'Converted' stage not found in pipeline");
+
         }
         String convertedStageId = convertedStage.get().getStageId();
         
         // Validate lead can be converted
         if (convertedStageId.equals(lead.getStageId())) {
-            throw new RuntimeException("Lead is already converted");
+
+            throw new RuntimeException(" Lead is already converted");
+
         }
         
         var lostStage = pipelineStageService.getStageByName("Lost");
         if (lostStage.isPresent() && lostStage.get().getStageId().equals(lead.getStageId())) {
-            throw new RuntimeException("Cannot convert a lost lead");
+
+            throw new RuntimeException(" Cannot convert a lost lead");
+
         }
         
         // Validate required lead information
         if (lead.getName() == null || lead.getName().trim().isEmpty()) {
-            throw new RuntimeException("Lead name is required for conversion");
+
+            throw new RuntimeException(" Lead name is required for conversion");
         }
         
         if (lead.getContactNumber() == null || lead.getContactNumber().trim().isEmpty()) {
-            throw new RuntimeException("Contact number is required for conversion");
+            throw new RuntimeException(" Contact number is required for conversion");
         }
         
         if (lead.getEmail() == null || lead.getEmail().trim().isEmpty()) {
-            throw new RuntimeException("Email is required for conversion");
+            throw new RuntimeException(" Email is required for conversion");
+
         }
         
         // Validate conversion data
         if (conversionData.getFinalQuotation() == null || conversionData.getFinalQuotation().trim().isEmpty()) {
-            throw new RuntimeException("Final quotation is required for conversion");
+
+            throw new RuntimeException(" Final quotation is required for conversion");
+
         }
         
         if (conversionData.getSignupAmount() == null || conversionData.getSignupAmount().trim().isEmpty()) {
@@ -368,7 +382,7 @@ public class LeadService {
         String conversionNoteId = "NOTE-" + snowflakeIdGenerator.nextId();
         Note conversionNote = new Note();
         conversionNote.setId(conversionNoteId);
-        conversionNote.setContent("🎉 LEAD CONVERTED: " + conversionData.getConversionNotes());
+        conversionNote.setContent(" LEAD CONVERTED: " + conversionData.getConversionNotes());
         conversionNote.setUser(user);
         conversionNote.setTimestamp(LocalDateTime.now().toString());
         lead.getNotesList().add(conversionNote);
@@ -448,13 +462,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getActivities() == null) {
-            throw new RuntimeException("❌ No activities found for this lead");
+            throw new RuntimeException(" No activities found for this lead");
         }
         
         Activity activityToUpdate = lead.getActivities().stream()
                 .filter(activity -> activity.getId().equals(activityId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
+                .orElseThrow(() -> new RuntimeException(" Activity not found with id: " + activityId));
         
         // Update activity fields
         if (activityDTO.getType() != null) {
@@ -511,7 +525,7 @@ public class LeadService {
     public LeadModel deleteActivity(String leadId, String activityId) {
         LeadModel lead = getLeadByLeadId(leadId);
         if (lead.getActivities() == null) {
-            throw new RuntimeException("❌ No activities found for this lead");
+            throw new RuntimeException(" No activities found for this lead");
         }
         Activity deletedActivity = lead.getActivities().stream()
             .filter(activity -> activity.getId().equals(activityId))
@@ -519,7 +533,7 @@ public class LeadService {
             .orElse(null);
         boolean removed = lead.getActivities().removeIf(activity -> activity.getId().equals(activityId));
         if (!removed) {
-            throw new RuntimeException("❌ Activity not found with id: " + activityId);
+            throw new RuntimeException(" Activity not found with id: " + activityId);
         }
         // Add ActivityLog for deletion
         if (deletedActivity != null) {
@@ -543,13 +557,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getActivities() == null) {
-            throw new RuntimeException("❌ No activities found for this lead");
+            throw new RuntimeException(" No activities found for this lead");
         }
         
         Activity activity = lead.getActivities().stream()
                 .filter(act -> act.getId().equals(activityId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
+                .orElseThrow(() -> new RuntimeException(" Activity not found with id: " + activityId));
         
         return activity.getStatus();
     }
@@ -558,13 +572,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getActivities() == null) {
-            throw new RuntimeException("❌ No activities found for this lead");
+            throw new RuntimeException(" No activities found for this lead");
         }
         
         Activity activity = lead.getActivities().stream()
                 .filter(act -> act.getId().equals(activityId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("❌ Activity not found with id: " + activityId));
+                .orElseThrow(() -> new RuntimeException(" Activity not found with id: " + activityId));
         
         String oldStatus = activity.getStatus();
         activity.setStatus(status);
@@ -599,13 +613,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getNotesList() == null) {
-            throw new RuntimeException("❌ No notes found for this lead");
+            throw new RuntimeException(" No notes found for this lead");
         }
         
         Note noteToUpdate = lead.getNotesList().stream()
                 .filter(note -> note.getId().equals(noteId))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("❌ Note not found with id: " + noteId));
+                .orElseThrow(() -> new RuntimeException(" Note not found with id: " + noteId));
         
         if (noteDTO.getContent() != null) {
             noteToUpdate.setContent(noteDTO.getContent());
@@ -618,13 +632,13 @@ public class LeadService {
         LeadModel lead = getLeadByLeadId(leadId);
         
         if (lead.getNotesList() == null) {
-            throw new RuntimeException("❌ No notes found for this lead");
+            throw new RuntimeException(" No notes found for this lead");
         }
         
         boolean removed = lead.getNotesList().removeIf(note -> note.getId().equals(noteId));
         
         if (!removed) {
-            throw new RuntimeException("❌ Note not found with id: " + noteId);
+            throw new RuntimeException(" Note not found with id: " + noteId);
         }
         
         return leadRepository.save(lead);
@@ -833,7 +847,7 @@ public class LeadService {
     private String findConversionNoteId(LeadModel convertedLead) {
         if (convertedLead.getNotesList() != null) {
             for (Note note : convertedLead.getNotesList()) {
-                if (note.getContent().startsWith("🎉 LEAD CONVERTED:")) {
+                if (note.getContent().startsWith(" LEAD CONVERTED:")) {
                     return note.getId();
                 }
             }
