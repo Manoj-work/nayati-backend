@@ -740,7 +740,7 @@ public class EmployeeService {
 
         String prefix = company.getPrefixForEmpID();
 
-        return generatedId.generateEmployeeId(prefix, EmployeeModel.class, "employeeId");
+        return generatedId.generateId(prefix, EmployeeModel.class, "employeeId");
     }
     public String generateAdminsId(String companyId) {
         CompanyModel company = companyService.getCompanyById(companyId)

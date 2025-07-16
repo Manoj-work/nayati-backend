@@ -23,7 +23,7 @@ public class GeneratedId {
     /**
      * Generate Employee ID: always >= 100
      */
-    public <T> String generateEmployeeId(String prefix, Class<T> modelClass, String idFieldName) {
+    public <T> String generateId(String prefix, Class<T> modelClass, String idFieldName) {
         String collectionName = modelClass.getAnnotation(Document.class).collection();
         return generateNextId(prefix, collectionName, idFieldName, 100);
     }

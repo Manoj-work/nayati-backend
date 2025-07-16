@@ -61,4 +61,5 @@ public class DepartmentController {
         response.put("message", "Department deleted successfully");
         return ResponseEntity.ok(response);
     }
+
 }
