@@ -21,11 +21,16 @@ public class CompanyDetailsDTO {
     @Pattern(regexp = "\\d{10}")
     private String phone;
 
-    @NotBlank
+    @NotBlank(message = "GST number is required")
+    @Pattern(
+            regexp = "^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[0-9A-Z]{1}[Z]{1}[0-9A-Z]{1}$",
+            message = "Invalid GST format. Must be a 15-character alphanumeric GSTIN.")
     private String gst;
 
     @NotBlank
     private String regAdd;
+
+    private String colorCode="#FFFFFF";
 
     private String prefixForEmpID;
 
