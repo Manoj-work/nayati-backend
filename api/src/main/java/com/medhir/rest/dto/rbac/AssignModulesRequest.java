@@ -8,7 +8,7 @@ import java.util.List;
 public class AssignModulesRequest {
 
     @NotNull
-    private List<ModuleRequest> modules;
+    private List<ModuleRequest> assignedModules;
 
     @Data
     public static class ModuleRequest {

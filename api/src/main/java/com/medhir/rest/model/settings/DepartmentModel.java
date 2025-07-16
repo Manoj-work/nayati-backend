@@ -37,6 +37,8 @@ public class DepartmentModel {
 
     private String createdAt;
     private String updatedAt;
+
+
     private List<SimpleModule> assignedModules = new ArrayList<>();
 //    private List<ModulePermission> assignedModules = new ArrayList<>(); // Which modules, features, sub-features are enabled for this company
 }
