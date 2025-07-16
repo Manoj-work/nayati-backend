@@ -35,4 +35,17 @@ public class Asset {
     private Map<String, Object> customFields;
     private Double gstRate;
     private Boolean inputTaxCreditEligible;
+    private String laptopCompany;
+    private String processor;
+    private String ram;
+    private String memory;
+    private String graphicsCard;
+    private String condition;
+    private String accessories;
+
+    private String assignedToTeam;
+    private String assignmentDate;
+
+
+
 } 
