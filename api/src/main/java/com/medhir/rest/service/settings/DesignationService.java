@@ -97,6 +97,7 @@ public class DesignationService {
         }
 
         existingDesignation.setManager(designation.isManager());
+        existingDesignation.setAdmin(designation.isAdmin());
         existingDesignation.setUpdatedAt(LocalDateTime.now().toString());
         existingDesignation.setOvertimeEligible(designation.isOvertimeEligible());
 
