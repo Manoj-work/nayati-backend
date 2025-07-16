@@ -137,16 +137,32 @@ public class PipelineStageService {
             return; // Already initialized
         }
 
-        String[] defaultStages = {"New", "Contacted", "Qualified", "Quoted", "Converted", "Lost"};
-        String[] colors = {"#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#6B7280"};
+        // Updated default stages and their properties
+        String[] defaultStages = {"New", "Contacted", "Qualified", "Quoted", "Converted", "Lost", "Junk"};
+        String[] colors = {"#3B82F6", "#10B981", "#F59E0B", "#8B5CF6", "#EF4444", "#6B7280", "#F87171"};
 
         for (int i = 0; i < defaultStages.length; i++) {
+            String stageName = defaultStages[i];
+            boolean isForm = false;
+            FormType formType = null;
+            if ("Converted".equals(stageName)) {
+                isForm = true;
+                formType = FormType.CONVERTED;
+            } else if ("Lost".equals(stageName)) {
+                isForm = true;
+                formType = FormType.LOST;
+            } else if ("Junk".equals(stageName)) {
+                isForm = true;
+                formType = FormType.JUNK;
+            }
             PipelineStage stage = new PipelineStage(
-                    defaultStages[i],
-                    "Default " + defaultStages[i] + " stage",
-                    i,
-                    colors[i],
-                    createdBy
+                stageName,
+                "Default " + stageName + " stage",
+                i,
+                colors[i],
+                isForm,
+                formType,
+                createdBy
             );
             stage.setStageId("STAGE-" + snowflakeIdGenerator.nextId());
             pipelineStageRepository.save(stage);
