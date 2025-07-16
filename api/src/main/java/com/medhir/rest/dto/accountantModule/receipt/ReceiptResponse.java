@@ -28,6 +28,10 @@ public class ReceiptResponse {
 
     private BigDecimal unallocatedAmount;
 
+    private String paymentMethod;
+
+    private String paymentTransactionId;
+
     private List<LinkedInvoice> linkedInvoices;
 
     @Data
@@ -36,7 +40,7 @@ public class ReceiptResponse {
     public static class ProjectInfo {
         private String projectId;
         private String projectName;
-        private String siteAddress;
+        private String address;
     }
 
     @Data
