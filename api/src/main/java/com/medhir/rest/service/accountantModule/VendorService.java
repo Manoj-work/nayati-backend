@@ -3,7 +3,7 @@ package com.medhir.rest.service.accountantModule;
 import com.medhir.rest.model.accountantModule.VendorModel;
 import com.medhir.rest.repository.accountantModule.VendorRepository;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.dto.accountantModule.VendorCreditUpdateRequest;
 import org.springframework.beans.factory.annotation.Autowired;

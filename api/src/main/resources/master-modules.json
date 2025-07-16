@@ -1,0 +1,67 @@
+{
+  "modules": [
+    {
+      "moduleId": "MOD_ACCOUNTANT",
+      "moduleName": "Accountant",
+      "features": [
+        {
+          "featureId": "FEATURE_CUSTOMERS",
+          "featureName": "Customers",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_INVOICES",
+              "subFeatureName": "Invoices",
+              "actions": [
+                "CREATE", "READ", "UPDATE", "DELETE"
+              ]
+            },
+            {
+              "subFeatureId": "SUB_RECEIPTS",
+              "subFeatureName": "Receipts",
+              "actions": [
+                "CREATE", "READ", "UPDATE", "DELETE"
+              ]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_VENDORS",
+          "featureName": "Vendors",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_BILLS",
+              "subFeatureName": "Bills",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "subFeatureId": "SUB_PURCHASE_ORDERS",
+              "subFeatureName": "Purchase Orders",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "subFeatureId": "SUB_PAYMENTS",
+              "subFeatureName": "Payments",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "subFeatureId": "SUB_VENDOR_LIST",
+              "subFeatureName": "Vendor List",
+              "actions": ["READ"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_EMPLOYEES",
+          "featureName": "Employees",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_REIMBURSEMENTS",
+              "subFeatureName": "Reimbursements",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

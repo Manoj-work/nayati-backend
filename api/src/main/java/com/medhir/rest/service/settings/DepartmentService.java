@@ -3,15 +3,15 @@ package com.medhir.rest.service.settings;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.settings.DepartmentModel;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.repository.settings.DepartmentRepository;
-import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DepartmentService {
@@ -39,8 +39,10 @@ public class DepartmentService {
         }
 
         // Verify leave policy exists
-        leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
-
+        //     leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+        if (department.getLeavePolicy() != null) {
+            leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+        }
 
         String newDepartmentId = "DEPT" + snowflakeIdGenerator.nextId();
         department.setDepartmentId(newDepartmentId);
@@ -86,8 +88,15 @@ public class DepartmentService {
             throw new DuplicateResourceException("Department with name " + department.getName() + " already exists in this company");
         }
 
-        // Verify leave policy exists
-        leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+        // Only validate leave policy if it's provided
+        if (department.getLeavePolicy() != null) {
+            leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+        }
+
+        //  Update all fields
+        if (department.getName() != null) {
+            existingDepartment.setName(department.getName());
+        }
 
         existingDepartment.setName(department.getName());
         existingDepartment.setDescription(department.getDescription());
@@ -95,7 +104,9 @@ public class DepartmentService {
         existingDepartment.setLeavePolicy(department.getLeavePolicy());
         existingDepartment.setWeeklyHolidays(department.getWeeklyHolidays());
         existingDepartment.setUpdatedAt(LocalDateTime.now().toString());
-        
+        if(department.getLeavePolicy() != null){
+            existingDepartment.setLeavePolicy(department.getLeavePolicy());
+        }
         // Update companyId if provided
         if (department.getCompanyId() != null) {
             existingDepartment.setCompanyId(department.getCompanyId());
@@ -107,5 +118,9 @@ public class DepartmentService {
     public void deleteDepartment(String id) {
         DepartmentModel department = getDepartmentById(id);
         departmentRepository.deleteById(department.getId());
+    }
+
+    public List<DepartmentModel> getDepartmentsByIds(Set<String> ids) {
+        return departmentRepository.findByDepartmentIdIn(ids);
     }
 }

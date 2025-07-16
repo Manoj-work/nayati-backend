@@ -37,10 +37,8 @@ public class IncomeService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Submitted by (employeeId) is required");
             }
 
-            income.setGeneratedId(generatedId);
              income.setIncomeId("INC" + snowflakeIdGenerator.nextId());
 
-            income.generateIncomeId();
             return incomeRepository.save(income);
         } catch (ResponseStatusException e) {
             throw e;

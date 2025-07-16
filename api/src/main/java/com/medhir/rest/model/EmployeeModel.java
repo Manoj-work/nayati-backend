@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -17,12 +18,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Getter
 @Setter
 @Document(collection = "employees")
+@Data
 @JsonInclude(JsonInclude.Include.NON_NULL) // Exclude null fields from JSON response
 public class EmployeeModel {
 
@@ -32,73 +35,97 @@ public class EmployeeModel {
 
     // @NotBlank(message = "Employee Id cannot be empty")
     @Indexed(unique = true)
-    private String employeeId;
+    private String employeeId = "";
 
     @NotBlank(message = "Company Id cannot be empty")
-    private String companyId;
+    private String companyId = "";
+  
+    private String name = "";
 
-    @NotBlank(message = "Employee name cannot be empty")
-    private String name;
+    @NotBlank(message = "first name cannot be empty")
+    private String firstName="";
+
+    private String middleName;
+
+    @NotBlank(message = "last name cannot be empty")
+    private String lastName="";
+
+    public String getName() {
+        boolean hasFirst = firstName != null && !firstName.trim().isEmpty();
+        boolean hasLast = lastName != null && !lastName.trim().isEmpty();
+
+        if (!hasFirst && !hasLast) {
+            return name;
+        }
+
+        StringBuilder fullName = new StringBuilder();
+        if (hasFirst) fullName.append(firstName.trim());
+        if (middleName != null && !middleName.trim().isEmpty()) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(middleName.trim());
+        }
+        if (hasLast) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(lastName.trim());
+        }
+        return fullName.toString();
+    }
 
     @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     @Indexed(unique = true)
-    @NotBlank(message = "Phone number cannot be empty")
-    private String phone;
+    private String phone = "";
 
     @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
-    private String alternatePhone;
+    private String alternatePhone = "";
 
-    private Set<String> Roles;
-    private List<String> moduleIds;
+    private Set<String> Roles = new HashSet<>();
+    private List<String> moduleIds = new ArrayList<>();
 
-    @NotNull(message = "Email is required!")
-    @Email(message = "Invalid email format!")
-    @Indexed(unique = true)
-    private String emailPersonal;
+    private String emailPersonal = "";
 
     @Email(message = "Invalid email format!")
     @Indexed(unique = true)
-    private String emailOfficial;
+    private String emailOfficial = "";
 
-    private String designation;
-    private String fathersName;
-    private boolean overtimeEligibile;
-    private boolean pfEnrolled;
-    private String uanNumber;
-    private boolean esicEnrolled;
-    private String esicNumber;
-    private List<String> weeklyOffs;
+    private String designation = "";
+    private String fathersName = "";
+    private boolean overtimeEligibile = false;
+    private boolean pfEnrolled = false;
+    private String uanNumber = "";
+    private boolean esicEnrolled = false;
+    private String esicNumber = "";
+    private List<String> weeklyOffs = new ArrayList<>();
 
     private String employeeImgUrl = "";
 
-    private LocalDate joiningDate;
-    private String department;
-    private String gender;
-    private String reportingManager;
-    private String permanentAddress;
-    private String currentAddress;
+    private LocalDate joiningDate = null;
+    private String department = "";
+    private String gender = "";
+    private String reportingManager = "";
+    private String permanentAddress = "";
+    private String currentAddress = "";
 
     // Leave related fields
-    private String leavePolicyId; // Stores the ID of the leave policy from department
+    private String leavePolicyId = ""; // Stores the ID of the leave policy from department
 
     // ID Proofs Section
     @Valid
-    private IdProofs idProofs;
+    private IdProofs idProofs = new IdProofs();
 
     // Bank Details Section
     @Valid
-    private BankDetails bankDetails;
+    private BankDetails bankDetails = new BankDetails();
 
     // Salary Details Section
     @Valid
-    private SalaryDetails salaryDetails;
+    private SalaryDetails salaryDetails = new SalaryDetails();
 
-    private String updateStatus; // Approved, Pending, Rejected
+    private String updateStatus = ""; // Approved, Pending, Rejected
 
     private List<String> assignTo = new ArrayList<>(); // Field to store who the employee is assigned to
 
     @Valid
-    private EmployeeUpdateRequest pendingUpdateRequest; // Reference to EmployeeUpdateRequest which stores the pending
+    private EmployeeUpdateRequest pendingUpdateRequest = null; // Reference to EmployeeUpdateRequest which stores the pending
                                                         // updates
 
     @Getter
@@ -129,13 +156,11 @@ public class EmployeeModel {
     @Setter
     public static class BankDetails {
         @Pattern(regexp = "\\d{9,18}", message = "Account number must be between 9 to 18 digits")
-        @Size(min = 0) // Allows empty values
         private String accountNumber = "";
 
         private String accountHolderName = "";
 
         @Pattern(regexp = "^[A-Z]{4}0[A-Z0-9]{6}$", message = "Invalid IFSC Code format")
-        @Size(min = 0) // Allows empty values
         private String ifscCode = "";
 
         private String bankName = "";
@@ -143,7 +168,7 @@ public class EmployeeModel {
         private String upiId = "";
         private String upiPhoneNumber = "";
 
-        private String passbookImgUrl;
+        private String passbookImgUrl = "";
     }
 
     @Getter
@@ -157,4 +182,6 @@ public class EmployeeModel {
         private Double employerPfContribution = 0.0;
         private Double employeePfContribution = 0.0;
     }
+    private List<String> roleIds;
+
 }

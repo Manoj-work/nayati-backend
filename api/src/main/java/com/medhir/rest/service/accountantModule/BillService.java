@@ -11,7 +11,7 @@ import java.util.Collections;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;

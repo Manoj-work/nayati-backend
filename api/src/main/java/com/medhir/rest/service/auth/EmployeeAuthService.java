@@ -8,7 +8,7 @@ import com.medhir.rest.config.JwtUtil;
 import com.medhir.rest.model.EmployeeModel;
 import com.medhir.rest.repository.EmployeeRepository;
 import com.medhir.rest.exception.ResourceNotFoundException;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.service.settings.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
