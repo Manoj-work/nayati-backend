@@ -1,5 +1,6 @@
 package com.medhir.rest.model.settings;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.medhir.rest.dto.rbac.SimpleModule;
 import com.medhir.rest.model.rbac.ModulePermission;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
@@ -36,6 +37,6 @@ public class DepartmentModel {
 
     private String createdAt;
     private String updatedAt;
-    private List<String> moduleNames;
-    private List<ModulePermission> assignedModules = new ArrayList<>(); // Which modules, features, sub-features are enabled for this company
+    private List<SimpleModule> assignedModules = new ArrayList<>();
+//    private List<ModulePermission> assignedModules = new ArrayList<>(); // Which modules, features, sub-features are enabled for this company
 }

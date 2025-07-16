@@ -5,7 +5,7 @@ import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.CompanyModel;
 import com.medhir.rest.model.settings.LeaveTypeModel;
 import com.medhir.rest.repository.settings.LeaveTypeRepository;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.service.settings.LeaveTypeService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.junit.jupiter.api.BeforeEach;
