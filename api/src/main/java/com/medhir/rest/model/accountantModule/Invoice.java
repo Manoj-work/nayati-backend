@@ -37,6 +37,7 @@ public class Invoice {
     private BigDecimal totalGst;
     private BigDecimal totalAmount;
     private BigDecimal amountReceived;
+    @Builder.Default
     private Status status = Status.PENDING;
     @Builder.Default
     private List<LinkedReceipt> linkedReceipts = new ArrayList<>();

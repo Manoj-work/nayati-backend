@@ -10,6 +10,7 @@ import com.medhir.rest.dto.UserCompanyDTO;
 import com.medhir.rest.dto.EmployeeAttendanceDetailsDTO;
 import com.medhir.rest.dto.EmployeeWithLeaveDetailsDTO;
 import com.medhir.rest.dto.EmployeeLeavePolicyWeeklyOffsDTO;
+import com.medhir.rest.dto.EmployeeDTO;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.EmployeeModel;
 import com.medhir.rest.repository.ModuleRepository;
@@ -44,12 +45,7 @@ public class EmployeeController {
     @Autowired
     private ModuleRepository moduleRepository;
 
-    // Generate Employee ID
-    @GetMapping("/hradmin/generate-employee-id/{companyId}")
-    public ResponseEntity<String> generateEmployeeId(@PathVariable String companyId) {
-        String generatedId = employeeService.generateEmployeeId(companyId);
-        return ResponseEntity.ok(generatedId);
-    }
+
 
     // Get all companies associated with admins
     @GetMapping("/hradmin/companies/{employeeId}")
@@ -75,28 +71,28 @@ public class EmployeeController {
             @RequestParam(value = "voterIdImage", required = false) MultipartFile voterIdImage,
             @RequestParam(value = "passbookImage", required = false) MultipartFile passbookImage) throws Exception {
 
-        // Convert JSON string to EmployeeModel object
+        // Convert JSON string to EmployeeDTO object
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule()); // Required for LocalDate
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        EmployeeModel employee = objectMapper.readValue(employeeJson, EmployeeModel.class);
+        EmployeeDTO employeeDTO = objectMapper.readValue(employeeJson, EmployeeDTO.class);
 
-        // Manually validate the employee object
+        // Validate the DTO
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
-        Set<ConstraintViolation<EmployeeModel>> violations = validator.validate(employee);
+        Set<ConstraintViolation<EmployeeDTO>> violations = validator.validate(employeeDTO);
 
         if (!violations.isEmpty()) {
             Map<String, String> errors = new HashMap<>();
-            for (ConstraintViolation<EmployeeModel> violation : violations) {
+            for (ConstraintViolation<EmployeeDTO> violation : violations) {
                 errors.put(violation.getPropertyPath().toString(), violation.getMessage());
             }
             return ResponseEntity.badRequest().body(Map.of("errors", errors));
         }
 
-        // Pass the deserialized object to the service layer
+        // Pass the DTO directly to the service layer
         EmployeeWithLeaveDetailsDTO createdEmployee = employeeService.createEmployee(
-                employee, profileImage, aadharImage, panImage, passportImage, drivingLicenseImage, voterIdImage, passbookImage);
+                employeeDTO, profileImage, aadharImage, panImage, passportImage, drivingLicenseImage, voterIdImage, passbookImage);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Employee created successfully");
@@ -122,11 +118,7 @@ public class EmployeeController {
         return ResponseEntity.ok(employeeService.getAllEmployeesMinimal());
     }
 
-    // Get All Employees by Company ID
-    // @GetMapping("/hradmin/companies/{companyId}/employees")
-    // public ResponseEntity<List<EmployeeWithLeaveDetailsDTO>> getEmployeesByCompanyId(@PathVariable String companyId){
-    //     return ResponseEntity.ok(employeeService.getEmployeesByCompanyId(companyId));
-    // }
+
 
     // Get All Employees by Company ID with additional details
     @GetMapping("/hradmin/companies/{companyId}/employees")
@@ -152,28 +144,28 @@ public class EmployeeController {
             @RequestParam(value = "voterIdImage", required = false) MultipartFile voterIdImage,
             @RequestParam(value = "passbookImage", required = false) MultipartFile passbookImage) throws Exception {
 
-        // Convert JSON string to EmployeeModel object
+        // Convert JSON string to EmployeeDTO object
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule()); // Required for LocalDate
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        EmployeeModel employee = objectMapper.readValue(employeeJson, EmployeeModel.class);
+        EmployeeDTO employeeDTO = objectMapper.readValue(employeeJson, EmployeeDTO.class);
 
-        // Manually validate the employee object
+        // Validate the DTO
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
-        Set<ConstraintViolation<EmployeeModel>> violations = validator.validate(employee);
+        Set<ConstraintViolation<EmployeeDTO>> violations = validator.validate(employeeDTO);
 
         if (!violations.isEmpty()) {
             Map<String, String> errors = new HashMap<>();
-            for (ConstraintViolation<EmployeeModel> violation : violations) {
+            for (ConstraintViolation<EmployeeDTO> violation : violations) {
                 errors.put(violation.getPropertyPath().toString(), violation.getMessage());
             }
             return ResponseEntity.badRequest().body(Map.of("errors", errors));
         }
 
-        // Pass the deserialized object and images to the service layer
+        // Pass the DTO directly to the service layer
         EmployeeWithLeaveDetailsDTO updatedEmployee = employeeService.updateEmployee(
-                employeeId, employee, profileImage, aadharImage, panImage, passportImage, drivingLicenseImage, voterIdImage, passbookImage);
+                employeeId, employeeDTO, profileImage, aadharImage, panImage, passportImage, drivingLicenseImage, voterIdImage, passbookImage);
 
         Map<String, Object> response = new HashMap<>();
         response.put("message", "Employee updated successfully");

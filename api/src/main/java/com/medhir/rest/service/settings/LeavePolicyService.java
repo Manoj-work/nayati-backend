@@ -5,8 +5,7 @@ import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.settings.LeavePolicyModel;
 import com.medhir.rest.repository.settings.LeavePolicyRepository;
-import com.medhir.rest.service.CompanyService;
-import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class LeavePolicyService {
@@ -143,5 +143,9 @@ public class LeavePolicyService {
                 }
             }
         }
+    }
+
+    public List<LeavePolicyModel> getLeavePoliciesByIds(Set<String> ids) {
+        return leavePolicyRepository.findByLeavePolicyIdIn(ids);
     }
 } 

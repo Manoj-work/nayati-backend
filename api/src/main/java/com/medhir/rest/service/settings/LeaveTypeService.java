@@ -3,14 +3,14 @@ package com.medhir.rest.service.settings;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.repository.settings.LeaveTypeRepository;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.model.settings.LeaveTypeModel;
-import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class LeaveTypeService {
@@ -106,5 +106,9 @@ public class LeaveTypeService {
 
     public boolean existsByName(String name) {
         return leaveTypeRepository.existsByLeaveTypeName(name);
+    }
+
+    public List<LeaveTypeModel> getLeaveTypesByIds(Set<String> ids) {
+        return leaveTypeRepository.findByLeaveTypeIdIn(ids);
     }
 }

@@ -3,7 +3,7 @@ package com.medhir.rest.service.auth;
 import com.medhir.rest.model.auth.EmployeeAuth;
 import com.medhir.rest.model.EmployeeModel;
 import com.medhir.rest.repository.EmployeeRepository;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

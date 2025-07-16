@@ -10,7 +10,7 @@ import com.medhir.rest.model.leave.LeaveBalance;
 import com.medhir.rest.model.leave.LeaveModel;
 import com.medhir.rest.repository.leave.LeaveBalanceRepository;
 import com.medhir.rest.repository.leave.LeaveRepository;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.service.settings.DepartmentService;
 import com.medhir.rest.service.settings.LeaveTypeService;
 import com.medhir.rest.service.settings.LeavePolicyService;
@@ -18,16 +18,9 @@ import com.medhir.rest.service.settings.LeavePolicyService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,9 +33,6 @@ public class LeaveApplicationService {
 
     @Autowired
     private EmployeeService employeeService;
-
-//    @Autowired
-//    private GeneratedId generatedId;
 
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
@@ -67,10 +57,7 @@ public class LeaveApplicationService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${attendance.service.url}")
-    private String ATTENDANCE_SERVICE_URL;
 
-//controller.. hit
     public LeaveModel applyLeave(LeaveModel request) {
         // Validate employee exists
         Optional<EmployeeWithLeaveDetailsDTO> employeeOpt = employeeService.getEmployeeById(request.getEmployeeId());
@@ -92,9 +79,6 @@ public class LeaveApplicationService {
 
         // Copy all properties except leaveId and status
         BeanUtils.copyProperties(request, leave, "leaveId", "status");
-
-////         Set system-generated values
-//        leave.setLeaveId(generatedId.generateId("LID"+ LeaveModel.class, "leaveId"));
 
         leave.setLeaveId("LID" + snowflakeIdGenerator.nextId());
         leave.setStatus("Pending");
@@ -232,68 +216,6 @@ public class LeaveApplicationService {
             return leaveWithDetails;
         }).collect(Collectors.toList());
     }
-
-//    private String markPresentWithApprovedLeaveInAttendance(String employeeId, LocalDate leaveDate, LocalDate endDate, String reason, String leaveId) {
-//        try {
-//            // Create list of dates between start and end date
-//            List<LocalDate> dates = leaveDate.datesUntil(endDate.plusDays(1)).collect(Collectors.toList());
-//
-//            // Convert dates to string array
-//            String datesJson = dates.stream()
-//                    .map(date -> "\"" + date + "\"")
-//                    .collect(Collectors.joining(",", "[", "]"));
-//
-//            String url = ATTENDANCE_SERVICE_URL + "/mark-bulk";
-//
-//            // Create request body
-//            String requestBody = String.format(
-//                    "{\"employeeId\":\"%s\",\"status\":\"Leave\",\"dates\":%s,\"leaveId\":\"%s\"}",
-//                    employeeId,
-//                    datesJson,
-//                    leaveId
-//            );
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//            HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-//
-//            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-//            return response.getBody();
-//        } catch (Exception e) {
-//            return "Error while applying leave: " + e.getMessage();
-//        }
-//    }
-//
-//    private String markApprovedLOPInAttendance(String employeeId, LocalDate leaveDate, LocalDate endDate, String reason, String leaveId) {
-//        try {
-//            // Create list of dates between start and end date
-//            List<LocalDate> dates = leaveDate.datesUntil(endDate.plusDays(1)).collect(Collectors.toList());
-//
-//            // Convert dates to string array
-//            String datesJson = dates.stream()
-//                    .map(date -> "\"" + date + "\"")
-//                    .collect(Collectors.joining(",", "[", "]"));
-//
-//            String url = ATTENDANCE_SERVICE_URL + "/mark-bulk";
-//
-//            // Create request body
-//            String requestBody = String.format(
-//                    "{\"employeeId\":\"%s\",\"status\":\"LOP\",\"dates\":%s,\"leaveId\":\"%s\"}",
-//                    employeeId,
-//                    datesJson,
-//                    leaveId
-//            );
-//
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.setContentType(MediaType.APPLICATION_JSON);
-//            HttpEntity<String> request = new HttpEntity<>(requestBody, headers);
-//
-//            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
-//            return response.getBody();
-//        } catch (Exception e) {
-//            return "Error while applying leave: " + e.getMessage();
-//        }
-//    }
 
     public List<LeaveModel> getLeavesByEmployeeId(String employeeId) {
         List<LeaveModel> leaves = leaveRepository.findByEmployeeId(employeeId);

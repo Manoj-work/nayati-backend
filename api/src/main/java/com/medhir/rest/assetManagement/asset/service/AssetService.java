@@ -95,6 +95,37 @@ public class AssetService {
             String url = minioService.uploadAssetInvoice(invoiceScan, existingAsset.getVendorId());
             existingAsset.setInvoiceScanUrl(url);
         }
+        if (updatedAsset.getLaptopCompany() != null) {
+            existingAsset.setLaptopCompany(updatedAsset.getLaptopCompany());
+        }
+        if (updatedAsset.getProcessor() != null) {
+            existingAsset.setProcessor(updatedAsset.getProcessor());
+        }
+        if (updatedAsset.getRam() != null) {
+            existingAsset.setRam(updatedAsset.getRam());
+        }
+        if (updatedAsset.getMemory() != null) {
+            existingAsset.setMemory(updatedAsset.getMemory());
+        }
+        if (updatedAsset.getGraphicsCard() != null) {
+            existingAsset.setGraphicsCard(updatedAsset.getGraphicsCard());
+        }
+        if (updatedAsset.getCondition() != null) {
+            existingAsset.setCondition(updatedAsset.getCondition());
+        }
+        if (updatedAsset.getAccessories() != null) {
+            existingAsset.setAccessories(updatedAsset.getAccessories());
+        }
+
+        if (updatedAsset.getAssignedToTeam() != null) {
+            existingAsset.setAssignedToTeam(updatedAsset.getAssignedToTeam());
+        }
+        if (updatedAsset.getAssignmentDate() != null) {
+            existingAsset.setAssignedToTeam(updatedAsset.getAssignmentDate());
+        }
+
+
+
         
         return assetRepository.save(existingAsset);
     }
@@ -140,6 +171,18 @@ public class AssetService {
         existingAsset.setCustomFields(updatedAsset.getCustomFields());
         existingAsset.setGstRate(updatedAsset.getGstRate());
         existingAsset.setInputTaxCreditEligible(updatedAsset.getInputTaxCreditEligible());
+        existingAsset.setLaptopCompany(updatedAsset.getLaptopCompany());
+        existingAsset.setProcessor(updatedAsset.getProcessor());
+        existingAsset.setRam(updatedAsset.getRam());
+        existingAsset.setMemory(updatedAsset.getMemory());
+        existingAsset.setGraphicsCard(updatedAsset.getGraphicsCard());
+        existingAsset.setCondition(updatedAsset.getCondition());
+        existingAsset.setAccessories(updatedAsset.getAccessories());
+        existingAsset.setAssignedToTeam(updatedAsset.getAssignedToTeam());
+        existingAsset.setAssignmentDate(updatedAsset.getAssignmentDate());
+
+
+
         
         // Handle invoice scan upload
         if (invoiceScan != null && !invoiceScan.isEmpty()) {

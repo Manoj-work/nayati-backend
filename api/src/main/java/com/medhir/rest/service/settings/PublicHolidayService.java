@@ -2,9 +2,8 @@ package com.medhir.rest.service.settings;
 
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.repository.settings.PublicHolidayRepository;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.model.settings.PublicHolidayModel;
-import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
