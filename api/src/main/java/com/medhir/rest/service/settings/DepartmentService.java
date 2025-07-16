@@ -1,7 +1,12 @@
 package com.medhir.rest.service.settings;
 
+import com.medhir.rest.config.rbac.MasterModulesLoader;
+import com.medhir.rest.dto.rbac.AssignModulesRequest;
+import com.medhir.rest.dto.rbac.SimpleModule;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
+import com.medhir.rest.mapper.rbac.AssignModulesMapper;
+import com.medhir.rest.model.rbac.ModulePermission;
 import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.repository.settings.DepartmentRepository;
@@ -28,6 +33,10 @@ public class DepartmentService {
 
     @Autowired
     private CompanyService companyService;
+    @Autowired
+    private MasterModulesLoader masterModulesLoader;
+    @Autowired
+    private AssignModulesMapper assignModulesMapper;
 
     public DepartmentModel createDepartment(DepartmentModel department) {
         // Check if company exists
@@ -123,4 +132,30 @@ public class DepartmentService {
     public List<DepartmentModel> getDepartmentsByIds(Set<String> ids) {
         return departmentRepository.findByDepartmentIdIn(ids);
     }
+
+    public void assignModulesToDepartment(String departmentId, AssignModulesRequest request) {
+        DepartmentModel department = departmentRepository.findByDepartmentId(departmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with ID: " + departmentId));
+
+        List<SimpleModule> simpleModules = request.getModules().stream()
+                .map(moduleDTO -> {
+                    var masterModule = masterModulesLoader.getConfig().getModules().stream()
+                            .filter(m -> m.getModuleId().equals(moduleDTO.getModuleId()))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid module ID: " + moduleDTO.getModuleId()));
+
+                    return new SimpleModule(masterModule.getModuleId(), masterModule.getModuleName());
+                })
+                .toList();
+
+        department.setAssignedModules(simpleModules);
+        departmentRepository.save(department);
+    }
+
+    public List<SimpleModule> getAssignedModules(String departmentId) {
+        DepartmentModel department = departmentRepository.findByDepartmentId(departmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Department not found with ID: " + departmentId));
+        return department.getAssignedModules();
+    }
+
 }
