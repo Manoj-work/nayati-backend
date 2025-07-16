@@ -13,5 +13,6 @@ public class CompanyDesignationDTO {
     private String department;
     private String description;
     private boolean isManager;
+    private boolean isAdmin;
     private boolean overtimeEligible;
 } 
