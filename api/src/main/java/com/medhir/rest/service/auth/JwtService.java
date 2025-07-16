@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -98,6 +99,28 @@ public class JwtService {
                 .claim("name", employee.getName())
                 .claim("employeeId", employeeAuth.getEmployeeId())
                 .claim("roles", roles)  // Add roles to the token
+                .setSubject(employeeAuth.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String generateToken(EmployeeAuth employeeAuth, List<String> moduleIds, List<String> roles) {
+        EmployeeModel employee = employeeRepository.findByEmployeeId(employeeAuth.getEmployeeId())
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        String companyName = companyService.getCompanyById(employee.getCompanyId())
+                .map(company -> company.getName())
+                .orElse("Unknown Company");
+
+        return Jwts.builder()
+                .claim("companyId", employee.getCompanyId())
+                .claim("companyName", companyName)
+                .claim("name", employee.getName())
+                .claim("employeeId", employeeAuth.getEmployeeId())
+                .claim("roles", roles)
+                .claim("module_ids", moduleIds)
                 .setSubject(employeeAuth.getEmail())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
