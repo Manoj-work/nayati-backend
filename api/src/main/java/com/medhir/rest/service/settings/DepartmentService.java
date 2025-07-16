@@ -55,7 +55,18 @@ public class DepartmentService {
 
         String newDepartmentId = "DEPT" + snowflakeIdGenerator.nextId();
         department.setDepartmentId(newDepartmentId);
+        List<SimpleModule> simpleModules = department.getAssignedModules().stream()
+                .map(moduleDTO -> {
+                    var masterModule = masterModulesLoader.getConfig().getModules().stream()
+                            .filter(m -> m.getModuleId().equals(moduleDTO.getModuleId()))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid module ID: " + moduleDTO.getModuleId()));
 
+                    return new SimpleModule(masterModule.getModuleId(), masterModule.getModuleName());
+                })
+                .toList();
+
+        department.setAssignedModules(simpleModules);
         department.setCreatedAt(LocalDateTime.now().toString());
         department.setUpdatedAt(LocalDateTime.now().toString());
         return departmentRepository.save(department);
@@ -137,7 +148,7 @@ public class DepartmentService {
         DepartmentModel department = departmentRepository.findByDepartmentId(departmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found with ID: " + departmentId));
 
-        List<SimpleModule> simpleModules = request.getModules().stream()
+        List<SimpleModule> simpleModules = request.getAssignedModules().stream()
                 .map(moduleDTO -> {
                     var masterModule = masterModulesLoader.getConfig().getModules().stream()
                             .filter(m -> m.getModuleId().equals(moduleDTO.getModuleId()))

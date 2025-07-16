@@ -131,7 +131,7 @@ public class CompanyService {
                 .orElseThrow(() -> new ResourceNotFoundException("Company not found with ID: " + companyId));
 
         // Validate against master modules config
-        for (AssignModulesRequest.ModuleRequest moduleDTO : request.getModules()) {
+        for (AssignModulesRequest.ModuleRequest moduleDTO : request.getAssignedModules()) {
             var masterModule = masterModulesLoader.getConfig().getModules().stream()
                     .filter(m -> m.getModuleId().equals(moduleDTO.getModuleId()))
                     .findFirst()
@@ -159,7 +159,7 @@ public class CompanyService {
         }
 
         // Map DTOs to entity using MapStruct
-        List<ModulePermission> permissions = assignModulesMapper.toModulePermissions(request.getModules());
+        List<ModulePermission> permissions = assignModulesMapper.toModulePermissions(request.getAssignedModules());
         company.setAssignedModules(permissions);
         companyRepository.save(company);
 
