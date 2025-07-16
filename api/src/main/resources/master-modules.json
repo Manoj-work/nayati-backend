@@ -11,16 +11,12 @@
             {
               "subFeatureId": "SUB_INVOICES",
               "subFeatureName": "Invoices",
-              "actions": [
-                "CREATE", "READ", "UPDATE", "DELETE"
-              ]
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             },
             {
               "subFeatureId": "SUB_RECEIPTS",
               "subFeatureName": "Receipts",
-              "actions": [
-                "CREATE", "READ", "UPDATE", "DELETE"
-              ]
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             }
           ]
         },
@@ -57,6 +53,142 @@
             {
               "subFeatureId": "SUB_REIMBURSEMENTS",
               "subFeatureName": "Reimbursements",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "moduleId": "MOD_HR",
+      "moduleName": "Human Resources",
+      "features": [
+        {
+          "featureId": "FEATURE_ATTENDANCE",
+          "featureName": "Attendance",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_MARK_ATTENDANCE",
+              "subFeatureName": "Mark Attendance",
+              "actions": ["CREATE", "READ"]
+            },
+            {
+              "subFeatureId": "SUB_ATTENDANCE_REPORT",
+              "subFeatureName": "Attendance Report",
+              "actions": ["READ", "UPDATE"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_PAYROLL",
+          "featureName": "Payroll",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_SALARY_GENERATION",
+              "subFeatureName": "Salary Generation",
+              "actions": ["CREATE", "READ", "UPDATE"]
+            },
+            {
+              "subFeatureId": "SUB_PAYSLIPS",
+              "subFeatureName": "Payslips",
+              "actions": ["READ"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_EMPLOYEE_MANAGEMENT",
+          "featureName": "Employee Management",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_EMPLOYEE_PROFILES",
+              "subFeatureName": "Employee Profiles",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            },
+            {
+              "subFeatureId": "SUB_EMPLOYEE_LEAVES",
+              "subFeatureName": "Leave Management",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_SETTINGS",
+          "featureName": "Settings",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_HR_POLICIES",
+              "subFeatureName": "HR Policies",
+              "actions": ["CREATE", "READ", "UPDATE"]
+            },
+            {
+              "subFeatureId": "SUB_HOLIDAY_LIST",
+              "subFeatureName": "Holiday List",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "moduleId": "MOD_SALES",
+      "moduleName": "Sales",
+      "features": [
+        {
+          "featureId": "FEATURE_LEADS",
+          "featureName": "Leads",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_LEAD_MANAGEMENT",
+              "subFeatureName": "Lead Management",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_OPPORTUNITIES",
+          "featureName": "Opportunities",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_OPPORTUNITY_TRACKING",
+              "subFeatureName": "Opportunity Tracking",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_QUOTATIONS",
+          "featureName": "Quotations",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_QUOTE_CREATION",
+              "subFeatureName": "Quote Creation",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_SALES_ORDERS",
+          "featureName": "Sales Orders",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_ORDER_MANAGEMENT",
+              "subFeatureName": "Order Management",
+              "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
+            }
+          ]
+        },
+        {
+          "featureId": "FEATURE_CUSTOMER_RELATIONS",
+          "featureName": "Customer Relations",
+          "subFeatures": [
+            {
+              "subFeatureId": "SUB_FEEDBACK",
+              "subFeatureName": "Customer Feedback",
+              "actions": ["CREATE", "READ"]
+            },
+            {
+              "subFeatureId": "SUB_SUPPORT_TICKETS",
+              "subFeatureName": "Support Tickets",
               "actions": ["CREATE", "READ", "UPDATE", "DELETE"]
             }
           ]
