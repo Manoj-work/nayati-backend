@@ -352,21 +352,21 @@ public class LeadController {
     public ResponseEntity<LeadProjectCustomerResponseDTO> getProjectCustomerInfo(@PathVariable String leadId) {
         return ResponseEntity.ok(leadService.getProjectCustomerInfo(leadId));
     }
-
-    @GetMapping("/by-project-name/{projectName}")
-    public ResponseEntity<LeadProjectCustomerResponseDTO> getByProjectName(@PathVariable String projectName) {
-        LeadModel lead = leadRepository.findByProjectName(projectName)
-                .orElseThrow(() -> new ResourceNotFoundException("Lead not found"));
-
-        return ResponseEntity.ok(
-                new LeadProjectCustomerResponseDTO(
-                        lead.getLeadId(),          // this will become projectId in receipt
-                        lead.getProjectName(),     // shown in UI
-                        lead.getCustomerId(),      // used in receipt
-                        lead.getName()             // customer name
-                )
-        );
-    }
+//
+//    @GetMapping("/by-project-name/{projectName}")
+//    public ResponseEntity<LeadProjectCustomerResponseDTO> getByProjectName(@PathVariable String projectName) {
+//        LeadModel lead = leadRepository.findByProjectName(projectName)
+//                .orElseThrow(() -> new ResourceNotFoundException("Lead not found"));
+//
+//        return ResponseEntity.ok(
+//                new LeadProjectCustomerResponseDTO(
+//                        lead.getLeadId(),          // this will become projectId in receipt
+//                        lead.getProjectName(),     // shown in UI
+//                        lead.getCustomerId(),      // used in receipt
+//                        lead.getName()             // customer name
+//                )
+//        );
+//    }
 
     @GetMapping("/project-customer/all")
     public ResponseEntity<List<LeadProjectCustomerResponseDTO>> getAllProjectCustomerInfo() {
