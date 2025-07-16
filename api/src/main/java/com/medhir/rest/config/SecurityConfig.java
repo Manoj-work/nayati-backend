@@ -48,9 +48,8 @@ public class SecurityConfig {
                                 "/payslip/generate/**",
                                 "/leads/**",
                                 "/pipeline-stages/**",
-                                "/api/attendance/upload",
-                                "/employee/**",
-                                "/receipts/**"
+                                "/api/attendance/upload"
+
 
                         ).permitAll()
 

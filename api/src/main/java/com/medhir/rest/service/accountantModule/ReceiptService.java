@@ -204,7 +204,6 @@ public class ReceiptService {
                     ? new ReceiptResponse.ProjectInfo(
                     project.getLeadId(),
                     project.getProjectName()  ,
-//                    null//assuming this exists in LeadModel
                     project.getAddress()
             )
                     : null;
@@ -306,36 +305,7 @@ public class ReceiptService {
     }
 
 
-//    public UnallocatedReceiptsResponse getUnallocatedReceipts(String projectId) {
-//        List<Receipt> receipts = receiptRepository.findAllByProjectId(projectId);
-//
-//        List<ReceiptResponse> unallocatedReceipts = receipts.stream()
-//                .filter(r -> r.getAmountReceived().subtract(
-//                        r.getAllocatedAmount() != null ? r.getAllocatedAmount() : BigDecimal.ZERO
-//                ).compareTo(BigDecimal.ZERO) > 0)
-//                .map(r -> {
-//                    BigDecimal allocated = r.getAllocatedAmount() != null ? r.getAllocatedAmount() : BigDecimal.ZERO;
-//                    return new ReceiptResponse(
-//                            r.getId(),
-//                            null,  // ProjectInfo if you want
-//                            null,  // CustomerInfo if you want
-//                            r.getReceiptNumber(),
-//                            r.getReceiptDate(),
-//                            r.getAmountReceived(),
-//                            allocated,
-//                            r.getAmountReceived().subtract(allocated),
-//                            r.getPaymentMethod(),
-//                            r.getPaymentTransactionId(),
-//                            List.of()  // linkedInvoices if needed
-//                    );
-//                }).toList();
-//
-//        BigDecimal totalUnallocated = unallocatedReceipts.stream()
-//                .map(ReceiptResponse::getUnallocatedAmount)
-//                .reduce(BigDecimal.ZERO, BigDecimal::add);
-//
-//        return new UnallocatedReceiptsResponse(unallocatedReceipts, totalUnallocated);
-//    }
+
 
     public UnallocatedReceiptsResponse getUnallocatedReceipts(String projectId) {
         List<Receipt> receipts = receiptRepository.findAllByProjectId(projectId);

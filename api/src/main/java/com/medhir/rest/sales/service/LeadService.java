@@ -1056,17 +1056,7 @@ public class LeadService {
             .collect(Collectors.toList());
     }
 
-    public LeadProjectCustomerResponseDTO getProjectCustomerInfo(String leadId) {
-        LeadModel lead = leadRepository.findByLeadId(leadId)
-                .orElseThrow(() -> new ResourceNotFoundException("Lead not found with ID: " + leadId));
 
-        return new LeadProjectCustomerResponseDTO(
-                lead.getLeadId(),
-                lead.getProjectName(),
-                lead.getCustomerId(),
-                lead.getName()
-        );
-    }
 
     public List<LeadProjectCustomerResponseDTO> getAllProjectCustomerInfo() {
         List<LeadModel> leads = leadRepository.findAll();
