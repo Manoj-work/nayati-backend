@@ -29,7 +29,7 @@ public class PipelineStageService {
     @Autowired
     private SnowflakeIdGenerator snowflakeIdGenerator;
 
-    // 🎯 Get all active pipeline stages
+    //  Get all active pipeline stages
     public List<PipelineStageResponse> getAllActiveStages() {
         List<PipelineStage> stages = pipelineStageRepository.findByIsActiveTrueOrderByOrderIndexAsc();
         return stages.stream()
@@ -37,7 +37,7 @@ public class PipelineStageService {
                 .collect(Collectors.toList());
     }
 
-    // 🎯 Get all pipeline stages (including inactive)
+    //  Get all pipeline stages (including inactive)
     public List<PipelineStageResponse> getAllStages() {
         List<PipelineStage> stages = pipelineStageRepository.findAll();
         return stages.stream()
@@ -45,7 +45,7 @@ public class PipelineStageService {
                 .collect(Collectors.toList());
     }
 
-    // 🎯 Get stage by ID
+    //  Get stage by ID
     public PipelineStageResponse getStageById(String id) {
         PipelineStage stage = pipelineStageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Pipeline stage not found with id: " + id));
@@ -64,7 +64,7 @@ public class PipelineStageService {
         return mapToResponse(savedStage);
     }
 
-    // 🎯 Update pipeline stage
+    //  Update pipeline stage
     public PipelineStageResponse updateStage(String id, UpdatePipelineStageRequest request, String updatedBy) {
         PipelineStage stage = getStageOrThrow(id);
         if (request.getName() != null && !request.getName().equalsIgnoreCase(stage.getName())) {
@@ -78,7 +78,7 @@ public class PipelineStageService {
         return mapToResponse(savedStage);
     }
 
-    // 🎯 Delete pipeline stage
+    //  Delete pipeline stage
     public void deleteStage(String stageId) {
         PipelineStage stage = pipelineStageRepository.findByStageId(stageId)
             .orElseThrow(() -> new RuntimeException("Pipeline stage not found with stageId: " + stageId));
@@ -89,7 +89,7 @@ public class PipelineStageService {
         pipelineStageRepository.deleteById(stage.getId());
     }
 
-    // 🎯 Reorder pipeline stages
+    //  Reorder pipeline stages
     public List<PipelineStageResponse> reorderStages(List<ReorderPipelineStageRequest> reorderRequests) {
         for (ReorderPipelineStageRequest request : reorderRequests) {
             PipelineStage stage = pipelineStageRepository.findById(request.getStageId())
@@ -103,7 +103,7 @@ public class PipelineStageService {
         return getAllActiveStages();
     }
 
-    // 🎯 Get stage names as list (for frontend compatibility)
+    //  Get stage names as list (for frontend compatibility)
     public List<String> getStageNames() {
         List<PipelineStage> stages = pipelineStageRepository.findByIsActiveTrueOrderByOrderIndexAsc();
         return stages.stream()
@@ -111,27 +111,27 @@ public class PipelineStageService {
                 .collect(Collectors.toList());
     }
 
-    // 🎯 Validate stage exists by name (for backward compatibility)
+    //  Validate stage exists by name (for backward compatibility)
     public boolean stageExists(String stageName) {
         return pipelineStageRepository.existsByNameIgnoreCase(stageName);
     }
 
-    // 🎯 Validate stage exists by ID (new method for stageId approach)
+    // Validate stage exists by ID (new method for stageId approach)
     public boolean stageExistsById(String stageId) {
         return pipelineStageRepository.existsByStageId(stageId);
     }
 
-    // 🎯 Get stage by name (for backward compatibility)
+    //  Get stage by name (for backward compatibility)
     public Optional<PipelineStage> getStageByName(String stageName) {
         return pipelineStageRepository.findByNameIgnoreCase(stageName);
     }
 
-    // 🎯 Get stage by ID (new method for stageId approach)
+    //  Get stage by ID (new method for stageId approach)
     public Optional<PipelineStage> getStageByIdOptional(String stageId) {
         return pipelineStageRepository.findByStageId(stageId);
     }
 
-    // 🎯 Initialize default stages (for first-time setup)
+    //  Initialize default stages (for first-time setup)
     public void initializeDefaultStages(String createdBy) {
         if (pipelineStageRepository.count() > 0) {
             return; // Already initialized
@@ -169,13 +169,13 @@ public class PipelineStageService {
         }
     }
 
-    // 🎯 Check if migration is needed
+    //  Check if migration is needed
     public boolean isMigrationNeeded() {
         List<PipelineStage> allStages = pipelineStageRepository.findAll();
         return allStages.stream().anyMatch(stage -> stage.getFormType() == null);
     }
 
-    // 🎯 Get migration status
+    //  Get migration status
     public MigrationStatus getMigrationStatus() {
         List<PipelineStage> allStages = pipelineStageRepository.findAll();
         long migratedCount = allStages.stream()
@@ -199,13 +199,13 @@ public class PipelineStageService {
         public boolean isComplete() { return totalStages == migratedStages; }
     }
 
-    // 🎯 Helper method to get next order index
+    //  Helper method to get next order index
     private int getNextOrderIndex() {
         Optional<PipelineStage> lastStage = pipelineStageRepository.findTopByOrderByOrderIndexDesc();
         return lastStage.map(stage -> stage.getOrderIndex() + 1).orElse(0);
     }
 
-    // 🎯 Helper method to map to response DTO
+    //  Helper method to map to response DTO
     private PipelineStageResponse mapToResponse(PipelineStage stage) {
         PipelineStageResponse response = new PipelineStageResponse();
         response.setStageId(stage.getStageId());
