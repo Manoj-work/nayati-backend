@@ -30,6 +30,7 @@ public interface LeadRepository extends MongoRepository<LeadModel, String> {
 
     Optional<LeadModel> findByProjectName(String projectName);
     List<LeadModel> findAllByLeadIdIn(Set<String> leadIds);
+    List<LeadModel> findAllByProjectIdIn(Set<String> projectIds);
 
 
 }

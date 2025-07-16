@@ -39,7 +39,7 @@ public class InvoiceResponse {
     public static class ProjectInfo {
         private String projectId;
         private String projectName;
-        private String siteAddress;
+        private String address;
     }
 
     @Data
@@ -47,7 +47,7 @@ public class InvoiceResponse {
     @AllArgsConstructor
     public static class CustomerInfo {
         private String customerId;
-        private String CustomerName;
+        private String customerName;
     }
 
     @Data

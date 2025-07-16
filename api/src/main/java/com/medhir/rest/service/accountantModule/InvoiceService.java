@@ -9,11 +9,14 @@ import com.medhir.rest.model.accountantModule.Invoice;
 import com.medhir.rest.model.accountantModule.Receipt;
 import com.medhir.rest.repository.accountantModule.InvoiceRepository;
 import com.medhir.rest.repository.accountantModule.ReceiptRepository;
+import com.medhir.rest.sales.model.LeadModel;
+import com.medhir.rest.sales.repository.LeadRepository;
 import com.medhir.rest.testModuleforsales.Customer;
 import com.medhir.rest.testModuleforsales.CustomerRepository;
 import com.medhir.rest.testModuleforsales.Project;
 import com.medhir.rest.testModuleforsales.ProjectRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +30,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InvoiceService {
 
+    @Autowired
+    private LeadRepository leadRepository;
+
     private final InvoiceRepository invoiceRepository;
     private final InvoiceMapper invoiceMapper;
     private final ProjectRepository projectRepository;
@@ -35,6 +41,8 @@ public class InvoiceService {
 
     @Transactional
     public Invoice createInvoice(InvoiceCreateDTO dto) {
+
+
 
         // Check for duplicate invoice number
         if (invoiceRepository.existsByInvoiceNumber(dto.getInvoiceNumber())) {
@@ -116,11 +124,11 @@ public class InvoiceService {
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice not found with number: " + invoiceNumber));
 
         // Fetch related Project and Customer by their IDs
-        Project project = projectRepository.findByProjectId(invoice.getProjectId()).orElse(null);
+        LeadModel project = leadRepository.findByProjectId(invoice.getProjectId()).orElse(null);
         Customer customer = customerRepository.findByCustomerId(invoice.getCustomerId()).orElse(null);
 
         InvoiceResponse.ProjectInfo projectInfo = (project != null)
-                ? new InvoiceResponse.ProjectInfo(project.getProjectId(), project.getProjectName(), project.getSiteAddress())
+                ? new InvoiceResponse.ProjectInfo(project.getProjectId(), project.getProjectName(), project.getAddress())
                 : null;
 
         InvoiceResponse.CustomerInfo customerInfo = (customer != null)
@@ -166,41 +174,127 @@ public class InvoiceService {
         );
     }
 
+//    public List<InvoiceResponse> getAllInvoices() {
+//        // Get all invoices
+//        List<Invoice> invoices = invoiceRepository.findAll();
+//
+//        // Collect unique projectIds and customerIds
+//        Set<String> projectIds = invoices.stream()
+//                .map(Invoice::getProjectId)
+//                .collect(Collectors.toSet());
+//
+//        Set<String> customerIds = invoices.stream()
+//                .map(Invoice::getCustomerId)
+//                .collect(Collectors.toSet());
+//
+//        // Fetch all related projects and customers in 1 DB call each
+//        List<LeadModel> projects = leadRepository.findAllByProjectIdIn(projectIds);
+//        List<Customer> customers = customerRepository.findAllByCustomerIdIn(customerIds);
+//
+//        // Build lookup maps
+//        Map<String, LeadModel> projectMap = projects.stream()
+//                .collect(Collectors.toMap(LeadModel::getProjectId, p -> p));
+//
+//        Map<String, Customer> customerMap = customers.stream()
+//                .collect(Collectors.toMap(Customer::getCustomerId, c -> c));
+//
+//        // Map each invoice to InvoiceResponse
+//        return invoices.stream().map(invoice -> {
+//
+//            LeadModel project = projectMap.get(invoice.getProjectId());
+//            Customer customer = customerMap.get(invoice.getCustomerId());
+//
+//            InvoiceResponse.ProjectInfo projectInfo = (project != null)
+//                    ? new InvoiceResponse.ProjectInfo(
+//                    project.getProjectId(),
+//                    project.getProjectName(),
+//                    project.getAddress()
+//            )
+//                    : null;
+//
+//            InvoiceResponse.CustomerInfo customerInfo = (customer != null)
+//                    ? new InvoiceResponse.CustomerInfo(
+//                    customer.getCustomerId(),
+//                    customer.getCustomerName()
+//            )
+//                    : null;
+//
+//            List<InvoiceResponse.InvoiceItem> items = invoice.getItems().stream()
+//                    .map(item -> new InvoiceResponse.InvoiceItem(
+//                            item.getItemName(),
+//                            item.getDescription(),
+//                            item.getHsnOrSac(),
+//                            item.getQuantity(),
+//                            item.getUom(),
+//                            BigDecimal.valueOf(item.getRate()),
+//                            BigDecimal.valueOf(item.getGstPercentage()),
+//                            BigDecimal.valueOf(item.getTotal())
+//                    ))
+//                    .collect(Collectors.toList());
+//
+//            List<InvoiceResponse.LinkedReceiptInfo> linkedReceipts = invoice.getLinkedReceipts() != null
+//                    ? invoice.getLinkedReceipts().stream()
+//                    .map(lr -> new InvoiceResponse.LinkedReceiptInfo(
+//                            lr.getReceiptNumber(),
+//                            lr.getAmountAllocated()
+//                    ))
+//                    .collect(Collectors.toList())
+//                    : List.of();
+//
+//            return new InvoiceResponse(
+//                    invoice.getId(),
+//                    projectInfo,
+//                    customerInfo,
+//                    invoice.getInvoiceNumber(),
+//                    invoice.getInvoiceDate(),
+//                    invoice.getDueDate(),
+//                    invoice.getSubtotal(),
+//                    invoice.getTotalGst(),
+//                    invoice.getTotalAmount(),
+//                    invoice.getAmountReceived(),
+//                    invoice.getAmountRemaining(),
+//                    items,
+//                    invoice.getStatus().name(),
+//                    linkedReceipts
+//            );
+//
+//        }).collect(Collectors.toList());
+//    }
+
     public List<InvoiceResponse> getAllInvoices() {
         // Get all invoices
         List<Invoice> invoices = invoiceRepository.findAll();
 
-        // Collect unique projectIds and customerIds
-        Set<String> projectIds = invoices.stream()
-                .map(Invoice::getProjectId)
+        // Collect unique projectIds from invoices (these actually corresponds to leadIds)
+        Set<String> leadIds = invoices.stream()
+                .map(Invoice::getProjectId) // projectId here corresponds to leadId in LeadModel
                 .collect(Collectors.toSet());
 
         Set<String> customerIds = invoices.stream()
                 .map(Invoice::getCustomerId)
                 .collect(Collectors.toSet());
 
-        // Fetch all related projects and customers in 1 DB call each
-        List<Project> projects = projectRepository.findAllByProjectIdIn(projectIds);
+        // Fetch all related projects with correct method (by leadId)
+        List<LeadModel> projects = leadRepository.findAllByLeadIdIn(leadIds);
+
+        // Fetch customers as earlier
         List<Customer> customers = customerRepository.findAllByCustomerIdIn(customerIds);
 
-        // Build lookup maps
-        Map<String, Project> projectMap = projects.stream()
-                .collect(Collectors.toMap(Project::getProjectId, p -> p));
+        Map<String, LeadModel> projectMap = projects.stream()
+                .collect(Collectors.toMap(LeadModel::getLeadId, p -> p));
 
         Map<String, Customer> customerMap = customers.stream()
                 .collect(Collectors.toMap(Customer::getCustomerId, c -> c));
 
-        // Map each invoice to InvoiceResponse
         return invoices.stream().map(invoice -> {
-
-            Project project = projectMap.get(invoice.getProjectId());
+            LeadModel project = projectMap.get(invoice.getProjectId());
             Customer customer = customerMap.get(invoice.getCustomerId());
 
             InvoiceResponse.ProjectInfo projectInfo = (project != null)
                     ? new InvoiceResponse.ProjectInfo(
-                    project.getProjectId(),
+                    project.getLeadId(),        // note: changed from getProjectId()
                     project.getProjectName(),
-                    project.getSiteAddress()
+                    project.getAddress()
             )
                     : null;
 
@@ -252,10 +346,15 @@ public class InvoiceService {
 
         }).collect(Collectors.toList());
     }
+
+
+
+
     public List<InvoiceResponse> getInvoicesByProjectId(String projectId) {
         // Get only invoices for the given projectId
         List<Invoice> invoices = invoiceRepository.findAllByProjectId(projectId);
 
+        System.out.println("invoice : "  + invoices);
         if (invoices.isEmpty()) {
             return List.of(); // Return empty list if none found
         }
@@ -266,8 +365,10 @@ public class InvoiceService {
                 .collect(Collectors.toSet());
 
         // Fetch related Project once (should be unique)
-        Project project = projectRepository.findByProjectId(projectId)
+        LeadModel project = leadRepository.findByLeadId(projectId)
                 .orElse(null);
+
+
 
         // Fetch all related customers
         List<Customer> customers = customerRepository.findAllByCustomerIdIn(customerIds);
@@ -282,9 +383,9 @@ public class InvoiceService {
 
             InvoiceResponse.ProjectInfo projectInfo = (project != null)
                     ? new InvoiceResponse.ProjectInfo(
-                    project.getProjectId(),
+                    project.getLeadId(),
                     project.getProjectName(),
-                    project.getSiteAddress()
+                    project.getAddress()
             )
                     : null;
 
