@@ -125,6 +125,7 @@ public class DesignationService {
                                     department.getName(), // Department name instead of ID
                                     designation.getDescription(),
                                     designation.isManager(),
+                                    designation.isAdmin(),
                                     designation.isOvertimeEligible()
                             ));
                 })
