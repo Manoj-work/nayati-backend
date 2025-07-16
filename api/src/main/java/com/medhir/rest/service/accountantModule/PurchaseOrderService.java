@@ -2,7 +2,7 @@ package com.medhir.rest.service.accountantModule;
 
 import com.medhir.rest.model.accountantModule.PurchaseOrderModel;
 import com.medhir.rest.repository.accountantModule.PurchaseOrderRepository;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;

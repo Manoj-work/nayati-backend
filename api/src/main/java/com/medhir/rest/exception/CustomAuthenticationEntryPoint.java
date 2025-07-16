@@ -20,17 +20,18 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
-                        AuthenticationException authException) throws IOException, ServletException {
-        
+                         AuthenticationException authException) throws IOException, ServletException {
+
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ApiErrorResponse errorResponse = new ApiErrorResponse(
-            LocalDateTime.now().toString(),
-            HttpStatus.UNAUTHORIZED.value(),
-            "Unauthorized",
-            "Authentication is required to access this resource",
-            null
+                LocalDateTime.now().toString(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "Unauthorized",
+                "Authentication is required to access this resource",
+                null,
+                request.getRequestURI()
         );
 
         objectMapper.writeValue(response.getOutputStream(), errorResponse);

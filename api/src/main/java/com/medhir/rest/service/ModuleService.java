@@ -7,7 +7,7 @@ import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.CompanyModel;
 import com.medhir.rest.model.ModuleModel;
 import com.medhir.rest.repository.ModuleRepository;
-import com.medhir.rest.utils.GeneratedId;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

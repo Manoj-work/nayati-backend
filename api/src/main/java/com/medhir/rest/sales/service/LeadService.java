@@ -1,5 +1,6 @@
 package com.medhir.rest.sales.service;
 
+import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.sales.model.LeadModel;
 import com.medhir.rest.sales.model.Activity;
 import com.medhir.rest.sales.model.ActivityLog;
@@ -14,6 +15,9 @@ import com.medhir.rest.sales.dto.activity.ActivityLogRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadConversionResponseDTO;
 import com.medhir.rest.sales.dto.activity.ActivityDTO;
 import com.medhir.rest.sales.dto.activity.NoteDTO;
+import com.medhir.rest.testModuleforsales.Customer;
+import com.medhir.rest.testModuleforsales.CustomerRepository;
+import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.service.EmployeeService;
@@ -29,9 +33,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import com.medhir.rest.sales.dto.lead.LeadProjectCustomerResponseDTO;
 
 @Service
 public class LeadService {
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
 
     @Autowired
     private LeadRepository leadRepository;
@@ -51,6 +60,9 @@ public class LeadService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @Autowired
+    private GeneratedId generatedId;
+
     // 🔍 Fetch all leads
     public List<LeadModel> getAllLeads() {
         return leadRepository.findAll();
@@ -59,13 +71,17 @@ public class LeadService {
     // �� Get single lead by leadId (Snowflake ID)
     public LeadModel getLeadByLeadId(String leadId) {
         return leadRepository.findByLeadId(leadId)
+
                 .orElseThrow(() -> new RuntimeException(" Lead not found with leadId: " + leadId));
+
     }
 
     // Helper: Validate stageId exists
     private void validateStageId(String stageId) {
         if (!pipelineStageService.stageExistsById(stageId)) {
+
             throw new RuntimeException(" Invalid stageId: " + stageId + ". Please use a valid pipeline stage ID.");
+
         }
     }
 
@@ -136,11 +152,26 @@ public class LeadService {
         return lead;
     }
 
-    // 🆕 Create a new lead
+    //  Create a new lead
     public LeadModel createLead(LeadModel lead) {
         if (lead.getLeadId() == null || lead.getLeadId().isBlank()) {
             lead.setLeadId("LEAD-" + snowflakeIdGenerator.nextId());
         }
+        if (lead.getCustomerId() == null || lead.getCustomerId().isBlank()) {
+            lead.setCustomerId("CUS-" + snowflakeIdGenerator.nextId());
+        }
+        lead.setGeneratedId(generatedId);  // Injected service or bean
+        lead.generateProjectName();
+
+        Customer customer = Customer.builder()
+                .customerId(lead.getCustomerId())
+                .customerName(lead.getName())
+                .email(lead.getEmail())
+                .contactNumber(lead.getContactNumber())
+                .build();
+
+        customerRepository.save(customer);
+
         setDefaultStageIdIfMissing(lead);
         validateStageId(lead.getStageId());
         return leadRepository.save(lead);
@@ -149,6 +180,9 @@ public class LeadService {
     // Overload: Create a new lead from DTO
     public LeadModel createLead(LeadRequestDTO dto) {
         LeadModel lead = createLeadModelFromDTO(dto);
+//        if (lead.getLeadId() == null || lead.getCustomerId().isBlank()) {
+//            lead.setLeadId("CUS" + snowflakeIdGenerator.nextId());
+//        }
         return createLead(lead);
     }
 
@@ -281,22 +315,29 @@ public class LeadService {
         // Get the "Converted" stage ID
         var convertedStage = pipelineStageService.getStageByName("Converted");
         if (convertedStage.isEmpty()) {
+
             throw new RuntimeException(" 'Converted' stage not found in pipeline");
+
         }
         String convertedStageId = convertedStage.get().getStageId();
         
         // Validate lead can be converted
         if (convertedStageId.equals(lead.getStageId())) {
+
             throw new RuntimeException(" Lead is already converted");
+
         }
         
         var lostStage = pipelineStageService.getStageByName("Lost");
         if (lostStage.isPresent() && lostStage.get().getStageId().equals(lead.getStageId())) {
+
             throw new RuntimeException(" Cannot convert a lost lead");
+
         }
         
         // Validate required lead information
         if (lead.getName() == null || lead.getName().trim().isEmpty()) {
+
             throw new RuntimeException(" Lead name is required for conversion");
         }
         
@@ -306,15 +347,18 @@ public class LeadService {
         
         if (lead.getEmail() == null || lead.getEmail().trim().isEmpty()) {
             throw new RuntimeException(" Email is required for conversion");
+
         }
         
         // Validate conversion data
         if (conversionData.getFinalQuotation() == null || conversionData.getFinalQuotation().trim().isEmpty()) {
+
             throw new RuntimeException(" Final quotation is required for conversion");
+
         }
         
         if (conversionData.getSignupAmount() == null || conversionData.getSignupAmount().trim().isEmpty()) {
-            throw new RuntimeException("❌ Sign-up amount is required for conversion");
+            throw new RuntimeException("Sign-up amount is required for conversion");
         }
         
         // Update lead with conversion data
@@ -1025,4 +1069,22 @@ public class LeadService {
             ))
             .collect(Collectors.toList());
     }
+
+
+
+    public List<LeadProjectCustomerResponseDTO> getAllProjectCustomerInfo() {
+        List<LeadModel> leads = leadRepository.findAll();
+
+        return leads.stream()
+                .filter(lead -> lead.getCustomerId() != null) // skip bad data
+                .map(lead -> new LeadProjectCustomerResponseDTO(
+                        lead.getLeadId(),
+                        lead.getProjectName(),
+                        lead.getCustomerId(),
+                        lead.getName()
+                ))
+                .collect(Collectors.toList());
+    }
+
+
 }

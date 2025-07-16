@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface LeadRepository extends MongoRepository<LeadModel, String> {
@@ -23,6 +24,13 @@ public interface LeadRepository extends MongoRepository<LeadModel, String> {
 
     // Find by custom Snowflake leadId
     Optional<LeadModel> findByLeadId(String leadId);
+    Optional<LeadModel> findByProjectId(String leadId);
 
     List<KanbanLeadProjection> findAllBy(Class<KanbanLeadProjection> type);
+
+    Optional<LeadModel> findByProjectName(String projectName);
+    List<LeadModel> findAllByLeadIdIn(Set<String> leadIds);
+    List<LeadModel> findAllByProjectIdIn(Set<String> projectIds);
+
+
 }

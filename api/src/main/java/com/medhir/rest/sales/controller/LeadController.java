@@ -1,11 +1,15 @@
 package com.medhir.rest.sales.controller;
+import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.sales.dto.lead.*;
 import com.medhir.rest.sales.dto.activity.ActivityLogRequestDTO;
+import com.medhir.rest.sales.dto.lead.LeadProjectCustomerResponseDTO;
 
+import com.medhir.rest.sales.repository.LeadRepository;
 import com.medhir.rest.sales.service.LeadService;
 import com.medhir.rest.sales.dto.activity.ActivityDTO;
 import com.medhir.rest.sales.dto.activity.NoteDTO;
 import com.medhir.rest.sales.dto.activity.ActivityLogDTO;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import com.medhir.rest.sales.mapper.LeadMapper;
 import com.medhir.rest.sales.service.PipelineStageService;
@@ -19,6 +23,8 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestPart;
+
+
 
 import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +42,9 @@ public class LeadController {
     private PipelineStageService pipelineStageService;
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private LeadRepository leadRepository;
 
     @Autowired
     private MinioService minioService;
@@ -338,4 +347,13 @@ public class LeadController {
     public List<LeadService.KanbanStageGroupDTO> getKanbanLeads() {
         return leadService.getKanbanLeadsForBoard();
     }
+
+
+
+
+    @GetMapping("/project-customer/all")
+    public ResponseEntity<List<LeadProjectCustomerResponseDTO>> getAllProjectCustomerInfo() {
+        return ResponseEntity.ok(leadService.getAllProjectCustomerInfo());
+    }
+
 }

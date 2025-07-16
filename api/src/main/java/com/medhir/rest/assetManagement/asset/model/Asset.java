@@ -13,9 +13,11 @@ import java.util.Map;
  * Includes core identification, financial, assignment, and custom fields.
  */
 @Data
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "assets")
+
 public class Asset {
     @Id
     private String id;

@@ -182,4 +182,6 @@ public class EmployeeModel {
         private Double employerPfContribution = 0.0;
         private Double employeePfContribution = 0.0;
     }
+    private List<String> roleIds;
+
 }
