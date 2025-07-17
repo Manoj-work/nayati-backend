@@ -1,9 +1,8 @@
-package com.medhir.rest.controller;
+package com.medhir.rest.controller.company;
 
-import com.medhir.rest.dto.company.CompanyHeadResponseDTO;
 import com.medhir.rest.dto.company.CompanyResponseDTO;
 import com.medhir.rest.dto.company.CreateCompanyWithHeadRequest;
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.service.company.CompanyOrchestratorService;
 import com.medhir.rest.service.company.CompanyService;
 import jakarta.validation.Valid;
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/superadmin/companies")

@@ -4,7 +4,7 @@
 //import com.medhir.rest.exception.DuplicateResourceException;
 //import com.medhir.rest.exception.ResourceNotFoundException;
 //import com.medhir.rest.mapper.company.CompanyMapper;
-//import com.medhir.rest.model.CompanyModel;
+//import com.medhir.rest.model.company.CompanyModel;
 //import com.medhir.rest.repository.CompanyRepository;
 //import com.medhir.rest.service.company.CompanyService;
 //import com.medhir.rest.utils.SnowflakeIdGenerator;

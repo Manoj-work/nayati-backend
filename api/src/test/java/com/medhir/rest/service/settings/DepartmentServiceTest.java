@@ -2,7 +2,7 @@ package com.medhir.rest.service.settings;
 
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.model.settings.LeavePolicyModel;
 import com.medhir.rest.repository.settings.DepartmentRepository;

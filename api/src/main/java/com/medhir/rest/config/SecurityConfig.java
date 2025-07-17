@@ -89,7 +89,7 @@ public class SecurityConfig {
                         .requestMatchers("/income/**").hasAuthority("HRADMIN")
                         .requestMatchers("/vendors/**","/payments/**","/bills/**").hasAuthority("ACCOUNTANT")
                         // All other routes can be accessed by HR or Super Admin
-                        .anyRequest().hasAnyAuthority("HRADMIN", "SUPERADMIN")
+                        .anyRequest().hasAnyAuthority("HRADMIN", "SUPERADMIN","COMPANY_HEAD")
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint()) // 401 handler

@@ -10,7 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.MediaType;
 import org.springframework.web.multipart.MultipartFile;
-import com.medhir.rest.dto.PaymentDTO;
+import com.medhir.rest.dto.accountantModule.PaymentDTO;
 
 import java.util.List;
 

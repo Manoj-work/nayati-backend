@@ -9,7 +9,7 @@ import com.medhir.rest.utils.GeneratedId;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.util.StringUtils;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.repository.EmployeeRepository;
 
 import java.util.List;

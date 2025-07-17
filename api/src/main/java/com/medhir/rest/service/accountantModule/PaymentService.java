@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.ArrayList;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.web.multipart.MultipartFile;
-import com.medhir.rest.dto.PaymentDTO;
+import com.medhir.rest.dto.accountantModule.PaymentDTO;
 import lombok.RequiredArgsConstructor;
 import com.medhir.rest.model.accountantModule.VendorModel;
 import com.medhir.rest.service.company.CompanyService;
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.company.CompanyModel;
 import java.math.BigDecimal;
 
 @Service

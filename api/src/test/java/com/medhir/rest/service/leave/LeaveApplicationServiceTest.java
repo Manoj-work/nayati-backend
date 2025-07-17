@@ -5,7 +5,7 @@ import com.medhir.rest.dto.ManagerEmployeeDTO;
 import com.medhir.rest.dto.leave.LeaveWithEmployeeDetails;
 import com.medhir.rest.dto.leave.UpdateLeaveStatusRequest;
 import com.medhir.rest.exception.ResourceNotFoundException;
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.model.leave.LeaveBalance;
 import com.medhir.rest.model.leave.LeaveModel;
 import com.medhir.rest.model.settings.DepartmentModel;

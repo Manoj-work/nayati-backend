@@ -1,4 +1,4 @@
-package com.medhir.rest.model;
+package com.medhir.rest.model.company;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.medhir.rest.model.rbac.ModulePermission;

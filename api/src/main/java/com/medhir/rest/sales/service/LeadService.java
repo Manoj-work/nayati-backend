@@ -1,6 +1,5 @@
 package com.medhir.rest.sales.service;
 
-import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.sales.model.LeadModel;
 import com.medhir.rest.sales.model.Activity;
 import com.medhir.rest.sales.model.ActivityLog;
@@ -10,7 +9,6 @@ import com.medhir.rest.sales.repository.KanbanLeadProjection;
 import com.medhir.rest.sales.dto.lead.ConvertLeadRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadAssignmentRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadRequestDTO;
-import com.medhir.rest.sales.dto.lead.LeadResponseDTO;
 import com.medhir.rest.sales.dto.activity.ActivityLogRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadConversionResponseDTO;
 import com.medhir.rest.sales.dto.activity.ActivityDTO;
@@ -21,9 +19,7 @@ import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.service.EmployeeService;
-import com.medhir.rest.sales.mapper.LeadMapper;
 import com.medhir.rest.repository.EmployeeRepository;
-import com.medhir.rest.model.EmployeeModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
