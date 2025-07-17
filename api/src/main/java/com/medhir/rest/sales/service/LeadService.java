@@ -64,6 +64,7 @@ public class LeadService {
         return leadRepository.findAll();
     }
 
+
     // �� Get single lead by leadId (Snowflake ID)
     public LeadModel getLeadByLeadId(String leadId) {
         return leadRepository.findByLeadId(leadId)
@@ -182,7 +183,7 @@ public class LeadService {
         return createLead(lead);
     }
 
-    // ✏️ Update existing lead
+    // ✏Update existing lead
     public LeadModel updateLead(String id, LeadModel updatedLead) {
         LeadModel existingLead = getLeadByLeadId(id); // Ensures lead exists
         updatedLead.setLeadId(existingLead.getLeadId()); // Retain original ID

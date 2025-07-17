@@ -56,12 +56,8 @@ public class InvoiceController {
 //        return ResponseEntity.ok(invoices);
 //    }
 
-    @GetMapping("/invoice-leads")
-    public ResponseEntity<List<LeadProjectCustomerResponseDTO>> getInvoiceLeads() {
-        List<LeadProjectCustomerResponseDTO> leads = leadService.getLeadsForInvoice();
-        return ResponseEntity.ok(leads);
-    }
+        }
 
 
 
-}
+

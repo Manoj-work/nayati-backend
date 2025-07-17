@@ -10,7 +10,6 @@ import com.medhir.rest.assetManagement.assetSetting.dto.LocationDTO;
 import com.medhir.rest.assetManagement.assetSetting.dto.StatusLabelDTO;
 import com.medhir.rest.assetManagement.assetSetting.dto.CustomFieldDTO;
 import com.medhir.rest.assetManagement.assetSetting.dto.IDFormattingDTO;
-import com.medhir.rest.assetManagement.assetSetting.AssetSettingService;
 import com.medhir.rest.assetManagement.assetSetting.service.AssetIdGeneratorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/asset-settings")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AssetSettingController {
     
     @Autowired
