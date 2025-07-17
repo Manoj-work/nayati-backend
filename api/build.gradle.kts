@@ -27,8 +27,8 @@ repositories {
         name = "reposiliteRepositoryReleases"
         url = uri("http://10.0.3.90:9021/releases")
         isAllowInsecureProtocol = true
-
     }
+    mavenCentral()
 }
 
 dependencies {

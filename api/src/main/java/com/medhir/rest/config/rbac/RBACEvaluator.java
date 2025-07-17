@@ -1,7 +1,7 @@
 package com.medhir.rest.config.rbac;
 
-import com.medhir.rest.model.CompanyModel;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.company.CompanyModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.model.rbac.Roles;
 import com.medhir.rest.repository.CompanyRepository;
 import com.medhir.rest.repository.EmployeeRepository;

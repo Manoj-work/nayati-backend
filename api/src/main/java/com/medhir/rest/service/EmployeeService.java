@@ -3,10 +3,10 @@ package com.medhir.rest.service;
 import com.medhir.rest.dto.*;
 import com.medhir.rest.exception.BadRequestException;
 import com.medhir.rest.service.auth.EmployeeAuthService;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.model.ModuleModel;
 import com.medhir.rest.repository.EmployeeRepository;
 import com.medhir.rest.repository.ModuleRepository;
@@ -28,7 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 import java.util.stream.Collectors;
 import com.medhir.rest.dto.EmployeeDTO;
-import com.medhir.rest.mapper.EmployeeMapper;
+import com.medhir.rest.mapper.employee.EmployeeMapper;
 
 @Service
 public class EmployeeService {

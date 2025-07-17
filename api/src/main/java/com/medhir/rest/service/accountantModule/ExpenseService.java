@@ -5,7 +5,7 @@ import com.medhir.rest.dto.accountantModule.expense.ExpenseResponse;
 import com.medhir.rest.dto.accountantModule.expense.UpdateExpenseRequest;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.mapper.accountantModule.ExpenseMapper;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.model.accountantModule.Expense;
 import com.medhir.rest.model.accountantModule.VendorModel;
 import com.medhir.rest.repository.EmployeeRepository;

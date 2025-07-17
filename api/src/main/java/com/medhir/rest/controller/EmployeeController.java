@@ -12,7 +12,7 @@ import com.medhir.rest.dto.EmployeeWithLeaveDetailsDTO;
 import com.medhir.rest.dto.EmployeeLeavePolicyWeeklyOffsDTO;
 import com.medhir.rest.dto.EmployeeDTO;
 import com.medhir.rest.exception.ResourceNotFoundException;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.repository.ModuleRepository;
 import com.medhir.rest.service.EmployeeService;
 import com.medhir.rest.utils.GeneratedId;

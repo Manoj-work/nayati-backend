@@ -3,7 +3,7 @@ package com.medhir.rest.controller.employeeUpdateRequest;
 import com.medhir.rest.dto.employeeUpdateRequest.EmployeeUpdateRequest;
 import com.medhir.rest.dto.employeeUpdateRequest.UpdateFieldComparison;
 import com.medhir.rest.service.employeeUpdateRequest.EmployeeUpdateService;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.repository.EmployeeRepository;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import jakarta.validation.constraints.NotBlank;

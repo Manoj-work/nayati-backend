@@ -3,7 +3,7 @@ package com.medhir.rest.controller.employeeUpdateRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medhir.rest.dto.employeeUpdateRequest.EmployeeUpdateRequest;
 import com.medhir.rest.service.employeeUpdateRequest.EmployeeUpdateService;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.repository.EmployeeRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;

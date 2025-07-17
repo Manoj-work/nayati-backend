@@ -1,6 +1,6 @@
 package com.medhir.rest.repository;
 
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.company.CompanyModel;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

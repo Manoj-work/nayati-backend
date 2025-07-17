@@ -1,4 +1,4 @@
-package com.medhir.rest.dto;
+package com.medhir.rest.dto.accountantModule;
 
 import java.math.BigDecimal;
 import java.util.List;

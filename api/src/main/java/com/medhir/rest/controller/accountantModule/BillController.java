@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medhir.rest.model.accountantModule.BillModel;
 import com.medhir.rest.service.accountantModule.BillService;
-import com.medhir.rest.dto.BillDTO;
+import com.medhir.rest.dto.accountantModule.BillDTO;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

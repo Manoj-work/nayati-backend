@@ -1,7 +1,7 @@
 package com.medhir.rest.service.auth;
 
 import com.medhir.rest.repository.auth.EmployeeRoleRepository;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
