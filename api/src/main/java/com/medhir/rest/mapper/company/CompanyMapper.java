@@ -10,7 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CompanyMapper {
 
-    @Mapping(target = "companyHead", ignore = true)
+    @Mapping(target = "companyHeads", ignore = true)
     CompanyResponseDTO toCompanyResponseDTO(CompanyModel company);
 
     @Mapping(source = "emailPersonal", target = "email")

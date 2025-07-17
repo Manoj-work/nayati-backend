@@ -12,12 +12,14 @@ import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.model.rbac.ModulePermission;
 import com.medhir.rest.repository.company.CompanyRepository;
 import com.medhir.rest.repository.employee.EmployeeRepository;
+import com.medhir.rest.service.employee.EmployeeService;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -56,47 +58,18 @@ public class CompanyService {
         return companyRepository.findAll().stream().map(company -> {
             CompanyResponseDTO dto = companyMapper.toCompanyResponseDTO(company);
 
-            if (company.getCompanyHeadId() != null) {
-                employeeRepository.findByEmployeeId(company.getCompanyHeadId()).ifPresent(head -> {
-                    dto.setCompanyHead(companyMapper.toCompanyHeadResponseDTO(head));
-                });
+            if (company.getCompanyHeadIds() != null && !company.getCompanyHeadIds().isEmpty()) {
+                List<EmployeeModel> heads = employeeRepository.findByEmployeeIdIn(company.getCompanyHeadIds());
+                dto.setCompanyHeads(heads.stream()
+                        .map(companyMapper::toCompanyHeadResponseDTO)
+                        .collect(Collectors.toList()));
             }
 
             return dto;
         }).collect(Collectors.toList());
     }
 
-    public CompanyModel updateCompany(String companyId, CompanyModel company) {
-        Optional<CompanyModel> existingCompany = companyRepository.findByCompanyId(companyId);
-        if (existingCompany.isEmpty()) {
-            throw new ResourceNotFoundException("Company not found with ID: " + companyId);
-        }
 
-        CompanyModel companyToUpdate = existingCompany.get();
-
-        // Check for unique email
-        if (!companyToUpdate.getEmail().equals(company.getEmail()) &&
-                companyRepository.findByEmail(company.getEmail()).isPresent()) {
-            throw new DuplicateResourceException("Email already exists: " + company.getEmail());
-        }
-
-        // Check for unique phone number
-        if (!companyToUpdate.getPhone().equals(company.getPhone()) &&
-                companyRepository.findByPhone(company.getPhone()).isPresent()) {
-            throw new DuplicateResourceException("Phone number already exists: " + company.getPhone());
-        }
-
-        companyToUpdate.setName(company.getName());
-        companyToUpdate.setEmail(company.getEmail());
-        companyToUpdate.setPhone(company.getPhone());
-        companyToUpdate.setGst(company.getGst());
-        companyToUpdate.setRegAdd(company.getRegAdd());
-        companyToUpdate.setPrefixForEmpID(company.getPrefixForEmpID());
-        companyToUpdate.setCompanyHeadId(company.getCompanyHeadId());
-
-
-        return companyRepository.save(companyToUpdate);
-    }
 
     public void deleteCompany(String companyId) {
         if (!companyRepository.existsByCompanyId(companyId)) {
@@ -115,11 +88,18 @@ public class CompanyService {
 
         CompanyResponseDTO dto = companyMapper.toCompanyResponseDTO(company);
 
-        if (company.getCompanyHeadId() != null) {
-            EmployeeModel head = employeeRepository.findByEmployeeId(company.getCompanyHeadId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Company Head not found with ID: " + company.getCompanyHeadId()));
-            dto.setCompanyHead(companyMapper.toCompanyHeadResponseDTO(head));
+        if (company.getCompanyHeadIds() != null && !company.getCompanyHeadIds().isEmpty()) {
+            List<EmployeeModel> heads = employeeRepository.findByEmployeeIdIn(company.getCompanyHeadIds());
+
+            if (heads.size() != company.getCompanyHeadIds().size()) {
+                throw new ResourceNotFoundException("One or more company heads not found for IDs: " + company.getCompanyHeadIds());
+            }
+
+            dto.setCompanyHeads(heads.stream()
+                    .map(companyMapper::toCompanyHeadResponseDTO)
+                    .collect(Collectors.toList()));
         }
+
 
         return dto;
     }
