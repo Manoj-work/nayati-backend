@@ -12,7 +12,7 @@ import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.repository.leave.LeaveBalanceRepository;
 import com.medhir.rest.repository.leave.LeaveRepository;
 import com.medhir.rest.service.company.CompanyService;
-import com.medhir.rest.service.EmployeeService;
+import com.medhir.rest.service.employee.EmployeeService;
 import com.medhir.rest.service.settings.DepartmentService;
 import com.medhir.rest.service.settings.LeavePolicyService;
 import com.medhir.rest.service.settings.LeaveTypeService;

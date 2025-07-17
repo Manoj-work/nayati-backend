@@ -2,7 +2,7 @@ package com.medhir.rest.service;
 
 import com.medhir.rest.dto.ModuleResponseDTO;
 import com.medhir.rest.model.employee.EmployeeModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.repository.employee.EmployeeRepository;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.model.ModuleModel;

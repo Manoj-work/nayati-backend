@@ -1,4 +1,4 @@
-package com.medhir.rest.service;
+package com.medhir.rest.service.employee;
 
 import com.medhir.rest.dto.*;
 import com.medhir.rest.exception.BadRequestException;
@@ -8,7 +8,7 @@ import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.model.ModuleModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.repository.employee.EmployeeRepository;
 import com.medhir.rest.repository.ModuleRepository;
 import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.service.company.CompanyService;

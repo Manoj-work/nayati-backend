@@ -53,6 +53,8 @@ public class SecurityConfig {
 
                         ).permitAll()
 
+                        .requestMatchers("/**").hasAnyAuthority("COMPANY_HEAD", "SUPERADMIN")
+
                         // Only HR Admin can access /hradmin/**
                         .requestMatchers("/hradmin/**").hasAnyAuthority("HRADMIN", "SUPERADMIN")
 
@@ -89,7 +91,7 @@ public class SecurityConfig {
                         .requestMatchers("/income/**").hasAuthority("HRADMIN")
                         .requestMatchers("/vendors/**","/payments/**","/bills/**").hasAuthority("ACCOUNTANT")
                         // All other routes can be accessed by HR or Super Admin
-                        .anyRequest().hasAnyAuthority("HRADMIN", "SUPERADMIN","COMPANY_HEAD")
+                        .anyRequest().hasAnyAuthority("HRADMIN", "SUPERADMIN")
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(authenticationEntryPoint()) // 401 handler
@@ -103,9 +105,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(
-                List.of("http://localhost:3000", "http://localhost:3001", "http://192.168.0.200:3000", "https://manage.medhir.in")); // Allow frontend
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedOriginPatterns(
+                List.of("http://localhost:3000", "http://192.168.0.200:3000", "*.medhir.in")); config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // Allow cookies
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));
