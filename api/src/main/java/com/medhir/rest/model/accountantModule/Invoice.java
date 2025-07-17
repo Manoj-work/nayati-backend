@@ -17,7 +17,7 @@ import java.util.List;
 @Document(collection = "invoices")
 public class Invoice {
 
-//    @JsonIgnore
+    @JsonIgnore
     @Id
     private String id;
 

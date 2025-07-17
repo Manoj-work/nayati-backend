@@ -160,7 +160,7 @@ public class AssetController {
         return ResponseEntity.ok(Map.of("message", "Asset deleted successfully"));
     }
 
-    // 🔥 NEW: Get asset invoice file URL
+    //   Get asset invoice file URL
     @GetMapping("/{id}/invoice-url")
     public ResponseEntity<Map<String, String>> getAssetInvoiceUrl(@PathVariable String id) {
         Asset asset = assetService.getAssetById(id);
@@ -171,7 +171,7 @@ public class AssetController {
         }
     }
 
-    // 🔥 NEW: Download asset invoice file
+    //  Download asset invoice file
     @GetMapping("/{id}/invoice-download")
     public ResponseEntity<?> downloadAssetInvoice(@PathVariable String id) {
         Asset asset = assetService.getAssetById(id);
@@ -191,7 +191,7 @@ public class AssetController {
         return ResponseEntity.notFound().build();
     }
 
-    // 🔥 NEW: Preview asset invoice file
+    // Preview asset invoice file
     @GetMapping("/{id}/invoice-preview")
     public ResponseEntity<?> previewAssetInvoice(@PathVariable String id) {
         Asset asset = assetService.getAssetById(id);
