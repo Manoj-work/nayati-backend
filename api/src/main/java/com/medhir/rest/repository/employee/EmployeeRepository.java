@@ -1,6 +1,6 @@
-package com.medhir.rest.repository;
+package com.medhir.rest.repository.employee;
 
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

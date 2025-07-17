@@ -1,4 +1,4 @@
-package com.medhir.rest.model;
+package com.medhir.rest.model.employee;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,9 +6,7 @@ import com.medhir.rest.dto.employeeUpdateRequest.EmployeeUpdateRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -50,24 +48,24 @@ public class EmployeeModel {
     @NotBlank(message = "last name cannot be empty")
     private String lastName="";
 
-    public  String getName(){
-        if(firstName == null || lastName == null){
+    public String getName() {
+        boolean hasFirst = firstName != null && !firstName.trim().isEmpty();
+        boolean hasLast = lastName != null && !lastName.trim().isEmpty();
+
+        if (!hasFirst && !hasLast) {
             return name;
         }
+
         StringBuilder fullName = new StringBuilder();
-
-        fullName.append(firstName);
-
-        if (middleName != null) {
-            if (fullName.length() > 0) fullName.append(" "); // Add space only if not first
-            fullName.append(middleName);
-        }
-
-        if (lastName != null) {
+        if (hasFirst) fullName.append(firstName.trim());
+        if (middleName != null && !middleName.trim().isEmpty()) {
             if (fullName.length() > 0) fullName.append(" ");
-            fullName.append(lastName);
+            fullName.append(middleName.trim());
         }
-
+        if (hasLast) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(lastName.trim());
+        }
         return fullName.toString();
     }
 
@@ -182,4 +180,6 @@ public class EmployeeModel {
         private Double employerPfContribution = 0.0;
         private Double employeePfContribution = 0.0;
     }
+    private List<String> roleIds;
+
 }

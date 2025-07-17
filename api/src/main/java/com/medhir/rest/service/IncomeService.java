@@ -9,8 +9,8 @@ import com.medhir.rest.utils.GeneratedId;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.util.StringUtils;
-import com.medhir.rest.model.EmployeeModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.model.employee.EmployeeModel;
+import com.medhir.rest.repository.employee.EmployeeRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,10 +37,8 @@ public class IncomeService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Submitted by (employeeId) is required");
             }
 
-            income.setGeneratedId(generatedId);
              income.setIncomeId("INC" + snowflakeIdGenerator.nextId());
 
-            income.generateIncomeId();
             return incomeRepository.save(income);
         } catch (ResponseStatusException e) {
             throw e;

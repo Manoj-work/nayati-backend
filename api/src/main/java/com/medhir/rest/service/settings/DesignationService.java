@@ -97,6 +97,7 @@ public class DesignationService {
         }
 
         existingDesignation.setManager(designation.isManager());
+        existingDesignation.setAdmin(designation.isAdmin());
         existingDesignation.setUpdatedAt(LocalDateTime.now().toString());
         existingDesignation.setOvertimeEligible(designation.isOvertimeEligible());
 
@@ -124,6 +125,7 @@ public class DesignationService {
                                     department.getName(), // Department name instead of ID
                                     designation.getDescription(),
                                     designation.isManager(),
+                                    designation.isAdmin(),
                                     designation.isOvertimeEligible()
                             ));
                 })

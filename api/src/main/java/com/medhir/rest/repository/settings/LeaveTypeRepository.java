@@ -17,6 +17,6 @@ public interface LeaveTypeRepository extends MongoRepository<LeaveTypeModel, Str
     boolean existsByLeaveTypeId(String leaveTypeId);
     List<LeaveTypeModel> findByCompanyId(String companyId);
 
-    @Query("{'leaveTyprId': {'$in':?0}}")
+    @Query("{'leaveTypeId': {'$in':?0}}")
     List<LeaveTypeModel> findByLeaveTypeIdIn(Set<String> ids);
 }

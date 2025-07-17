@@ -1,5 +1,7 @@
 package com.medhir.rest.controller.settings;
 
+import com.medhir.rest.dto.rbac.AssignModulesRequest;
+import com.medhir.rest.dto.rbac.SimpleModule;
 import com.medhir.rest.model.settings.DepartmentModel;
 import com.medhir.rest.service.settings.DepartmentService;
 import jakarta.validation.Valid;
@@ -61,4 +63,27 @@ public class DepartmentController {
         response.put("message", "Department deleted successfully");
         return ResponseEntity.ok(response);
     }
+
+    // In your DepartmentController class
+
+    @PutMapping("/{departmentId}/modules")
+    public ResponseEntity<Map<String, Object>> assignModulesToDepartment(
+            @PathVariable String departmentId,
+            @Valid @RequestBody AssignModulesRequest request
+    ) {
+        departmentService.assignModulesToDepartment(departmentId, request);
+        return ResponseEntity.ok(Map.of(
+                "message", "Modules assigned to department successfully!"
+        ));
+    }
+
+    @GetMapping("/{departmentId}/modules")
+    public ResponseEntity<List<SimpleModule>> getAssignedModulesForDepartment(
+            @PathVariable String departmentId
+    ) {
+        List<SimpleModule> modules = departmentService.getAssignedModules(departmentId);
+        return ResponseEntity.ok(modules);
+    }
+
+
 }

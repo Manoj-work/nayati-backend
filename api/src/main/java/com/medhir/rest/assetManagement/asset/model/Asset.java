@@ -14,9 +14,11 @@ import java.util.Map;
  * Includes core identification, financial, assignment, and custom fields.
  */
 @Data
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Document(collection = "assets")
+
 public class Asset {
     @JsonIgnore
     @Id
@@ -37,4 +39,17 @@ public class Asset {
     private Map<String, Object> customFields;
     private Double gstRate;
     private Boolean inputTaxCreditEligible;
+    private String laptopCompany;
+    private String processor;
+    private String ram;
+    private String memory;
+    private String graphicsCard;
+    private String condition;
+    private String accessories;
+
+    private String assignedToTeam;
+    private String assignmentDate;
+
+
+
 } 

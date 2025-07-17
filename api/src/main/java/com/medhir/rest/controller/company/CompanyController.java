@@ -1,7 +1,10 @@
-package com.medhir.rest.controller;
+package com.medhir.rest.controller.company;
 
-import com.medhir.rest.model.CompanyModel;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.dto.company.CompanyResponseDTO;
+import com.medhir.rest.dto.company.CreateCompanyWithHeadRequest;
+import com.medhir.rest.model.company.CompanyModel;
+import com.medhir.rest.service.company.CompanyOrchestratorService;
+import com.medhir.rest.service.company.CompanyService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/superadmin/companies")
@@ -17,6 +19,8 @@ public class CompanyController {
 
     @Autowired
     private CompanyService companyService;
+    @Autowired
+    private CompanyOrchestratorService companyOrchestratorService;
 
     @PostMapping
     public ResponseEntity<Map<String, Object>> createCompany(@Valid @RequestBody CompanyModel company) {
@@ -28,13 +32,13 @@ public class CompanyController {
     }
 
     @GetMapping
-    public List<CompanyModel> getAllCompanies() {
+    public List<CompanyResponseDTO> getAllCompanies() {
         return companyService.getAllCompanies();
     }
-    
+
     @GetMapping("/{companyId}")
-    public ResponseEntity<Optional<CompanyModel>> getCompanyById(@PathVariable String companyId) {
-        Optional<CompanyModel> company = companyService.getCompanyById(companyId);
+    public ResponseEntity<CompanyResponseDTO> getCompanyById(@PathVariable String companyId) {
+        CompanyResponseDTO company = companyService.getCompanywithHeaddetailsById(companyId);
         return ResponseEntity.ok(company);
     }
 
@@ -52,4 +56,11 @@ public class CompanyController {
         companyService.deleteCompany(companyId);
         return ResponseEntity.ok(Map.of("message", "Company deleted successfully!"));
     }
+
+    @PostMapping("/with-head")
+    public ResponseEntity<CompanyModel> createCompanyWithHead(
+            @RequestBody @Valid CreateCompanyWithHeadRequest request) {
+        return ResponseEntity.ok(companyOrchestratorService.createCompanyWithHead(request));
+    }
+
 }

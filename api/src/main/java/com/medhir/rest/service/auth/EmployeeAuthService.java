@@ -5,13 +5,15 @@ import com.medhir.rest.dto.auth.LoginResponse;
 import com.medhir.rest.model.auth.EmployeeAuth;
 import com.medhir.rest.repository.auth.EmployeeAuthRepository;
 import com.medhir.rest.config.JwtUtil;
-import com.medhir.rest.model.EmployeeModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.model.employee.EmployeeModel;
+import com.medhir.rest.repository.employee.EmployeeRepository;
 import com.medhir.rest.exception.ResourceNotFoundException;
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.service.settings.DepartmentService;
+import com.medhir.rest.service.settings.DesignationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -34,6 +36,9 @@ public class EmployeeAuthService implements UserDetailsService {
     private final JwtService jwtService;
     private final CompanyService companyService;
     private final DepartmentService departmentService;
+    @Autowired
+    private DesignationService designationService;
+
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -98,24 +103,56 @@ public class EmployeeAuthService implements UserDetailsService {
             }
         }
 
-        // Get roles
-        Set<String> roles = employeeRoleService.getEmployeeRoles(employeeAuth.getEmployeeId());
-        List<String> roleList = new ArrayList<>(roles);
-        
-        log.info("Roles found for employee {}: {}", employeeAuth.getEmployeeId(), roleList);
-
-        // Get department name
+        // Fetch department and moduleIds
+        List<String> moduleIds = new ArrayList<>();
         String departmentName = "";
         if (employee.getDepartment() != null && !employee.getDepartment().isEmpty()) {
-            try {
-                departmentName = departmentService.getDepartmentById(employee.getDepartment()).getName();
-            } catch (Exception e) {
-                log.warn("Could not fetch department name for employee {}: {}", employee.getEmployeeId(), e.getMessage());
+
+                var department = departmentService.getDepartmentById(employee.getDepartment());
+                departmentName = department.getName();
+                if (department.getAssignedModules() != null) {
+                    department.getAssignedModules().forEach(am -> {
+                        if (am.getModuleId() != null && !am.getModuleId().isEmpty()) {
+                            moduleIds.add(am.getModuleId());
+                        }
+                    });
+                }
+
+        }
+
+        // Fetch designation and roles
+        List<String> roleList = new ArrayList<>();
+        if (employee.getDesignation() != null && !employee.getDesignation().isEmpty()) {
+
+                var designation = designationService.getDesignationById(employee.getDesignation());
+                if (designation.isManager()) {
+                    roleList.add("MANAGER");
+                }
+                if (designation.isAdmin()) {
+                    roleList.add("ADMIN");
+                }
+                if (!designation.isManager() && !designation.isAdmin()) {
+                    roleList.add(designation.getName().toUpperCase());
+                }
+
+        } else {
+            roleList.add("EMPLOYEE");
+        }
+
+        // Add previous roles from employee.getRoles()
+        if (employee.getRoles() != null) {
+            for (String prevRole : employee.getRoles()) {
+                if (prevRole != null && !prevRole.trim().isEmpty() && !roleList.contains(prevRole)) {
+                    roleList.add(prevRole);
+                }
             }
         }
 
-        // Generate JWT token
-        String token = jwtService.generateToken(employeeAuth);
+        log.info("Roles for employee {}: {}", employeeAuth.getEmployeeId(), roleList);
+        log.info("ModuleIds for employee {}: {}", employeeAuth.getEmployeeId(), moduleIds);
+
+        // Generate JWT token with moduleIds and roles
+        String token = jwtService.generateToken(employeeAuth, moduleIds, roleList);
         log.info("JWT token generated successfully for employee: {}", employeeAuth.getEmployeeId());
 
         return LoginResponse.builder()
@@ -124,6 +161,7 @@ public class EmployeeAuthService implements UserDetailsService {
                 .employeeId(employeeAuth.getEmployeeId())
                 .isPasswordChanged(employeeAuth.isPasswordChanged())
                 .departmentName(departmentName)
+                .moduleIds(moduleIds)
                 .build();
     }
 

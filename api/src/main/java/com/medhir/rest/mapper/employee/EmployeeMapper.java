@@ -1,8 +1,8 @@
-package com.medhir.rest.mapper;
+package com.medhir.rest.mapper.employee;
 
 import com.medhir.rest.dto.EmployeeDTO;
 import com.medhir.rest.dto.EmployeeWithLeaveDetailsDTO;
-import com.medhir.rest.model.EmployeeModel;
+import com.medhir.rest.model.employee.EmployeeModel;
 
 public class EmployeeMapper {
     public static EmployeeModel toModel(EmployeeDTO dto) {

@@ -11,13 +11,13 @@ import java.util.Collections;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-import com.medhir.rest.service.CompanyService;
+import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
-import com.medhir.rest.dto.BillDTO;
+import com.medhir.rest.dto.accountantModule.BillDTO;
 import com.medhir.rest.model.accountantModule.BillModel.BillLineItem;
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.model.accountantModule.VendorModel;
 
 @Service

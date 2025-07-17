@@ -17,4 +17,5 @@ public class LoginResponse {
     private String employeeId;
     private boolean isPasswordChanged;
     private String departmentName;
+    private List<String> moduleIds;
 } 

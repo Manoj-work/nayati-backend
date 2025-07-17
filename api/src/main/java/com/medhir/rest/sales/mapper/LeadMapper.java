@@ -6,7 +6,7 @@ import com.medhir.rest.sales.dto.activity.ActivityDTO;
 import com.medhir.rest.sales.dto.activity.NoteDTO;
 import com.medhir.rest.sales.dto.activity.ActivityLogDTO;
 import com.medhir.rest.sales.service.PipelineStageService;
-import com.medhir.rest.service.EmployeeService;
+import com.medhir.rest.service.employee.EmployeeService;
 import java.util.stream.Collectors;
 
 public class LeadMapper {

@@ -27,7 +27,9 @@ public class LeadModel {
     private String id;
     @Indexed(unique = true)
     private String leadId;
-
+    private String customerId;
+    private String projectName;
+    private String projectId;
     private String name;
     private String contactNumber;
     private String email;
@@ -40,11 +42,6 @@ public class LeadModel {
     private String leadSource;
     private String notes;
     private String stageId;
-    private String customerId;
-    private String projectName;
-    private String projectId;
-
-
     @Indexed
     private String priority;
     @Indexed

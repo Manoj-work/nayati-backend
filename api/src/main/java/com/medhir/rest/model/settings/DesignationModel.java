@@ -25,6 +25,7 @@ public class DesignationModel {
     private String department;
 
     private boolean isManager;
+    private boolean isAdmin;
     private boolean overtimeEligible;
 
     private String createdAt;

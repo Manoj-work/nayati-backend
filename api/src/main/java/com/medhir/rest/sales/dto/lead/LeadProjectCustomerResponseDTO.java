@@ -1,10 +1,8 @@
 package com.medhir.rest.sales.dto.lead;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 
 @Data
 @AllArgsConstructor

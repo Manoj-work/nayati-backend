@@ -36,9 +36,8 @@ public class MinioService {
     RestTemplate restTemplate = new RestTemplate();
 
     public String generateUUID() {
-        return restTemplate.getForObject(minioserviceUrl + "/generate-uuid", String.class);
+        return restTemplate.getForObject(minioserviceUrl + "/minio/generate-uuid", String.class);
     }
-
     public String uploadFile(String bucketName, MultipartFile file,String employeeId) {
 
         String uniqueId = generateUUID(); // Fetch UUID from MinIO Service
@@ -53,7 +52,7 @@ public class MinioService {
         body.add("filePath", filePath);
 
         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(minioserviceUrl + "/upload", requestEntity, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(minioserviceUrl + "/minio/upload", requestEntity, String.class);
 
         return response.getBody();  // MinIO file URL
     }

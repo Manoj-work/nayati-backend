@@ -4,18 +4,16 @@ import com.medhir.rest.model.accountantModule.PaymentModel;
 import com.medhir.rest.repository.accountantModule.PaymentRepository;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.utils.MinioService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.ArrayList;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import org.springframework.web.multipart.MultipartFile;
-import com.medhir.rest.dto.PaymentDTO;
+import com.medhir.rest.dto.accountantModule.PaymentDTO;
 import lombok.RequiredArgsConstructor;
-import com.medhir.rest.service.accountantModule.VendorService;
 import com.medhir.rest.model.accountantModule.VendorModel;
-import com.medhir.rest.service.CompanyService;
-import com.medhir.rest.model.CompanyModel;
+import com.medhir.rest.service.company.CompanyService;
+import com.medhir.rest.model.company.CompanyModel;
 import java.math.BigDecimal;
 
 @Service
