@@ -2,7 +2,7 @@ package com.medhir.rest.service.employeeUpdateRequest;
 
 import com.medhir.rest.dto.employeeUpdateRequest.EmployeeUpdateRequest;
 import com.medhir.rest.model.employee.EmployeeModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.repository.employee.EmployeeRepository;
 import com.medhir.rest.exception.DuplicateResourceException;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.utils.MinioService;

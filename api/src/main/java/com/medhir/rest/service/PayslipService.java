@@ -2,6 +2,7 @@ package com.medhir.rest.service;
 
 import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.model.PayslipModel;
+import com.medhir.rest.service.employee.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

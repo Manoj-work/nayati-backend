@@ -5,7 +5,7 @@
 //import com.medhir.rest.exception.ResourceNotFoundException;
 //import com.medhir.rest.mapper.company.CompanyMapper;
 //import com.medhir.rest.model.company.CompanyModel;
-//import com.medhir.rest.repository.CompanyRepository;
+//import com.medhir.rest.repository.company.CompanyRepository;
 //import com.medhir.rest.service.company.CompanyService;
 //import com.medhir.rest.utils.SnowflakeIdGenerator;
 //import org.junit.jupiter.api.BeforeEach;

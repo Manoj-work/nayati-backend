@@ -3,7 +3,7 @@ package com.medhir.rest.service.company;
 import com.medhir.rest.dto.company.CreateCompanyWithHeadRequest;
 import com.medhir.rest.model.company.CompanyModel;
 import com.medhir.rest.model.employee.EmployeeModel;
-import com.medhir.rest.service.EmployeeService;
+import com.medhir.rest.service.employee.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

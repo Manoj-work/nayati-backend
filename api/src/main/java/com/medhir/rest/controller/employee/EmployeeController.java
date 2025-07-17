@@ -1,4 +1,4 @@
-package com.medhir.rest.controller;
+package com.medhir.rest.controller.employee;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,7 +14,7 @@ import com.medhir.rest.dto.EmployeeDTO;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.repository.ModuleRepository;
-import com.medhir.rest.service.EmployeeService;
+import com.medhir.rest.service.employee.EmployeeService;
 import com.medhir.rest.utils.GeneratedId;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping("/")
+
 public class EmployeeController {
 
     @Autowired
@@ -123,6 +124,8 @@ public class EmployeeController {
     // Get All Employees by Company ID with additional details
     @GetMapping("/hradmin/companies/{companyId}/employees")
     public ResponseEntity<List<CompanyEmployeeDTO>> getAllEmployeesByCompanyIdWithDetails(@PathVariable String companyId) {
+
+
         return ResponseEntity.ok(employeeService.getAllEmployeesByCompanyIdWithDetails(companyId));
     }
 

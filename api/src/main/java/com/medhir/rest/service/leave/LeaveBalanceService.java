@@ -1,6 +1,6 @@
 package com.medhir.rest.service.leave;
 
-import com.medhir.rest.service.EmployeeService;
+import com.medhir.rest.service.employee.EmployeeService;
 import com.medhir.rest.dto.EmployeeWithLeaveDetailsDTO;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.model.leave.LeaveBalance;

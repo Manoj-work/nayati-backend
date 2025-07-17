@@ -6,7 +6,7 @@ import com.medhir.rest.model.auth.EmployeeAuth;
 import com.medhir.rest.repository.auth.EmployeeAuthRepository;
 import com.medhir.rest.config.JwtUtil;
 import com.medhir.rest.model.employee.EmployeeModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.repository.employee.EmployeeRepository;
 import com.medhir.rest.exception.ResourceNotFoundException;
 import com.medhir.rest.service.company.CompanyService;
 import com.medhir.rest.service.settings.DepartmentService;

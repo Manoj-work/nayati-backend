@@ -8,7 +8,7 @@ import com.medhir.rest.mapper.accountantModule.ExpenseMapper;
 import com.medhir.rest.model.employee.EmployeeModel;
 import com.medhir.rest.model.accountantModule.Expense;
 import com.medhir.rest.model.accountantModule.VendorModel;
-import com.medhir.rest.repository.EmployeeRepository;
+import com.medhir.rest.repository.employee.EmployeeRepository;
 import com.medhir.rest.repository.accountantModule.ExpenseRepository;
 import com.medhir.rest.repository.accountantModule.VendorRepository;
 import com.medhir.rest.utils.MinioService;
