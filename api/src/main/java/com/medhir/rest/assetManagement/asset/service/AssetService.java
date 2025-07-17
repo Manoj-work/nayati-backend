@@ -89,52 +89,36 @@ public class AssetService {
         if (updatedAsset.getInputTaxCreditEligible() != null) {
             existingAsset.setInputTaxCreditEligible(updatedAsset.getInputTaxCreditEligible());
         }
-        
+
         // Handle invoice scan upload
         if (invoiceScan != null && !invoiceScan.isEmpty()) {
             String url = minioService.uploadAssetInvoice(invoiceScan, existingAsset.getVendorId());
             existingAsset.setInvoiceScanUrl(url);
         }
-        
+
         return assetRepository.save(existingAsset);
     }
 
-//    public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
-//        // TODO: Validate category, location, etc.
-//
-//        // Generate asset ID based on category
-//        if (asset.getCategoryId() != null) {
-//            String generatedAssetId = assetIdGeneratorService.generateAssetId(asset.getCategoryId());
-//            asset.setAssetId(generatedAssetId);
-//        }
-//
-//        if (invoiceScan != null && !invoiceScan.isEmpty()) {
-//            String url = minioService.uploadAssetInvoice(invoiceScan, asset.getVendorId());
-//            asset.setInvoiceScanUrl(url);
-//        } else {
-//            asset.setInvoiceScanUrl(null);
-//        }
-//        return assetRepository.save(asset);
-//    }
-public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
-    // Validate and generate asset ID based on category
-    if (asset.getCategoryId() != null) {
-        String generatedAssetId = assetIdGeneratorService.generateAssetId(asset.getCategoryId());
-        asset.setAssetId(generatedAssetId);
-    }
 
-    // Handle invoice scan upload
-    if (invoiceScan != null && !invoiceScan.isEmpty()) {
-        String url = minioService.uploadAssetInvoice(invoiceScan, asset.getVendorId());  // Upload and get URL
-        System.out.println("url " + url);
-        asset.setInvoiceScanUrl(url);
-    } else {
-        asset.setInvoiceScanUrl(null);
-        // Optional: make it null if no file uploaded
-    }
+    public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
+        // Validate and generate asset ID based on category
+        if (asset.getCategoryId() != null) {
+            String generatedAssetId = assetIdGeneratorService.generateAssetId(asset.getCategoryId());
+            asset.setAssetId(generatedAssetId);
+        }
 
-    return assetRepository.save(asset);
-}
+        // Handle invoice scan upload
+        if (invoiceScan != null && !invoiceScan.isEmpty() && asset.getVendorId() != null) {
+            String url = minioService.uploadAssetInvoice(invoiceScan, asset.getVendorId());  // Upload and get URL
+            System.out.println("url " + url);
+            asset.setInvoiceScanUrl(url);
+        } else {
+            asset.setInvoiceScanUrl(null);
+            // Optional: make it null if no file uploaded
+        }
+
+        return assetRepository.save(asset);
+    }
 
 
     public Asset patchAsset(String id, Asset updatedAsset, MultipartFile invoiceScan) {
@@ -144,7 +128,7 @@ public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
 
     public Asset updateAsset(String id, Asset updatedAsset, MultipartFile invoiceScan) {
         Asset existingAsset = getAssetById(id);
-        
+
         // Update all fields (complete replacement)
         existingAsset.setName(updatedAsset.getName());
         existingAsset.setCategoryId(updatedAsset.getCategoryId());
@@ -160,13 +144,13 @@ public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
         existingAsset.setCustomFields(updatedAsset.getCustomFields());
         existingAsset.setGstRate(updatedAsset.getGstRate());
         existingAsset.setInputTaxCreditEligible(updatedAsset.getInputTaxCreditEligible());
-        
+
         // Handle invoice scan upload
         if (invoiceScan != null && !invoiceScan.isEmpty()) {
             String url = minioService.uploadAssetInvoice(invoiceScan, existingAsset.getVendorId());
             existingAsset.setInvoiceScanUrl(url);
         }
-        
+
         return assetRepository.save(existingAsset);
     }
 
@@ -174,4 +158,4 @@ public Asset createAsset(Asset asset, MultipartFile invoiceScan) {
         Asset asset = getAssetById(id); // This will throw exception if not found
         assetRepository.delete(asset);
     }
-} 
+}

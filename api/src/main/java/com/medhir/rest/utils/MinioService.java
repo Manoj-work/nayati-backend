@@ -80,7 +80,7 @@ public class MinioService {
 
     public String uploadAssetInvoice(MultipartFile file, String vendorId) {
         System.out.println("inside the asset  upload");
-        String Url = uploadFile(assetBucketName, file, vendorId.toString());
+        String Url = uploadFile(assetBucketName, file, vendorId);
 
         // 🔥 FIX: Convert direct MinIO URL to MinIO service URL for proper access
         // Original: http://192.168.0.200:9000/assets/vendorId/filename

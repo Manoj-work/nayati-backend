@@ -32,7 +32,7 @@ public class InvoiceCreateDTO {
     @NotNull(message = "Subtotal is required")
     private BigDecimal subtotal;
 
-    @NotNull(message = "Total GST is required")
+//    @NotNull(message = "Total GST is required")
     private BigDecimal totalGst;
 
     @NotNull(message = "Total amount is required")

@@ -1,25 +1,23 @@
 package com.medhir.rest.sales.service;
 
+import com.medhir.rest.exception.ResourceNotFoundException;
+import com.medhir.rest.sales.dto.lead.*;
 import com.medhir.rest.sales.model.LeadModel;
 import com.medhir.rest.sales.model.Activity;
 import com.medhir.rest.sales.model.ActivityLog;
 import com.medhir.rest.sales.model.Note;
 import com.medhir.rest.sales.repository.LeadRepository;
 import com.medhir.rest.sales.repository.KanbanLeadProjection;
-import com.medhir.rest.sales.dto.lead.ConvertLeadRequestDTO;
-import com.medhir.rest.sales.dto.lead.LeadAssignmentRequestDTO;
-import com.medhir.rest.sales.dto.lead.LeadRequestDTO;
-import com.medhir.rest.sales.dto.lead.LeadResponseDTO;
 import com.medhir.rest.sales.dto.activity.ActivityLogRequestDTO;
-import com.medhir.rest.sales.dto.lead.LeadConversionResponseDTO;
 import com.medhir.rest.sales.dto.activity.ActivityDTO;
 import com.medhir.rest.sales.dto.activity.NoteDTO;
+import com.medhir.rest.testModuleforsales.Customer;
+import com.medhir.rest.testModuleforsales.CustomerRepository;
+import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
 import com.medhir.rest.service.EmployeeService;
-import com.medhir.rest.sales.mapper.LeadMapper;
 import com.medhir.rest.repository.EmployeeRepository;
-import com.medhir.rest.model.EmployeeModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -43,6 +41,12 @@ public class LeadService {
     private MinioService minioService;
 
     @Autowired
+    private GeneratedId generatedId;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
     private PipelineStageService pipelineStageService;
 
     @Autowired
@@ -56,10 +60,25 @@ public class LeadService {
         return leadRepository.findAll();
     }
 
+
+    // 🧾 Fetch simplified lead info for invoices
+    public List<LeadProjectCustomerResponseDTO> getLeadsForInvoice() {
+        List<LeadModel> leads = leadRepository.findAll();
+
+        return leads.stream()
+                .map(lead -> new LeadProjectCustomerResponseDTO(
+                        lead.getProjectId(),     // assuming LeadModel has getProjectId()
+                        lead.getProjectName(),   // assuming LeadModel has getProjectName()
+                        lead.getCustomerId(),    // assuming LeadModel has getCustomerId()
+                        lead.getName()   // assuming LeadModel has getCustomerName()
+                ))
+                .collect(Collectors.toList());
+    }
+
     // �� Get single lead by leadId (Snowflake ID)
     public LeadModel getLeadByLeadId(String leadId) {
         return leadRepository.findByLeadId(leadId)
-                .orElseThrow(() -> new RuntimeException("❌ Lead not found with leadId: " + leadId));
+                .orElseThrow(() -> new RuntimeException("Lead not found with leadId: " + leadId));
     }
 
     // Helper: Validate stageId exists
@@ -137,10 +156,35 @@ public class LeadService {
     }
 
     // 🆕 Create a new lead
+//    public LeadModel createLead(LeadModel lead) {
+//        if (lead.getLeadId() == null || lead.getLeadId().isBlank()) {
+//            lead.setLeadId("LEAD-" + snowflakeIdGenerator.nextId());
+//        }
+//
+//        setDefaultStageIdIfMissing(lead);
+//        validateStageId(lead.getStageId());
+//        return leadRepository.save(lead);
+//    }
+
     public LeadModel createLead(LeadModel lead) {
         if (lead.getLeadId() == null || lead.getLeadId().isBlank()) {
             lead.setLeadId("LEAD-" + snowflakeIdGenerator.nextId());
         }
+        if (lead.getCustomerId() == null || lead.getCustomerId().isBlank()) {
+            lead.setCustomerId("CUS-" + snowflakeIdGenerator.nextId());
+        }
+        lead.setGeneratedId(generatedId);  // Injected service or bean
+        lead.generateProjectName();
+
+        Customer customer = Customer.builder()
+                .customerId(lead.getCustomerId())
+                .customerName(lead.getName())
+                .email(lead.getEmail())
+                .contactNumber(lead.getContactNumber())
+                .build();
+
+        customerRepository.save(customer);
+
         setDefaultStageIdIfMissing(lead);
         validateStageId(lead.getStageId());
         return leadRepository.save(lead);
@@ -1024,5 +1068,31 @@ public class LeadService {
                     .collect(Collectors.toList())
             ))
             .collect(Collectors.toList());
+    }
+
+    public LeadProjectCustomerResponseDTO getProjectCustomerInfo(String leadId) {
+        LeadModel lead = leadRepository.findByLeadId(leadId)
+                .orElseThrow(() -> new ResourceNotFoundException("Lead not found with ID: " + leadId));
+
+        return new LeadProjectCustomerResponseDTO(
+                lead.getLeadId(),
+                lead.getProjectName(),
+                lead.getCustomerId(),
+                lead.getName()
+        );
+    }
+
+    public List<LeadProjectCustomerResponseDTO> getAllProjectCustomerInfo() {
+        List<LeadModel> leads = leadRepository.findAll();
+//   System.out.println("lead details"+leads);
+        return leads.stream()
+                .filter(lead -> lead.getCustomerId() != null) // skip bad data
+                .map(lead -> new LeadProjectCustomerResponseDTO(
+                        lead.getLeadId(),
+                        lead.getProjectName(),
+                        lead.getCustomerId(),
+                        lead.getName()
+                ))
+                .collect(Collectors.toList());
     }
 }

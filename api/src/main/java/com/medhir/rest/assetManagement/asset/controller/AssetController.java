@@ -77,13 +77,13 @@ public class AssetController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Map<String, Object>> createAsset(
             @RequestPart("asset") String assetJson,
-            @RequestPart(value = "invoiceScan", required = true) MultipartFile invoiceScan) throws JsonProcessingException {
+            @RequestPart(value = "invoiceScan", required = false) MultipartFile invoiceScan) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         Asset asset = mapper.readValue(assetJson, Asset.class);
         Asset saved = assetService.createAsset(asset, invoiceScan);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset created successfully",
-                "assetId", saved.getId()
+                "assetId", saved.getAssetId()
         ));
     }
 
@@ -100,7 +100,7 @@ public class AssetController {
         Asset updated = assetService.patchAsset(id, asset, null);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset updated successfully",
-                "assetId", updated.getId(),
+                "assetId", updated.getAssetId(),
                 "asset", updated
         ));
     }
@@ -122,7 +122,7 @@ public class AssetController {
         Asset updated = assetService.patchAsset(id, asset, invoiceScan);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset updated successfully",
-                "assetId", updated.getId(),
+                "assetId", updated.getAssetId(),
                 "asset", updated
         ));
     }
@@ -144,7 +144,7 @@ public class AssetController {
         Asset updated = assetService.updateAsset(id, asset, invoiceScan);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset replaced successfully",
-                "assetId", updated.getId(),
+                "assetId", updated.getAssetId(),
                 "asset", updated
         ));
     }
