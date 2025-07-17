@@ -614,12 +614,21 @@ public class EmployeeService {
             existingEmployee.setLastName(updatedEmployeeDTO.getLastName());
 
             // Update leave policy based on department
+            // Update leave policy based on department
             if (updatedEmployeeDTO.getDepartment() != null && !updatedEmployeeDTO.getDepartment().isEmpty()) {
                 DepartmentModel department = departmentService.getDepartmentById(updatedEmployeeDTO.getDepartment());
-                LeavePolicyModel leavePolicy = leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
 
-                // Set the leave policy ID
-                existingEmployee.setLeavePolicyId(department.getLeavePolicy());
+                // Only update leave policy if department has one assigned
+                if (department.getLeavePolicy() != null) {
+                    LeavePolicyModel leavePolicy = leavePolicyService.getLeavePolicyById(department.getLeavePolicy());
+
+                    // Set the leave policy ID
+                    existingEmployee.setLeavePolicyId(department.getLeavePolicy());
+                } else {
+                    // Optionally clear or skip setting the leavePolicyId
+                    System.out.println("Department does not have a leave policy assigned.");
+                    existingEmployee.setLeavePolicyId(null); // or leave as-is
+                }
             }
 
             // Update Bank Details
