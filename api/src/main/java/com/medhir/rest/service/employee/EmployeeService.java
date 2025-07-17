@@ -220,6 +220,8 @@ public class EmployeeService {
 
     public EmployeeModel createCompanyHeadEmployee(
             String companyId,
+            String departmentId,
+            String designationId,
             String firstName,
             String middleName,
             String lastName,
@@ -228,6 +230,8 @@ public class EmployeeService {
     ) {
         EmployeeModel employee = new EmployeeModel();
         employee.setCompanyId(companyId);
+        employee.setDepartment(departmentId);
+        employee.setDesignation(designationId);
         employee.setFirstName(firstName);
         employee.setMiddleName(middleName);
         employee.setLastName(lastName);
@@ -1144,5 +1148,19 @@ public class EmployeeService {
 
         return dto;
     }
+    public void addRoleToEmployee(String empId, String role) {
+        EmployeeModel employee = employeeRepository.findByEmployeeId(empId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        employee.getRoles().add(role);
+        employeeRepository.save(employee);
+    }
+
+    public void removeRoleFromEmployee(String empId, String role) {
+        EmployeeModel employee = employeeRepository.findByEmployeeId(empId)
+                .orElseThrow(() -> new ResourceNotFoundException("Employee not found"));
+        employee.getRoles().remove(role);
+        employeeRepository.save(employee);
+    }
+
 
 }

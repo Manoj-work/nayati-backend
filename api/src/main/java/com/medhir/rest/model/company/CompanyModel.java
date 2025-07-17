@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -54,7 +55,8 @@ public class CompanyModel {
 
     private String colorCode="#FFFFFF";
 
-    private String companyHeadId;
+    private Set<String> companyHeadIds;
+
     private List<ModulePermission> assignedModules = new ArrayList<>(); // Which modules, features, sub-features are enabled for this company
 
 }

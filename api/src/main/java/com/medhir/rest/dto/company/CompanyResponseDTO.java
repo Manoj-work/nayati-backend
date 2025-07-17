@@ -2,6 +2,8 @@ package com.medhir.rest.dto.company;
 
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class CompanyResponseDTO {
     private String companyId;
@@ -12,7 +14,8 @@ public class CompanyResponseDTO {
     private String regAdd;
     private String prefixForEmpID;
     private String colorCode;
-    private CompanyHeadResponseDTO companyHead;
+    private List<CompanyHeadResponseDTO> companyHeads;
+
 
 
 }

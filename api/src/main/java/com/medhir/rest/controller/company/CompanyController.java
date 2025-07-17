@@ -44,7 +44,7 @@ public class CompanyController {
 
     @PutMapping("/{companyId}")
     public ResponseEntity<Map<String, Object>> updateCompany(@PathVariable String companyId, @Valid @RequestBody CompanyModel company) {
-        CompanyModel updatedCompany =  companyService.updateCompany(companyId, company);
+        CompanyModel updatedCompany =  companyOrchestratorService.updateCompany(companyId, company);
         return ResponseEntity.ok(Map.of(
                 "message", "Company updated successfully!"
 //                "Company ",updatedCompany

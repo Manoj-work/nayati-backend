@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class CreateCompanyWithHeadRequest {
@@ -15,6 +17,6 @@ public class CreateCompanyWithHeadRequest {
 
     @Valid
     @NotNull
-    private CompanyHeadDetailsDTO companyHead;
+    private List<CompanyHeadDetailsDTO> companyHeads;
 
 }
