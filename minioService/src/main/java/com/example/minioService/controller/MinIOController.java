@@ -16,7 +16,7 @@ public class MinIOController {
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(
             @RequestParam("bucketName") String bucketName,
-            @RequestParam("filePath") String filePath,  // 🔥 Pre-generated file path
+            @RequestParam("filePath") String filePath,  //  Pre-generated file path
             @RequestParam("file") MultipartFile file) {
         String fileUrl = minIOService.uploadFile(bucketName, filePath, file);
         return ResponseEntity.ok(fileUrl);

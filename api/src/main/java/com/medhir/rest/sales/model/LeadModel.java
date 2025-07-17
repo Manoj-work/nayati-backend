@@ -4,7 +4,6 @@ import com.medhir.rest.utils.GeneratedId;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import net.minidev.json.annotate.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
@@ -20,7 +19,7 @@ import java.util.List;
 @AllArgsConstructor
 @Document(collection = "leads")
 public class LeadModel {
-    @Setter
+
     @Transient
     private GeneratedId generatedId;
     @Id
@@ -75,6 +74,10 @@ public class LeadModel {
     private List<Activity> activities = new ArrayList<>();
     private List<Note> notesList = new ArrayList<>();
     private List<ActivityLog> activityLogs = new ArrayList<>();
+
+    public void setGeneratedId(GeneratedId generatedId) {
+        this.generatedId = generatedId;
+    }
 
     public void generateProjectName() {
         if (this.projectName == null && this.generatedId != null) {

@@ -120,7 +120,7 @@ public class DepartmentService {
 
         existingDepartment.setName(department.getName());
         existingDepartment.setDescription(department.getDescription());
-        existingDepartment.setDepartmentHead(department.getDepartmentHead());
+
         existingDepartment.setLeavePolicy(department.getLeavePolicy());
         existingDepartment.setWeeklyHolidays(department.getWeeklyHolidays());
         existingDepartment.setUpdatedAt(LocalDateTime.now().toString());

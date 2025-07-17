@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LeadProjectCustomerResponseDTO {
 
-//    private String LeadId;
-    private String projectId;
-    private String projectName;
-    private String customerId;
-    private String customerName;
+private String projectId;
+private String projectName;
+private String customerId;
+private String customerName;
+
 }

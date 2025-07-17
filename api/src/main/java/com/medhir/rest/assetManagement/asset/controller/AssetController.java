@@ -83,7 +83,7 @@ public class AssetController {
         Asset saved = assetService.createAsset(asset, invoiceScan);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset created successfully",
-                "assetId", saved.getId()
+                "assetId", saved.getAssetId()
         ));
     }
 
@@ -100,7 +100,7 @@ public class AssetController {
         Asset updated = assetService.patchAsset(id, asset, null);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset updated successfully",
-                "assetId", updated.getId(),
+                "assetId", updated.getAssetId(),
                 "asset", updated
         ));
     }
@@ -122,7 +122,7 @@ public class AssetController {
         Asset updated = assetService.patchAsset(id, asset, invoiceScan);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset updated successfully",
-                "assetId", updated.getId(),
+                "assetId", updated.getAssetId(),
                 "asset", updated
         ));
     }
@@ -144,7 +144,7 @@ public class AssetController {
         Asset updated = assetService.updateAsset(id, asset, invoiceScan);
         return ResponseEntity.ok(Map.of(
                 "message", "Asset replaced successfully",
-                "assetId", updated.getId(),
+                "assetId", updated.getAssetId(),
                 "asset", updated
         ));
     }
@@ -158,5 +158,56 @@ public class AssetController {
     public ResponseEntity<Map<String, String>> deleteAsset(@PathVariable String id) {
         assetService.deleteAsset(id);
         return ResponseEntity.ok(Map.of("message", "Asset deleted successfully"));
+    }
+
+    //   Get asset invoice file URL
+    @GetMapping("/{id}/invoice-url")
+    public ResponseEntity<Map<String, String>> getAssetInvoiceUrl(@PathVariable String id) {
+        Asset asset = assetService.getAssetById(id);
+        if (asset.getInvoiceScanUrl() != null && !asset.getInvoiceScanUrl().isEmpty()) {
+            return ResponseEntity.ok(Map.of("invoiceUrl", asset.getInvoiceScanUrl()));
+        } else {
+            return ResponseEntity.ok(Map.of("invoiceUrl", null));
+        }
+    }
+
+    //  Download asset invoice file
+    @GetMapping("/{id}/invoice-download")
+    public ResponseEntity<?> downloadAssetInvoice(@PathVariable String id) {
+        Asset asset = assetService.getAssetById(id);
+        if (asset.getInvoiceScanUrl() != null && !asset.getInvoiceScanUrl().isEmpty()) {
+            // Extract bucket and file path from URL
+            String url = asset.getInvoiceScanUrl();
+            String[] parts = url.split("/");
+            if (parts.length >= 4) {
+                String bucketName = parts[parts.length - 2]; // assets
+                String filePath = parts[parts.length - 1]; // vendorId/filename
+                
+                // Redirect to MinIO service for download
+                String downloadUrl = "http://192.168.0.200:8085/minio/download/" + bucketName + "/" + filePath;
+                return ResponseEntity.ok(Map.of("downloadUrl", downloadUrl));
+            }
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Preview asset invoice file
+    @GetMapping("/{id}/invoice-preview")
+    public ResponseEntity<?> previewAssetInvoice(@PathVariable String id) {
+        Asset asset = assetService.getAssetById(id);
+        if (asset.getInvoiceScanUrl() != null && !asset.getInvoiceScanUrl().isEmpty()) {
+            // Extract bucket and file path from URL
+            String url = asset.getInvoiceScanUrl();
+            String[] parts = url.split("/");
+            if (parts.length >= 4) {
+                String bucketName = parts[parts.length - 2]; // assets
+                String filePath = parts[parts.length - 1]; // vendorId/filename
+                
+                // Redirect to MinIO service for preview
+                String previewUrl = "http://192.168.0.200:8085/minio/preview/" + bucketName + "/" + filePath;
+                return ResponseEntity.ok(Map.of("previewUrl", previewUrl));
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 } 

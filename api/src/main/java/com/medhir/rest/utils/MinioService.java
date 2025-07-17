@@ -77,7 +77,10 @@ public class MinioService {
         return uploadFile(billsBucketName, file, paymentId);
     }
 
-    public String uploadAssetInvoice(MultipartFile file, Long vendorId) {
-        return uploadFile(assetBucketName, file, vendorId.toString());
+    public String uploadAssetInvoice(MultipartFile file, String vendorId) {
+        System.out.println("inside the asset  upload");
+        String Url = uploadFile(assetBucketName, file, vendorId);
+        return Url;
     }
+
 }

@@ -1,5 +1,6 @@
 package com.medhir.rest.assetManagement.asset.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ import java.util.Map;
 @Document(collection = "assets")
 
 public class Asset {
+    @JsonIgnore
     @Id
     private String id;
     private String assetId;
@@ -30,7 +32,7 @@ public class Asset {
     private String assignedTo;
     private String purchaseDate;
     private Double purchaseCost;
-    private Long vendorId;
+    private String vendorId;
     private String invoiceNumber;
     private String warrantyExpiry;
     private String invoiceScanUrl;

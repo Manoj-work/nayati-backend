@@ -21,7 +21,7 @@ public class MinIOService {
     @Value("${minio.url}")
     private String minioUrl;
 
-    // ✅ Generate UUID / Snowflake ID
+    //  Generate UUID / Snowflake ID
     public String generateUniqueID() {
         return String.valueOf(snowflakeIDGenerator.nextId());
     }
@@ -36,7 +36,7 @@ public class MinIOService {
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucketName)
-                            .object(filePath) // 🔥 Using the pre-generated file path
+                            .object(filePath) //  Using the pre-generated file path
                             .stream(file.getInputStream(), file.getSize(), -1)
                             .contentType(file.getContentType())
                             .build()
