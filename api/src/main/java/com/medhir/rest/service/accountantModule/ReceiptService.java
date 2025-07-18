@@ -12,10 +12,8 @@ import com.medhir.rest.repository.accountantModule.InvoiceRepository;
 import com.medhir.rest.repository.accountantModule.ReceiptRepository;
 import com.medhir.rest.sales.model.LeadModel;
 import com.medhir.rest.sales.repository.LeadRepository;
-import com.medhir.rest.testModuleforsales.Customer;
-import com.medhir.rest.testModuleforsales.CustomerRepository;
-import com.medhir.rest.testModuleforsales.Project;
-import com.medhir.rest.testModuleforsales.ProjectRepository;
+import com.medhir.rest.model.accountantModule.Customer;
+import com.medhir.rest.repository.accountantModule.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +32,6 @@ public class ReceiptService {
 
     private final ReceiptRepository receiptRepository;
     private final InvoiceRepository invoiceRepository;
-    private final ProjectRepository projectRepository;
     private final ReceiptMapper receiptMapper;
     private final CustomerRepository customerRepository;
 

@@ -1,5 +1,6 @@
-package com.medhir.rest.testModuleforsales;
+package com.medhir.rest.repository.accountantModule;
 
+import com.medhir.rest.model.accountantModule.Customer;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.List;

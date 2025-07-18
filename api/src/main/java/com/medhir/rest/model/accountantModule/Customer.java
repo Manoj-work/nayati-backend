@@ -1,4 +1,4 @@
-package com.medhir.rest.testModuleforsales;
+package com.medhir.rest.model.accountantModule;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;

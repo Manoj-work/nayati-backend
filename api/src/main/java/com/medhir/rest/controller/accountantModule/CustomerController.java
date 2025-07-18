@@ -1,5 +1,7 @@
-package com.medhir.rest.testModuleforsales;
+package com.medhir.rest.controller.accountantModule;
 
+import com.medhir.rest.model.accountantModule.Customer;
+import com.medhir.rest.service.accountantModule.CustomerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,9 +11,9 @@ import java.util.List;
 @RestController
 @RequestMapping("/accountant")
 @RequiredArgsConstructor
-public class CustomerProjectController {
+public class CustomerController {
 
-    private final CustomerProjectService service;
+    private final CustomerService service;
 
     @PostMapping("/customers")
     public ResponseEntity<Customer> createCustomer(@RequestBody Customer customer) {
@@ -23,14 +25,6 @@ public class CustomerProjectController {
         return ResponseEntity.ok(service.getAllCustomers());
     }
 
-    @PostMapping("/projects")
-    public ResponseEntity<Project> createProject(@RequestBody Project project) {
-        return ResponseEntity.ok(service.createProject(project));
-    }
 
-    @GetMapping("/projects")
-    public ResponseEntity<List<Project>> getAllProjects() {
-        return ResponseEntity.ok(service.getAllProjects());
-    }
 }
 
