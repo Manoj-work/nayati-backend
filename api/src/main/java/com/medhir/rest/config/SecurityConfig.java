@@ -106,7 +106,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(
-                List.of("http://localhost:3000", "http://192.168.0.200:3000", "*.medhir.in")); config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                List.of("http://localhost:3000", "http://192.168.0.200:3000", "*.medhir.in")); config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true); // Allow cookies
         config.setExposedHeaders(Arrays.asList("Authorization", "Content-Type"));

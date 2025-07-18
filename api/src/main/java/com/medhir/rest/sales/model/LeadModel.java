@@ -76,9 +76,4 @@ public class LeadModel {
     private List<Note> notesList = new ArrayList<>();
     private List<ActivityLog> activityLogs = new ArrayList<>();
 
-    public void generateProjectName() {
-        if (this.projectName == null && this.generatedId != null) {
-            this.projectName = generatedId.generateId("PROJ-", LeadModel.class, "projectName");
-        }
-    }
 }
