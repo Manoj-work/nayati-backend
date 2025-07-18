@@ -59,12 +59,10 @@ public class LeadService {
     @Autowired
     private GeneratedId generatedId;
 
-    // 🔍 Fetch all leads
     public List<LeadModel> getAllLeads() {
         return leadRepository.findAll();
     }
 
-    // �� Get single lead by leadId (Snowflake ID)
     public LeadModel getLeadByLeadId(String leadId) {
         return leadRepository.findByLeadId(leadId)
 
@@ -156,8 +154,7 @@ public class LeadService {
         if (lead.getCustomerId() == null || lead.getCustomerId().isBlank()) {
             lead.setCustomerId("CUS-" + snowflakeIdGenerator.nextId());
         }
-        lead.setGeneratedId(generatedId);  // Injected service or bean
-        lead.generateProjectName();
+        lead.setProjectName(generatedId.generateId("PROJ-", LeadModel.class, "projectName"));
 
         Customer customer = Customer.builder()
                 .customerId(lead.getCustomerId())
@@ -231,7 +228,6 @@ public class LeadService {
         return leadRepository.save(lead);
     }
 
-    // 🎯 Activity Logging Methods - Only Stage Changes and Activity Completion
     public void logStageChange(LeadModel lead, String oldStageId, String newStageId, String user) {
         Map<String, Object> metadata = new HashMap<>();
         metadata.put("oldStageId", oldStageId);
