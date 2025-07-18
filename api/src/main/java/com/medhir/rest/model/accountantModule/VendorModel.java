@@ -39,14 +39,7 @@ public class VendorModel {
 
     private List<String> vendorTags;
 
-    // @NotBlank(message = "Company type is required")
-    // @Pattern(regexp = "Company|Individual", message = "Company type must be either 'Company' or 'Individual'")
-    // private String companyType;
 
-    // @NotBlank(message = "Vendor Category is required")
-    // private String vendorCategory;
-
-    // @NotBlank(message = "GST number is required")
     private String gstin;
 
     @NotBlank(message = "PAN is required")
@@ -59,10 +52,7 @@ public class VendorModel {
     @NotBlank(message = "Tax Treatment is required")
     private String taxTreatment;
 
-    // @NotNull(message = "TDS is required")
-    // private Boolean tds;
 
-    // @NotNull(message = "TDS Percentage is required")
     @Min(value = 0, message = "TDS Percentage must be greater than 0")
     @Max(value = 10, message = "TDS Percentage must be less than 10")
     private Double tdsPercentage;
@@ -124,7 +114,6 @@ public class VendorModel {
     }
 
     @Valid
-    @NotEmpty(message = "At least one vendor credit is required")
     private List<VendorCredit> vendorCredits;
 
     @Data
@@ -157,24 +146,3 @@ public class VendorModel {
 
     private BigDecimal totalCredit;
 }
-
-//    @Valid
-//    private List<ContactAddress> contactAddresses;
-//
-//    // ---------- Nested Classes ----------
-//
-//    @Data
-//    public static class ContactAddress {
-//
-//
-//        @NotBlank(message = "Contact type is required")
-//        private String type;
-//
-//        @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
-//        private String phone;
-//
-//        @Email(message = "Invalid contact email format")
-//        private String email;
-//    }
-
-
