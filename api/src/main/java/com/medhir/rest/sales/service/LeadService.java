@@ -170,6 +170,18 @@ public class LeadService {
 
         setDefaultStageIdIfMissing(lead);
         validateStageId(lead.getStageId());
+        // Add initial note to notesList if notes field is not empty
+        if (lead.getNotes() != null && !lead.getNotes().trim().isEmpty()) {
+            if (lead.getNotesList() == null) {
+                lead.setNotesList(new ArrayList<>());
+            }
+            Note note = new Note();
+            note.setId("NOTE-" + snowflakeIdGenerator.nextId());
+            note.setContent(lead.getNotes());
+            note.setUser(lead.getSubmittedBy() != null ? lead.getSubmittedBy() : lead.getName());
+            note.setTimestamp(java.time.LocalDateTime.now().toString());
+            lead.getNotesList().add(note);
+        }
         return leadRepository.save(lead);
     }
 
