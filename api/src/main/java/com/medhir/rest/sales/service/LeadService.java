@@ -13,8 +13,8 @@ import com.medhir.rest.sales.dto.activity.ActivityLogRequestDTO;
 import com.medhir.rest.sales.dto.lead.LeadConversionResponseDTO;
 import com.medhir.rest.sales.dto.activity.ActivityDTO;
 import com.medhir.rest.sales.dto.activity.NoteDTO;
-import com.medhir.rest.testModuleforsales.Customer;
-import com.medhir.rest.testModuleforsales.CustomerRepository;
+import com.medhir.rest.model.accountantModule.Customer;
+import com.medhir.rest.repository.accountantModule.CustomerRepository;
 import com.medhir.rest.utils.GeneratedId;
 import com.medhir.rest.utils.SnowflakeIdGenerator;
 import com.medhir.rest.utils.MinioService;
@@ -167,6 +167,18 @@ public class LeadService {
 
         setDefaultStageIdIfMissing(lead);
         validateStageId(lead.getStageId());
+        // Add initial note to notesList if notes field is not empty
+        if (lead.getNotes() != null && !lead.getNotes().trim().isEmpty()) {
+            if (lead.getNotesList() == null) {
+                lead.setNotesList(new ArrayList<>());
+            }
+            Note note = new Note();
+            note.setId("NOTE-" + snowflakeIdGenerator.nextId());
+            note.setContent(lead.getNotes());
+            note.setUser(lead.getSubmittedBy() != null ? lead.getSubmittedBy() : lead.getName());
+            note.setTimestamp(java.time.LocalDateTime.now().toString());
+            lead.getNotesList().add(note);
+        }
         return leadRepository.save(lead);
     }
 
